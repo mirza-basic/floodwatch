@@ -34,7 +34,7 @@ html,body,#map{height:100%;margin:0}body{font:14px system-ui,sans-serif;backgrou
 <div class="mut" id="stamp"></div><div id="legend"></div><div id="list"></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const SNAP=__SNAPSHOT__, BOUNDS=__BOUNDS__;
+const SNAP=__SNAPSHOT__, BOUNDS=__BOUNDS__, RIV=__RIVERS__;
 const LV=["normal","watch","warning","severe"];
 const COL={normal:"#8fa6bb",watch:"#4f9de0",warning:"#6a3fd1",severe:"#a3188f"};
 const I18N={
@@ -49,7 +49,7 @@ lang=lang==="en"?"en":"bs";
 const t=k=>I18N[lang][k]||k;
 const map=L.map("map",{zoomControl:true}).fitBounds([[42.5,15.7],[45.3,19.7]],{animate:false});
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(map);
-const polys=L.layerGroup().addTo(map), dots=L.layerGroup().addTo(map);
+const polys=L.layerGroup().addTo(map), lines=L.layerGroup().addTo(map), dots=L.layerGroup().addTo(map);
 
 function spark(m){
   const f=m.flows, n=f.length, W=210, H=70, th=m.thresholds;
@@ -65,12 +65,12 @@ function spark(m){
 }
 function popup(m){
   if(!m.river) return `<div class="pop"><b>${m.name}</b><br>${t("noriver")}</div>`;
-  return `<div class="pop"><b>${m.name}</b><br><span style="color:${COL[m.level]}">● ${t(m.level)}</span>
+  return `<div class="pop"><b>${m.name}</b>${RIV[m.id]?` <span class="mut">· ${RIV[m.id].name}</span>`:""}<br><span style="color:${COL[m.level]}">● ${t(m.level)}</span>
    <div class="mut">${t("now")}: ${m.now??"–"} m³/s · ${t("peak")}: ${m.peak} (${m.peak_day})</div>${spark(m)}
    <div class="mut">${t("note")}</div></div>`;
 }
 function draw(){
-  polys.clearLayers(); dots.clearLayers();
+  polys.clearLayers(); lines.clearLayers(); dots.clearLayers();
   const seen={}; const worst=[];
   for(const m of SNAP.municipalities){
     const rings=BOUNDS[m.id]; if(!rings) continue;
@@ -78,9 +78,14 @@ function draw(){
     const p=L.polygon(rings,{color:COL[m.level],weight:up?2:.8,opacity:up?.9:.5,
       fillColor:COL[m.level],fillOpacity:up?.35:.03}).addTo(polys);
     p.bindPopup(()=>popup(m),{autoPan:false});
+    const r=RIV[m.id];
+    if(m.river&&r&&r.lines.length)
+      L.polyline(r.lines,{color:COL[m.level],weight:up?5:2,opacity:up?.95:.6,lineCap:"round"})
+        .addTo(lines).bindPopup(()=>popup(m),{autoPan:false});
     if(m.river){
-      const key=m.lat+","+m.lon+m.level; if(seen[key]) continue; seen[key]=1;
-      L.circleMarker([m.lat,m.lon],{radius:up?9:4,color:"#fff",weight:1.5,fillColor:COL[m.level],fillOpacity:.95})
+      const at=r?[r.mlat,r.mlon]:[m.lat,m.lon];
+      const key=at+","+m.level; if(seen[key]) continue; seen[key]=1;
+      L.circleMarker(at,{radius:up?9:4,color:"#fff",weight:1.5,fillColor:COL[m.level],fillOpacity:.95})
         .addTo(dots).bindPopup(()=>popup(m),{autoPan:false});
     }
     if(up) worst.push(m);
@@ -102,5 +107,12 @@ draw();
 
 def render(snapshot: dict) -> str:
     bounds = json.loads((config.DATA_DIR / "boundaries-simple.json").read_text())
+    rivers = {}
+    if config.POINTS_FILE.exists():
+        for p in json.loads(config.POINTS_FILE.read_text()):
+            if p.get("mlat") is not None:
+                rivers[p["id"]] = {"name": p["river_name"], "mlat": p["mlat"],
+                                   "mlon": p["mlon"], "lines": p["lines"]}
     return (PAGE.replace("__SNAPSHOT__", json.dumps(snapshot, ensure_ascii=False))
+                .replace("__RIVERS__", json.dumps(rivers, ensure_ascii=False, separators=(",", ":")))
                 .replace("__BOUNDS__", json.dumps(bounds, separators=(",", ":"))))
