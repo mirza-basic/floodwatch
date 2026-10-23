@@ -63,11 +63,14 @@ function spark(m){
   s+=`<polyline fill="none" stroke="${COL[m.level]}" stroke-width="2" points="${f.map((v,i)=>v==null?"":x(i)+","+y(v)).join(" ")}"/></svg>`;
   return s;
 }
-function popup(m){
-  if(!m.river) return `<div class="pop"><b>${m.name}</b><br>${t("noriver")}</div>`;
-  return `<div class="pop"><b>${m.name}</b>${RIV[m.id]?` <span class="mut">· ${RIV[m.id].name}</span>`:""}<br><span style="color:${COL[m.level]}">● ${t(m.level)}</span>
-   <div class="mut">${t("now")}: ${m.now??"–"} m³/s · ${t("peak")}: ${m.peak} (${m.peak_day})</div>${spark(m)}
-   <div class="mut">${t("note")}</div></div>`;
+function riverBlock(r){
+  return `<div style="margin-top:6px"><b>${r.river||""}</b> <span style="color:${COL[r.level]}">● ${t(r.level)}</span>
+   <div class="mut">${t("now")}: ${r.now??"–"} m³/s · ${t("peak")}: ${r.peak} (${r.peak_day})</div>${spark(r)}</div>`;
+}
+function popup(m,r){
+  if(!m.rivers.length) return `<div class="pop"><b>${m.name}</b><br>${t("noriver")}</div>`;
+  const rs=r?[r]:m.rivers;
+  return `<div class="pop"><b>${m.name}</b>${rs.map(riverBlock).join("")}<div class="mut" style="margin-top:6px">${t("note")}</div></div>`;
 }
 function draw(){
   polys.clearLayers(); lines.clearLayers(); dots.clearLayers();
@@ -78,27 +81,29 @@ function draw(){
     const p=L.polygon(rings,{color:COL[m.level],weight:up?2:.8,opacity:up?.9:.5,
       fillColor:COL[m.level],fillOpacity:up?.35:.03}).addTo(polys);
     p.bindPopup(()=>popup(m),{autoPan:false});
-    const r=RIV[m.id];
-    if(m.river&&r&&r.lines.length)
-      L.polyline(r.lines,{color:COL[m.level],weight:up?5:2,opacity:up?.95:.6,lineCap:"round"})
-        .addTo(lines).bindPopup(()=>popup(m),{autoPan:false});
-    if(m.river){
-      const at=r?[r.mlat,r.mlon]:[m.lat,m.lon];
-      const key=at+","+m.level; if(seen[key]) continue; seen[key]=1;
-      L.circleMarker(at,{radius:up?9:4,color:"#fff",weight:1.5,fillColor:COL[m.level],fillOpacity:.95})
-        .addTo(dots).bindPopup(()=>popup(m),{autoPan:false});
+    for(const r of m.rivers){
+      const g=(RIV[m.id]||[]).find(x=>x.name===r.river);
+      const ru=r.level!=="normal";
+      if(g&&g.lines.length)
+        L.polyline(g.lines,{color:COL[r.level],weight:ru?5:2,opacity:ru?.95:.6,lineCap:"round"})
+          .addTo(lines).bindPopup(()=>popup(m,r),{autoPan:false});
+      const at=g?[g.mlat,g.mlon]:[r.lat,r.lon];
+      const key=at+","+r.level; if(seen[key]) continue; seen[key]=1;
+      L.circleMarker(at,{radius:ru?9:4,color:"#fff",weight:1.5,fillColor:COL[r.level],fillOpacity:.95})
+        .addTo(dots).bindPopup(()=>popup(m,r),{autoPan:false});
     }
     if(up) worst.push(m);
   }
-  worst.sort((a,b)=>LV.indexOf(b.level)-LV.indexOf(a.level)||b.peak-a.peak);
+  const pk=m=>m.rivers.length?Math.max(...m.rivers.map(r=>r.peak||0)):0;
+  worst.sort((a,b)=>LV.indexOf(b.level)-LV.indexOf(a.level)||pk(b)-pk(a));
   const c={}; SNAP.municipalities.forEach(m=>c[m.level]=(c[m.level]||0)+1);
   document.getElementById("title").textContent=t("title");
   document.getElementById("lang").textContent=t("lang");
   document.getElementById("stamp").textContent=t("upd")+": "+SNAP.generated_at.replace("T"," ").slice(0,16)+" UTC";
   document.getElementById("legend").innerHTML=LV.map(k=>`<div class="row"><span class="dot" style="background:${COL[k]}"></span>${t(k)} <span class="mut">(${c[k]||0})</span></div>`).join("");
-  document.getElementById("list").innerHTML=worst.length?worst.map((m,i)=>`<div class="item" data-i="${i}"><span style="color:${COL[m.level]}">●</span> ${m.name} <span class="mut">${m.peak} m³/s · ${m.peak_day}</span></div>`).join(""):`<div class="mut" style="margin-top:8px">${t("none")}</div>`;
+  document.getElementById("list").innerHTML=worst.length?worst.map((m,i)=>`<div class="item" data-i="${i}"><span style="color:${COL[m.level]}">●</span> ${m.name} <span class="mut">${m.rivers.filter(r=>r.level===m.level).map(r=>r.river||"").filter(Boolean).join(", ")} · ${pk(m)} m³/s</span></div>`).join(""):`<div class="mut" style="margin-top:8px">${t("none")}</div>`;
   document.querySelectorAll(".item").forEach(el=>el.onclick=()=>{const m=worst[+el.dataset.i];
-    map.setView([m.lat,m.lon],10,{animate:false});L.popup({autoPan:false}).setLatLng([m.lat,m.lon]).setContent(popup(m)).openOn(map)});
+    const r0=m.rivers[0],g0=(RIV[m.id]||[]).find(x=>x.name===r0.river),at=g0?[g0.mlat,g0.mlon]:[r0.lat,r0.lon];map.setView(at,10,{animate:false});L.popup({autoPan:false}).setLatLng(at).setContent(popup(m)).openOn(map)});
 }
 document.getElementById("lang").onclick=()=>{lang=lang==="bs"?"en":"bs";try{localStorage.setItem("fl_lang",lang)}catch(e){}draw()};
 draw();
@@ -107,12 +112,12 @@ draw();
 
 def render(snapshot: dict) -> str:
     bounds = json.loads((config.DATA_DIR / "boundaries-simple.json").read_text())
-    rivers = {}
+    rivers: dict[str, list] = {}
     if config.POINTS_FILE.exists():
         for p in json.loads(config.POINTS_FILE.read_text()):
             if p.get("mlat") is not None:
-                rivers[p["id"]] = {"name": p["river_name"], "mlat": p["mlat"],
-                                   "mlon": p["mlon"], "lines": p["lines"]}
+                rivers.setdefault(p["id"], []).append(
+                    {"name": p["river_name"], "mlat": p["mlat"], "mlon": p["mlon"], "lines": p["lines"]})
     return (PAGE.replace("__SNAPSHOT__", json.dumps(snapshot, ensure_ascii=False))
                 .replace("__RIVERS__", json.dumps(rivers, ensure_ascii=False, separators=(",", ":")))
                 .replace("__BOUNDS__", json.dumps(bounds, separators=(",", ":"))))

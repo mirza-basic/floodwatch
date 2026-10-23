@@ -32,3 +32,6 @@ MIN_RIVER_M3S = 1.0
 # Open-Meteo accepts many comma-separated locations per call; stay well under
 # the documented ceiling.
 BATCH = 50
+
+# Distinct rivers shown per municipality (Bosna and Krivaja both reach Zavidovici).
+MAX_RIVERS = 3

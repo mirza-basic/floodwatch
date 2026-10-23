@@ -1,9 +1,9 @@
-"""Pick one river point per municipality and derive its flood thresholds.
+"""Pick river points per municipality (up to MAX_RIVERS) and derive their flood thresholds.
 
 Build-time artifact, like fire-detection's boundaries: run once, commit the
 result, never call at runtime. For each municipality every GloFAS cell whose
 centre lies inside is sampled over the last 30 days and the cell with the
-highest mean discharge is taken to be its main river. A municipality too small
+highest mean discharge is taken to be a main river. A municipality too small
 to contain a cell centre falls back to the cell nearest its centroid; one whose
 best cell is below MIN_RIVER_M3S gets `river: false` and no thresholds, rather
 than a made-up point on a hillside.
@@ -19,7 +19,9 @@ from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from floodwatch import config, geo, glofas, thresholds  # noqa: E402
+from floodwatch import config, geo, glofas, rivers, thresholds  # noqa: E402
+
+CANDIDATES = 8  # strongest cells per municipality considered for naming
 
 
 CACHE = config.STATE_DIR / "build-cache.json"
@@ -52,26 +54,49 @@ def main() -> None:
                 / max(1, sum(q is not None for q in d["river_discharge"])))
             for c, d in recent.items()}
 
-    best = {m.id: max(cells_of[m.id], key=lambda c: mean[c]) for m in munis}
-    rivers = sorted({c for c in best.values() if mean[c] >= config.MIN_RIVER_M3S})
-    print(f"{len(rivers)} river cells chosen; fetching archive", flush=True)
+    # Several rivers per municipality: Bosna and Krivaja flood together at
+    # Zavidovici, and one point could only show one of them. Candidates are the
+    # municipality's strongest cells; each is named by its nearest river line,
+    # the best cell per river name is kept, and at most MAX_RIVERS survive.
+    chosen: dict[str, list[tuple[tuple[float, float], str | None]]] = {}
+    for m in munis:
+        cand = sorted((c for c in cells_of[m.id] if mean[c] >= config.MIN_RIVER_M3S),
+                      key=lambda c: -mean[c])[:CANDIDATES]
+        per: dict[str | None, tuple[float, float]] = {}
+        for c in cand:
+            per.setdefault(rivers.nearest_name(*c), c)  # sorted, so first is the best
+        named = [(c, n) for n, c in per.items() if n]
+        chosen[m.id] = (named or [(c, n) for n, c in per.items()])[:config.MAX_RIVERS]
+
+    cells = sorted({c for v in chosen.values() for c, _ in v})
+    print(f"{len(cells)} river cells chosen; fetching archive", flush=True)
 
     end = f"{date.today().year - 1}-12-31"
     th = {}
-    for c, d in zip(rivers, cached('archive', rivers, lambda p: glofas.fetch(
+    for c, d in zip(cells, cached('archive', cells, lambda p: glofas.fetch(
             p, batch=3, start_date=config.HISTORY_START, end_date=end))):
         th[c] = thresholds.gumbel(thresholds.annual_maxima(d))
 
     out = []
     for m in munis:
-        c = best[m.id]
-        ok = mean[c] >= config.MIN_RIVER_M3S and th.get(c)
-        out.append({"id": m.id, "river": bool(ok), "lat": c[0], "lon": c[1],
-                    "inside": m.contains(*c), "mean_m3s": round(mean[c], 2),
-                    "thresholds": th.get(c) if ok else None})
-    config.POINTS_FILE.write_text(json.dumps(out, ensure_ascii=False, indent=1))
-    n = sum(p["river"] for p in out)
-    print(f"wrote {config.POINTS_FILE.name}: {n} with a river, {len(out) - n} without")
+        picks = [(c, n) for c, n in chosen[m.id] if th.get(c)]
+        if not picks:
+            c = max(cells_of[m.id], key=lambda c: mean[c])
+            out.append({"id": m.id, "river": False, "lat": c[0], "lon": c[1],
+                        "mean_m3s": round(mean[c], 2), "thresholds": None})
+            continue
+        for c, n in picks:
+            rec = {"id": m.id, "river": True, "lat": c[0], "lon": c[1],
+                   "inside": m.contains(*c), "mean_m3s": round(mean[c], 2),
+                   "thresholds": th[c], "river_name": n}
+            s = rivers.snap(m, c[0], c[1], n) if n else None
+            if s:
+                rec.update(mlat=s["point"][0], mlon=s["point"][1], lines=s["lines"])
+            out.append(rec)
+    config.POINTS_FILE.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
+    n = len({p["id"] for p in out if p["river"]})
+    print(f"wrote {config.POINTS_FILE.name}: {len(out)} points; {n} municipalities with a river, "
+          f"{len(munis) - n} without")
 
 
 if __name__ == "__main__":

@@ -26,19 +26,24 @@ def cycle() -> dict:
     series = dict(zip(cells, glofas.fetch(cells, past_days=3, forecast_days=7)))
     today = datetime.now(TZ).date().isoformat()
 
-    out = []
+    out = {}
     for p in points:
-        rec = {"id": p["id"], "name": munis[p["id"]]["short_name"], "river": p["river"],
-               "lat": p["lat"], "lon": p["lon"], "level": "normal"}
-        if p["river"]:
-            d = series[(p["lat"], p["lon"])]
-            rec.update(levels.assess(d["time"], d["river_discharge"], p["thresholds"], today))
-            rec.update(thresholds=p["thresholds"], times=d["time"],
-                       flows=[None if q is None else round(q, 2) for q in d["river_discharge"]])
-        out.append(rec)
+        rec = out.setdefault(p["id"], {"id": p["id"], "name": munis[p["id"]]["short_name"],
+                                       "level": "normal", "rivers": []})
+        if not p["river"]:
+            continue
+        d = series[(p["lat"], p["lon"])]
+        r = {"river": p.get("river_name"), "lat": p["lat"], "lon": p["lon"], "thresholds": p["thresholds"],
+             "times": d["time"], "flows": [None if q is None else round(q, 2) for q in d["river_discharge"]]}
+        r.update(levels.assess(d["time"], d["river_discharge"], p["thresholds"], today))
+        rec["rivers"].append(r)
+        if levels.ORDER.index(r["level"]) > levels.ORDER.index(rec["level"]):
+            rec["level"] = r["level"]  # a municipality is as bad as its worst river
+    for rec in out.values():
+        rec["rivers"].sort(key=lambda r: -levels.ORDER.index(r["level"]))
 
     snap = {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "today": today, "municipalities": out}
+            "today": today, "municipalities": list(out.values())}
     tmp = SNAPSHOT.with_suffix(".tmp")
     tmp.write_text(json.dumps(snap, ensure_ascii=False))
     os.replace(tmp, SNAPSHOT)
