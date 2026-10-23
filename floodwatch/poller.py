@@ -12,7 +12,7 @@ import os
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
-from . import config, glofas, levels
+from . import config, gauges as gauges_mod, glofas, levels
 
 TZ = ZoneInfo("Europe/Sarajevo")
 SNAPSHOT = config.STATE_DIR / "snapshot.json"
@@ -42,7 +42,8 @@ def cycle() -> dict:
     for rec in out.values():
         rec["rivers"].sort(key=lambda r: -levels.ORDER.index(r["level"]))
 
-    snap = {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    g, gstatus = gauges_mod.fetch_all() if config.GAUGES_ENABLED else ([], {})
+    snap = {"gauges": g, "gauge_status": gstatus, "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "today": today, "municipalities": list(out.values())}
     tmp = SNAPSHOT.with_suffix(".tmp")
     tmp.write_text(json.dumps(snap, ensure_ascii=False))

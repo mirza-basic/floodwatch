@@ -28,10 +28,14 @@ html,body,#map{height:100%;margin:0}body{font:14px system-ui,sans-serif;backgrou
 .item{padding:4px 0;border-top:1px solid var(--line);cursor:pointer}
 .lang{float:right;cursor:pointer;border:1px solid var(--line);border-radius:4px;padding:0 6px;font-size:12px}
 .leaflet-popup-content{margin:10px 12px;min-width:210px}.pop b{font-size:15px}
+.gsq{width:12px;height:12px;border:2px solid #111;box-sizing:border-box}
+.gl{display:flex;gap:6px;align-items:center;margin-top:8px;cursor:pointer}
 @media (max-width:600px){.panel{width:auto;left:10px;max-height:38%}}
 </style></head><body><div id="map"></div>
 <div class="panel"><span class="lang" id="lang"></span><h1 id="title"></h1>
-<div class="mut" id="stamp"></div><div id="legend"></div><div id="list"></div></div>
+<div class="mut" id="stamp"></div><div id="legend"></div>
+<label class="gl"><input type="checkbox" id="gtoggle" checked><span id="glabel"></span></label>
+<div class="mut" id="gattr" style="margin-top:2px"></div><div id="list"></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const SNAP=__SNAPSHOT__, BOUNDS=__BOUNDS__, RIV=__RIVERS__;
@@ -40,15 +44,28 @@ const COL={normal:"#8fa6bb",watch:"#4f9de0",warning:"#6a3fd1",severe:"#a3188f"};
 const I18N={
  bs:{title:"FloodWatch BiH",upd:"Ažurirano",normal:"Normalno",watch:"Pažnja",warning:"Upozorenje",severe:"Opasnost",
   now:"Sada",peak:"Vrhunac",flow:"Protok (m³/s)",noriver:"Nema značajnog vodotoka u modelu",
-  none:"Nema upozorenja u narednih 7 dana",note:"Prognoza modela GloFAS (~5 km), ne mjerenje vodostaja.",lang:"EN"},
+  none:"Nema upozorenja u narednih 7 dana",note:"Prognoza modela GloFAS (~5 km), ne mjerenje vodostaja.",lang:"EN",
+  gauges:"Mjerenja (vodomjerne stanice)",gsrc:"Izvor",gval:"Očitanje",gtime:"Vrijeme",gstale:"Podaci stariji od 6 h",
+  gcls:"Zvanična klasa izvora",gnocls:"Granične vrijednosti nisu definisane",gnounit:"jedinica nije navedena u izvoru",
+  gthr:"Pragovi odbrane (izvor)",gepoch:"vrijeme prema izvoru, vremenska zona nije potvrđena",gnone:"bez očitanja",
+  gnote:"Podaci agencija su informativni i nisu zvanični. Prikazani su kako ih objavljuje izvor.",
+  redovna_obrana:"redovna",vanredna_obrana:"vanredna",kontinuirana_obrana:"kontinuirana"},
  en:{title:"FloodWatch BiH",upd:"Updated",normal:"Normal",watch:"Watch",warning:"Warning",severe:"Severe",
   now:"Now",peak:"Peak",flow:"Discharge (m³/s)",noriver:"No significant river in the model",
-  none:"No warnings in the next 7 days",note:"GloFAS model forecast (~5 km), not a gauge reading.",lang:"BS"}};
+  none:"No warnings in the next 7 days",note:"GloFAS model forecast (~5 km), not a gauge reading.",lang:"BS",
+  gauges:"Measurements (gauges)",gsrc:"Source",gval:"Reading",gtime:"Time",gstale:"Data older than 6 h",
+  gcls:"Source's official class",gnocls:"Thresholds not defined",gnounit:"unit not stated by the source",
+  gthr:"Flood-defence thresholds (source)",gepoch:"time as published; time zone not confirmed",gnone:"no reading",
+  gnote:"Agency data is informative, not official. Shown as the source publishes it.",
+  redovna_obrana:"regular",vanredna_obrana:"extraordinary",kontinuirana_obrana:"continuous"}};
 let lang=null;try{lang=localStorage.getItem("fl_lang")}catch(e){}
 lang=lang==="en"?"en":"bs";
 const t=k=>I18N[lang][k]||k;
 const map=L.map("map",{zoomControl:true}).fitBounds([[42.5,15.7],[45.3,19.7]],{animate:false});
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(map);
+const GA=SNAP.gauges||[], gl=L.layerGroup().addTo(map);
+const GCOL={N:"#7CFC00",P:"#00B0F0",R:"#FFFF00",V:"#FFC000",Z:"#F00000"};
+const GSRC={sava:"Agencija za vodno područje rijeke Save",rhmzrs:"RHMZ Republike Srpske",jadran:"Agencija za vodno područje Jadranskog mora"};
 const polys=L.layerGroup().addTo(map), lines=L.layerGroup().addTo(map), dots=L.layerGroup().addTo(map);
 
 function spark(m){
@@ -72,7 +89,30 @@ function popup(m,r){
   const rs=r?[r]:m.rivers;
   return `<div class="pop"><b>${m.name}</b>${rs.map(riverBlock).join("")}<div class="mut" style="margin-top:6px">${t("note")}</div></div>`;
 }
+function gaugePopup(g){
+  const unit=g.unit||"", stale=g.time&&(Date.now()-Date.parse(g.time))>6*3600e3;
+  const val=g.value==null?t("gnone"):`${g.value} ${unit}${g.unit?"":` <span class="mut">(${t("gnounit")})</span>`}`;
+  const cls=g.source==="sava"?`<div>${t("gcls")}: <b>${g.class||"–"}</b>${g.class?"":` <span class="mut">(${t("gnocls")})</span>`}</div>`:"";
+  const thr=g.thresholds?`<div class="mut">${t("gthr")}: ${Object.entries(g.thresholds).map(([k,v])=>t(k)+" "+v).join(" · ")}</div>`:"";
+  const when=g.time?`${g.time.replace("T"," ").slice(0,16)}${stale?` · <b>${t("gstale")}</b>`:""}`
+    :g.time_raw_epoch?`${new Date(g.time_raw_epoch*1000).toISOString().replace("T"," ").slice(0,16)} <span class="mut">(${t("gepoch")})</span>`:"–";
+  return `<div class="pop"><b>${g.name}</b>${g.river?` <span class="mut">· ${g.river}</span>`:""}
+   <div>${t("gval")}: <b>${val}</b></div>${cls}${thr}<div class="mut">${t("gtime")}: ${when}</div>
+   <div class="mut">${t("gsrc")}: ${GSRC[g.source]}</div><div class="mut" style="margin-top:4px">${t("gnote")}</div></div>`;
+}
+function drawGauges(){
+  gl.clearLayers();
+  for(const g of GA){
+    const c=g.class?GCOL[g.class]:"#c7d0d9";
+    L.marker([g.lat,g.lon],{icon:L.divIcon({className:"",html:`<div class="gsq" style="background:${g.value==null?"transparent":c}"></div>`,iconSize:[12,12]})})
+      .addTo(gl).bindPopup(()=>gaugePopup(g),{autoPan:false});
+  }
+  document.getElementById("glabel").textContent=t("gauges")+" ("+GA.length+")";
+  document.getElementById("gattr").textContent=[...new Set(GA.map(g=>GSRC[g.source]))].join(" · ");
+}
+document.getElementById("gtoggle").onchange=e=>{e.target.checked?gl.addTo(map):map.removeLayer(gl)};
 function draw(){
+  drawGauges();
   polys.clearLayers(); lines.clearLayers(); dots.clearLayers();
   const seen={}; const worst=[];
   for(const m of SNAP.municipalities){

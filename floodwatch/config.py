@@ -35,3 +35,7 @@ BATCH = 50
 
 # Distinct rivers shown per municipality (Bosna and Krivaja both reach Zavidovici).
 MAX_RIVERS = 3
+
+# Measured gauges from the agencies. Local use only until written permission is on file
+# (Importat_to_to.md): nothing here is wired to alerts or public output.
+GAUGES_ENABLED = True
