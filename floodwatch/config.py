@@ -23,7 +23,7 @@ GRID_DEG = 0.05
 # Archive depth used to derive return-period thresholds. The reanalysis starts
 # in 1984; stopping at the last full year keeps a partial year's lower maximum
 # out of the annual-maxima sample.
-HISTORY_START = "1984-01-01"
+HISTORY_START = "1993-01-01"
 
 # A cell whose mean discharge is below this is a hillside, not a river: GloFAS
 # returns 0.0 for non-river cells rather than an error.

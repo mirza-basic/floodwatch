@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
 from datetime import date
 from pathlib import Path
 
@@ -36,6 +37,7 @@ def cached(key: str, cells, fetch):
         if part:
             for c, d in zip(part, fetch(part)):
                 cache[f"{key}:{c}"] = d
+            time.sleep(4)  # stay under the per-minute quota
             tmp = CACHE.with_suffix(".tmp")
             tmp.write_text(json.dumps(cache))
             os.replace(tmp, CACHE)

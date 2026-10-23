@@ -25,8 +25,12 @@ def _get(params: dict) -> list[dict]:
             return j if isinstance(j, list) else [j]
         last = f"HTTP {r.status_code}: {r.text[:200]}"
         if r.status_code == 429:
-            # "Hourly API request limit exceeded" - retrying inside the hour
-            # only burns more of the next one, so fail and let the caller resume.
+            # A minutely limit clears in a minute, so wait it out. An hourly (or
+            # daily) one does not - retrying inside the hour only burns more of
+            # the next, so fail and let the caller resume from its cache.
+            if "inutely" in r.text and attempt < 3:
+                time.sleep(65)
+                continue
             raise RuntimeError(f"flood api rate limit: {r.text[:160]}")
         if r.status_code == 400:
             break
