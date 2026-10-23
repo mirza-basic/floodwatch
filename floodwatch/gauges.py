@@ -20,6 +20,7 @@ from __future__ import annotations
 import html
 import json
 import logging
+import os
 import re
 from datetime import datetime, timezone
 
@@ -135,6 +136,32 @@ def fetch_all() -> tuple[list[dict], dict]:
     for g in gauges:
         g["municipality"] = next((m.id for m in munis if m.contains(g["lat"], g["lon"])), None)
     return gauges, status
+
+
+HISTORY_FILE = config.STATE_DIR / "gauge-history.json"
+HISTORY_KEEP = 96  # readings per station; hourly feeds => ~4 days
+
+
+def update_history(gauges: list[dict], path=HISTORY_FILE) -> None:
+    """Append each new published reading to a per-station list and attach it.
+
+    The sources publish only the latest value as data (the Sava agency's history
+    is images and spreadsheets), so history is what *we* saw, poll by poll -
+    exactly as published, deduplicated on the source's own timestamp. A reading
+    is added only if its timestamp is new, so polling more often than the source
+    updates adds nothing. Gaps simply mean the poller was not running.
+    """
+    hist = json.loads(path.read_text()) if path.exists() else {}
+    for g in gauges:
+        t = g.get("time") or g.get("time_raw_epoch")
+        h = hist.setdefault(g["id"], [])
+        if g.get("value") is not None and t is not None and (not h or h[-1][0] != t):
+            h.append([t, g["value"]])
+            del h[:-HISTORY_KEEP]
+        g["history"] = h
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(hist, ensure_ascii=False))
+    os.replace(tmp, path)
 
 
 def stamp() -> str:

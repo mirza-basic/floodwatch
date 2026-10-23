@@ -4,3 +4,6 @@ __pycache__/
 state/*.db*
 state/*.log
 state/build-cache.json
+state/gauge-history.json
+state/snapshot.json
+state/floodmap.html

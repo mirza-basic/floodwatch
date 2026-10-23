@@ -47,7 +47,7 @@ const I18N={
   none:"Nema upozorenja u narednih 7 dana",note:"Prognoza modela GloFAS (~5 km), ne mjerenje vodostaja.",lang:"EN",
   gauges:"Mjerenja (vodomjerne stanice)",gsrc:"Izvor",gval:"Očitanje",gtime:"Vrijeme",gstale:"Podaci stariji od 6 h",
   gcls:"Zvanična klasa izvora",gnocls:"Granične vrijednosti nisu definisane",gnounit:"jedinica nije navedena u izvoru",
-  gthr:"Pragovi odbrane (izvor)",gepoch:"vrijeme prema izvoru, vremenska zona nije potvrđena",gnone:"bez očitanja",
+  gthr:"Pragovi odbrane (izvor)",gepoch:"vrijeme prema izvoru, vremenska zona nije potvrđena",gnone:"bez očitanja",nomodel:"Podaci prognoze još nisu učitani",ghist:"Očitanja koja smo zabilježili",
   gnote:"Podaci agencija su informativni i nisu zvanični. Prikazani su kako ih objavljuje izvor.",
   redovna_obrana:"redovna",vanredna_obrana:"vanredna",kontinuirana_obrana:"kontinuirana"},
  en:{title:"FloodWatch BiH",upd:"Updated",normal:"Normal",watch:"Watch",warning:"Warning",severe:"Severe",
@@ -55,7 +55,7 @@ const I18N={
   none:"No warnings in the next 7 days",note:"GloFAS model forecast (~5 km), not a gauge reading.",lang:"BS",
   gauges:"Measurements (gauges)",gsrc:"Source",gval:"Reading",gtime:"Time",gstale:"Data older than 6 h",
   gcls:"Source's official class",gnocls:"Thresholds not defined",gnounit:"unit not stated by the source",
-  gthr:"Flood-defence thresholds (source)",gepoch:"time as published; time zone not confirmed",gnone:"no reading",
+  gthr:"Flood-defence thresholds (source)",gepoch:"time as published; time zone not confirmed",gnone:"no reading",nomodel:"Forecast data not loaded yet",ghist:"Readings we recorded",
   gnote:"Agency data is informative, not official. Shown as the source publishes it.",
   redovna_obrana:"regular",vanredna_obrana:"extraordinary",kontinuirana_obrana:"continuous"}};
 let lang=null;try{lang=localStorage.getItem("fl_lang")}catch(e){}
@@ -89,6 +89,13 @@ function popup(m,r){
   const rs=r?[r]:m.rivers;
   return `<div class="pop"><b>${m.name}</b>${rs.map(riverBlock).join("")}<div class="mut" style="margin-top:6px">${t("note")}</div></div>`;
 }
+function gspark(h,col){
+  if(!h||h.length<2) return "";
+  const W=210,H=46,v=h.map(p=>p[1]),lo=Math.min(...v),hi=Math.max(...v),r=(hi-lo)||1;
+  const x=i=>4+i*(W-8)/(h.length-1), y=a=>H-4-(H-8)*(a-lo)/r;
+  return `<svg width="${W}" height="${H}" role="img" aria-label="${t("ghist")}"><polyline fill="none" stroke="${col}" stroke-width="2" points="${v.map((a,i)=>x(i)+","+y(a)).join(" ")}"/></svg>
+   <div class="mut">${t("ghist")}: ${h.length}× · ${lo} – ${hi}</div>`;
+}
 function gaugePopup(g){
   const unit=g.unit||"", stale=g.time&&(Date.now()-Date.parse(g.time))>6*3600e3;
   const val=g.value==null?t("gnone"):`${g.value} ${unit}${g.unit?"":` <span class="mut">(${t("gnounit")})</span>`}`;
@@ -97,7 +104,7 @@ function gaugePopup(g){
   const when=g.time?`${g.time.replace("T"," ").slice(0,16)}${stale?` · <b>${t("gstale")}</b>`:""}`
     :g.time_raw_epoch?`${new Date(g.time_raw_epoch*1000).toISOString().replace("T"," ").slice(0,16)} <span class="mut">(${t("gepoch")})</span>`:"–";
   return `<div class="pop"><b>${g.name}</b>${g.river?` <span class="mut">· ${g.river}</span>`:""}
-   <div>${t("gval")}: <b>${val}</b></div>${cls}${thr}<div class="mut">${t("gtime")}: ${when}</div>
+   <div>${t("gval")}: <b>${val}</b></div>${cls}${thr}<div class="mut">${t("gtime")}: ${when}</div>${gspark(g.history,g.class?GCOL[g.class]:"#5b6b7a")}
    <div class="mut">${t("gsrc")}: ${GSRC[g.source]}</div><div class="mut" style="margin-top:4px">${t("gnote")}</div></div>`;
 }
 function drawGauges(){
@@ -141,7 +148,7 @@ function draw(){
   document.getElementById("lang").textContent=t("lang");
   document.getElementById("stamp").textContent=t("upd")+": "+SNAP.generated_at.replace("T"," ").slice(0,16)+" UTC";
   document.getElementById("legend").innerHTML=LV.map(k=>`<div class="row"><span class="dot" style="background:${COL[k]}"></span>${t(k)} <span class="mut">(${c[k]||0})</span></div>`).join("");
-  document.getElementById("list").innerHTML=worst.length?worst.map((m,i)=>`<div class="item" data-i="${i}"><span style="color:${COL[m.level]}">●</span> ${m.name} <span class="mut">${m.rivers.filter(r=>r.level===m.level).map(r=>r.river||"").filter(Boolean).join(", ")} · ${pk(m)} m³/s</span></div>`).join(""):`<div class="mut" style="margin-top:8px">${t("none")}</div>`;
+  document.getElementById("list").innerHTML=worst.length?worst.map((m,i)=>`<div class="item" data-i="${i}"><span style="color:${COL[m.level]}">●</span> ${m.name} <span class="mut">${m.rivers.filter(r=>r.level===m.level).map(r=>r.river||"").filter(Boolean).join(", ")} · ${pk(m)} m³/s</span></div>`).join(""):`<div class="mut" style="margin-top:8px">${SNAP.municipalities.length?t("none"):t("nomodel")}</div>`;
   document.querySelectorAll(".item").forEach(el=>el.onclick=()=>{const m=worst[+el.dataset.i];
     const r0=m.rivers[0],g0=(RIV[m.id]||[]).find(x=>x.name===r0.river),at=g0?[g0.mlat,g0.mlon]:[r0.lat,r0.lon];map.setView(at,10,{animate:false});L.popup({autoPan:false}).setLatLng(at).setContent(popup(m)).openOn(map)});
 }

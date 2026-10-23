@@ -43,6 +43,8 @@ def cycle() -> dict:
         rec["rivers"].sort(key=lambda r: -levels.ORDER.index(r["level"]))
 
     g, gstatus = gauges_mod.fetch_all() if config.GAUGES_ENABLED else ([], {})
+    if g:
+        gauges_mod.update_history(g)
     snap = {"gauges": g, "gauge_status": gstatus, "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "today": today, "municipalities": list(out.values())}
     tmp = SNAPSHOT.with_suffix(".tmp")
