@@ -1,0 +1,1597 @@
+[
+ {
+  "id": "banja-luka",
+  "short_name": "Banja Luka",
+  "name_en": "City of Banja Luka",
+  "osm_relation": 2528156,
+  "boundary": "banja-luka.geojson",
+  "town": {
+   "lat": 44.7720845,
+   "lon": 17.1917651
+  }
+ },
+ {
+  "id": "banovici",
+  "short_name": "Banovići",
+  "name_en": "Banovici municipality",
+  "osm_relation": 2528157,
+  "boundary": "banovici.geojson",
+  "town": {
+   "lat": 44.4088812,
+   "lon": 18.5292365
+  }
+ },
+ {
+  "id": "berkovici",
+  "short_name": "Berkovići",
+  "name_en": "Berkovići municipality",
+  "osm_relation": 2528158,
+  "boundary": "berkovici.geojson",
+  "town": {
+   "lat": 43.0950122,
+   "lon": 18.1203775
+  }
+ },
+ {
+  "id": "bihac",
+  "short_name": "Bihać",
+  "name_en": "City of Bihać",
+  "osm_relation": 2528159,
+  "boundary": "bihac.geojson",
+  "town": {
+   "lat": 44.6110129,
+   "lon": 16.0773
+  }
+ },
+ {
+  "id": "bijeljina",
+  "short_name": "Bijeljina",
+  "name_en": "City of Bijeljina",
+  "osm_relation": 2528160,
+  "boundary": "bijeljina.geojson",
+  "town": {
+   "lat": 44.7573656,
+   "lon": 19.2175336
+  }
+ },
+ {
+  "id": "bileca",
+  "short_name": "Bileća",
+  "name_en": "Bileca municipality",
+  "osm_relation": 2528161,
+  "boundary": "bileca.geojson",
+  "town": {
+   "lat": 42.8748513,
+   "lon": 18.4279766
+  }
+ },
+ {
+  "id": "bosanska-krupa",
+  "short_name": "Bosanska Krupa",
+  "name_en": "Town of Bosanska Krupa",
+  "osm_relation": 2528164,
+  "boundary": "bosanska-krupa.geojson",
+  "town": {
+   "lat": 44.8824428,
+   "lon": 16.1577
+  }
+ },
+ {
+  "id": "bosanski-petrovac",
+  "short_name": "Bosanski Petrovac",
+  "name_en": "Bosanski Petrovac municipality",
+  "osm_relation": 2528168,
+  "boundary": "bosanski-petrovac.geojson",
+  "town": {
+   "lat": 44.5543706,
+   "lon": 16.3686978
+  }
+ },
+ {
+  "id": "bosansko-grahovo",
+  "short_name": "Bosansko Grahovo",
+  "name_en": "Bosansko Grahovo municipality",
+  "osm_relation": 2528170,
+  "boundary": "bosansko-grahovo.geojson",
+  "town": {
+   "lat": 44.1794878,
+   "lon": 16.3639977
+  }
+ },
+ {
+  "id": "bratunac",
+  "short_name": "Bratunac",
+  "name_en": "Bratunac municipality",
+  "osm_relation": 2530647,
+  "boundary": "bratunac.geojson",
+  "town": {
+   "lat": 44.1840152,
+   "lon": 19.3310341
+  }
+ },
+ {
+  "id": "breza",
+  "short_name": "Breza",
+  "name_en": "Breza municipality",
+  "osm_relation": 2528171,
+  "boundary": "breza.geojson",
+  "town": {
+   "lat": 44.0182913,
+   "lon": 18.2608652
+  }
+ },
+ {
+  "id": "brod",
+  "short_name": "Brod",
+  "name_en": "",
+  "osm_relation": 2528166,
+  "boundary": "brod.geojson",
+  "town": {
+   "lat": 45.1464044,
+   "lon": 17.9991557
+  }
+ },
+ {
+  "id": "brcko",
+  "short_name": "Brčko",
+  "name_en": "Brčko District",
+  "osm_relation": 2528143,
+  "boundary": "brcko.geojson",
+  "town": {
+   "lat": 44.8771222,
+   "lon": 18.8095022
+  }
+ },
+ {
+  "id": "bugojno",
+  "short_name": "Bugojno",
+  "name_en": "Bugojno Municipality",
+  "osm_relation": 2528172,
+  "boundary": "bugojno.geojson",
+  "town": {
+   "lat": 44.0558542,
+   "lon": 17.4509043
+  }
+ },
+ {
+  "id": "busovaca",
+  "short_name": "Busovača",
+  "name_en": "Busovaca municipality",
+  "osm_relation": 2528173,
+  "boundary": "busovaca.geojson",
+  "town": {
+   "lat": 44.0984764,
+   "lon": 17.8791295
+  }
+ },
+ {
+  "id": "buzim",
+  "short_name": "Bužim",
+  "name_en": "Buzim municipality",
+  "osm_relation": 2528174,
+  "boundary": "buzim.geojson",
+  "town": {
+   "lat": 45.0612916,
+   "lon": 16.0323903
+  }
+ },
+ {
+  "id": "cazin",
+  "short_name": "Cazin",
+  "name_en": "City of Cazin",
+  "osm_relation": 2528177,
+  "boundary": "cazin.geojson",
+  "town": {
+   "lat": 44.9665331,
+   "lon": 15.9422967
+  }
+ },
+ {
+  "id": "centar",
+  "short_name": "Centar",
+  "name_en": "Centar Municipality",
+  "osm_relation": 2528180,
+  "boundary": "centar.geojson",
+  "town": {
+   "lat": 43.8992312,
+   "lon": 18.4151611
+  }
+ },
+ {
+  "id": "derventa",
+  "short_name": "Derventa",
+  "name_en": "Town of Derventa",
+  "osm_relation": 2528182,
+  "boundary": "derventa.geojson",
+  "town": {
+   "lat": 44.9767094,
+   "lon": 17.906959
+  }
+ },
+ {
+  "id": "doboj",
+  "short_name": "Doboj",
+  "name_en": "City of Doboj",
+  "osm_relation": 2528185,
+  "boundary": "doboj.geojson",
+  "town": {
+   "lat": 44.7324559,
+   "lon": 18.0850157
+  }
+ },
+ {
+  "id": "doboj-istok",
+  "short_name": "Doboj Istok",
+  "name_en": "Doboj Istok Municipality",
+  "osm_relation": 2528183,
+  "boundary": "doboj-istok.geojson",
+  "town": {
+   "lat": 44.7381908,
+   "lon": 18.190292
+  }
+ },
+ {
+  "id": "doboj-jug",
+  "short_name": "Doboj Jug",
+  "name_en": "Doboj Jug Municipality",
+  "osm_relation": 2528184,
+  "boundary": "doboj-jug.geojson",
+  "town": {
+   "lat": 44.6787798,
+   "lon": 18.0579222
+  }
+ },
+ {
+  "id": "dobretici",
+  "short_name": "Dobretići",
+  "name_en": "Dobretici municipality",
+  "osm_relation": 2528186,
+  "boundary": "dobretici.geojson",
+  "town": {
+   "lat": 44.3942737,
+   "lon": 17.4201333
+  }
+ },
+ {
+  "id": "domaljevac-samac",
+  "short_name": "Domaljevac-Šamac",
+  "name_en": "Domaljevac-Šamac Municipality",
+  "osm_relation": 2528187,
+  "boundary": "domaljevac-samac.geojson",
+  "town": {
+   "lat": 45.0561508,
+   "lon": 18.5695572
+  }
+ },
+ {
+  "id": "donji-vakuf",
+  "short_name": "Donji Vakuf",
+  "name_en": "Donji Vakuf Municipality",
+  "osm_relation": 2528188,
+  "boundary": "donji-vakuf.geojson",
+  "town": {
+   "lat": 44.144488,
+   "lon": 17.3949964
+  }
+ },
+ {
+  "id": "donji-zabar",
+  "short_name": "Donji Žabar",
+  "name_en": "Donji Zabar municipality",
+  "osm_relation": 2528189,
+  "boundary": "donji-zabar.geojson",
+  "town": {
+   "lat": 44.9659666,
+   "lon": 18.6649715
+  }
+ },
+ {
+  "id": "drvar",
+  "short_name": "Drvar",
+  "name_en": "Drvar municipality",
+  "osm_relation": 2528190,
+  "boundary": "drvar.geojson",
+  "town": {
+   "lat": 44.3740882,
+   "lon": 16.3845503
+  }
+ },
+ {
+  "id": "fojnica",
+  "short_name": "Fojnica",
+  "name_en": "Fojnica municipality",
+  "osm_relation": 2528197,
+  "boundary": "fojnica.geojson",
+  "town": {
+   "lat": 43.9634432,
+   "lon": 17.8990217
+  }
+ },
+ {
+  "id": "foca-fbih",
+  "short_name": "Foča (FBiH)",
+  "name_en": "Foča Municipality (FBiH)",
+  "osm_relation": 2528284,
+  "boundary": "foca-fbih.geojson",
+  "town": {
+   "lat": 43.6254849,
+   "lon": 18.6695194
+  }
+ },
+ {
+  "id": "foca-rs",
+  "short_name": "Foča (RS)",
+  "name_en": "Foča Municipality (RS)",
+  "osm_relation": 2528196,
+  "boundary": "foca-rs.geojson",
+  "town": {
+   "lat": 43.4344421,
+   "lon": 18.7778764
+  }
+ },
+ {
+  "id": "gacko",
+  "short_name": "Gacko",
+  "name_en": "Gacko municipality",
+  "osm_relation": 2528198,
+  "boundary": "gacko.geojson",
+  "town": {
+   "lat": 43.1664068,
+   "lon": 18.5357977
+  }
+ },
+ {
+  "id": "glamoc",
+  "short_name": "Glamoč",
+  "name_en": "Glamoč municipality",
+  "osm_relation": 2528199,
+  "boundary": "glamoc.geojson",
+  "town": {
+   "lat": 44.0449852,
+   "lon": 16.8499014
+  }
+ },
+ {
+  "id": "gorazde",
+  "short_name": "Goražde",
+  "name_en": "City of Goražde",
+  "osm_relation": 2528200,
+  "boundary": "gorazde.geojson",
+  "town": {
+   "lat": 43.6684413,
+   "lon": 18.9759044
+  }
+ },
+ {
+  "id": "gornji-vakuf-uskoplje",
+  "short_name": "Gornji Vakuf-Uskoplje",
+  "name_en": "Gornji Vakuf-Uskoplje municipality",
+  "osm_relation": 2528201,
+  "boundary": "gornji-vakuf-uskoplje.geojson",
+  "town": {
+   "lat": 43.9385698,
+   "lon": 17.5853035
+  }
+ },
+ {
+  "id": "gradacac",
+  "short_name": "Gradačac",
+  "name_en": "Town of Gradačac",
+  "osm_relation": 2528203,
+  "boundary": "gradacac.geojson",
+  "town": {
+   "lat": 44.8781486,
+   "lon": 18.4254813
+  }
+ },
+ {
+  "id": "gradiska",
+  "short_name": "Gradiška",
+  "name_en": "Town of Gradiška",
+  "osm_relation": 2528162,
+  "boundary": "gradiska.geojson",
+  "town": {
+   "lat": 45.1461945,
+   "lon": 17.2520748
+  }
+ },
+ {
+  "id": "gracanica",
+  "short_name": "Gračanica",
+  "name_en": "Town of Gračanica",
+  "osm_relation": 2528202,
+  "boundary": "gracanica.geojson",
+  "town": {
+   "lat": 44.7043396,
+   "lon": 18.310107
+  }
+ },
+ {
+  "id": "grude",
+  "short_name": "Grude",
+  "name_en": "Grude municipality",
+  "osm_relation": 2528204,
+  "boundary": "grude.geojson",
+  "town": {
+   "lat": 43.3723256,
+   "lon": 17.4141836
+  }
+ },
+ {
+  "id": "hadzici",
+  "short_name": "Hadžići",
+  "name_en": "Hadzici municipality",
+  "osm_relation": 2528205,
+  "boundary": "hadzici.geojson",
+  "town": {
+   "lat": 43.8223256,
+   "lon": 18.2031453
+  }
+ },
+ {
+  "id": "han-pijesak",
+  "short_name": "Han Pijesak",
+  "name_en": "Han Pijesak Municipality",
+  "osm_relation": 2528206,
+  "boundary": "han-pijesak.geojson",
+  "town": {
+   "lat": 44.0812895,
+   "lon": 18.9530643
+  }
+ },
+ {
+  "id": "ilidza",
+  "short_name": "Ilidža",
+  "name_en": "Ilidža Municipality",
+  "osm_relation": 2528207,
+  "boundary": "ilidza.geojson",
+  "town": {
+   "lat": 43.8306182,
+   "lon": 18.3077357
+  }
+ },
+ {
+  "id": "ilijas",
+  "short_name": "Ilijaš",
+  "name_en": "Ilijas municipality",
+  "osm_relation": 2528208,
+  "boundary": "ilijas.geojson",
+  "town": {
+   "lat": 43.95645,
+   "lon": 18.2661553
+  }
+ },
+ {
+  "id": "istocna-ilidza",
+  "short_name": "Istočna Ilidža",
+  "name_en": "Istočna Ilidža Municipality",
+  "osm_relation": 2528192,
+  "boundary": "istocna-ilidza.geojson",
+  "town": {
+   "lat": 43.7897021,
+   "lon": 18.3730051
+  }
+ },
+ {
+  "id": "istocni-drvar",
+  "short_name": "Istočni Drvar",
+  "name_en": "Istočni Drvar Мunicipality",
+  "osm_relation": 2528191,
+  "boundary": "istocni-drvar.geojson",
+  "town": {
+   "lat": 44.4055752,
+   "lon": 16.609625
+  }
+ },
+ {
+  "id": "istocni-mostar",
+  "short_name": "Istočni Mostar",
+  "name_en": "Eastern Mostar municipality",
+  "osm_relation": 2528193,
+  "boundary": "istocni-mostar.geojson",
+  "town": {
+   "lat": 43.4089256,
+   "lon": 18.0113961
+  }
+ },
+ {
+  "id": "istocni-stari-grad",
+  "short_name": "Istočni Stari Grad",
+  "name_en": "Istočni Stari Grad Municipality",
+  "osm_relation": 2528195,
+  "boundary": "istocni-stari-grad.geojson",
+  "town": {
+   "lat": 43.8835288,
+   "lon": 18.5121747
+  }
+ },
+ {
+  "id": "istocno-novo-sarajevo",
+  "short_name": "Istočno Novo Sarajevo",
+  "name_en": "Istočno Novo Sarajevo Municipality",
+  "osm_relation": 2528194,
+  "boundary": "istocno-novo-sarajevo.geojson",
+  "town": {
+   "lat": 43.8023988,
+   "lon": 18.4288446
+  }
+ },
+ {
+  "id": "istocno-sarajevo",
+  "short_name": "Istočno Sarajevo",
+  "name_en": "City of Istočno Sarajevo",
+  "osm_relation": 2567396,
+  "boundary": "istocno-sarajevo.geojson",
+  "town": {
+   "lat": 43.8983532,
+   "lon": 18.7332166
+  }
+ },
+ {
+  "id": "jablanica",
+  "short_name": "Jablanica",
+  "name_en": "Jablanica municipality",
+  "osm_relation": 2528209,
+  "boundary": "jablanica.geojson",
+  "town": {
+   "lat": 43.6617485,
+   "lon": 17.7618471
+  }
+ },
+ {
+  "id": "jajce",
+  "short_name": "Jajce",
+  "name_en": "Jajce Municipality",
+  "osm_relation": 2528210,
+  "boundary": "jajce.geojson",
+  "town": {
+   "lat": 44.3396706,
+   "lon": 17.2711786
+  }
+ },
+ {
+  "id": "jezero",
+  "short_name": "Jezero",
+  "name_en": "Jezero municipality",
+  "osm_relation": 2528212,
+  "boundary": "jezero.geojson",
+  "town": {
+   "lat": 44.3324939,
+   "lon": 17.1723366
+  }
+ },
+ {
+  "id": "kakanj",
+  "short_name": "Kakanj",
+  "name_en": "Kakanj municipality",
+  "osm_relation": 2528213,
+  "boundary": "kakanj.geojson",
+  "town": {
+   "lat": 44.128571,
+   "lon": 18.1184071
+  }
+ },
+ {
+  "id": "kalesija",
+  "short_name": "Kalesija",
+  "name_en": "Kalesija municipality",
+  "osm_relation": 2528214,
+  "boundary": "kalesija.geojson",
+  "town": {
+   "lat": 44.4429857,
+   "lon": 18.8756758
+  }
+ },
+ {
+  "id": "kalinovik",
+  "short_name": "Kalinovik",
+  "name_en": "Kalinovik municipality",
+  "osm_relation": 2528215,
+  "boundary": "kalinovik.geojson",
+  "town": {
+   "lat": 43.5043116,
+   "lon": 18.4467193
+  }
+ },
+ {
+  "id": "kiseljak",
+  "short_name": "Kiseljak",
+  "name_en": "Kiseljak municipality",
+  "osm_relation": 2528216,
+  "boundary": "kiseljak.geojson",
+  "town": {
+   "lat": 43.9431668,
+   "lon": 18.0774711
+  }
+ },
+ {
+  "id": "kladanj",
+  "short_name": "Kladanj",
+  "name_en": "Kladanj municipality",
+  "osm_relation": 2528217,
+  "boundary": "kladanj.geojson",
+  "town": {
+   "lat": 44.2252216,
+   "lon": 18.6940672
+  }
+ },
+ {
+  "id": "kljuc",
+  "short_name": "Ključ",
+  "name_en": "Ključ Municipality",
+  "osm_relation": 2528218,
+  "boundary": "kljuc.geojson",
+  "town": {
+   "lat": 44.533341,
+   "lon": 16.7761951
+  }
+ },
+ {
+  "id": "knezevo",
+  "short_name": "Kneževo",
+  "name_en": "Kneževo municipality",
+  "osm_relation": 2528266,
+  "boundary": "knezevo.geojson",
+  "town": {
+   "lat": 44.4899319,
+   "lon": 17.3800905
+  }
+ },
+ {
+  "id": "konjic",
+  "short_name": "Konjic",
+  "name_en": "City of Konjic",
+  "osm_relation": 2528219,
+  "boundary": "konjic.geojson",
+  "town": {
+   "lat": 43.6544405,
+   "lon": 17.9606621
+  }
+ },
+ {
+  "id": "kostajnica",
+  "short_name": "Kostajnica",
+  "name_en": "Kostajnica municipality",
+  "osm_relation": 2528163,
+  "boundary": "kostajnica.geojson",
+  "town": {
+   "lat": 45.2187079,
+   "lon": 16.5463194
+  }
+ },
+ {
+  "id": "kotor-varos",
+  "short_name": "Kotor Varoš",
+  "name_en": "Kotor Varos municipality",
+  "osm_relation": 2528220,
+  "boundary": "kotor-varos.geojson",
+  "town": {
+   "lat": 44.6202944,
+   "lon": 17.3701203
+  }
+ },
+ {
+  "id": "kozarska-dubica",
+  "short_name": "Kozarska Dubica",
+  "name_en": "Kozarska Dubica Municipality",
+  "osm_relation": 2528165,
+  "boundary": "kozarska-dubica.geojson",
+  "town": {
+   "lat": 45.1827099,
+   "lon": 16.8086377
+  }
+ },
+ {
+  "id": "kresevo",
+  "short_name": "Kreševo",
+  "name_en": "Kresevo municipality",
+  "osm_relation": 2528221,
+  "boundary": "kresevo.geojson",
+  "town": {
+   "lat": 43.8657424,
+   "lon": 18.0421665
+  }
+ },
+ {
+  "id": "krupa-na-uni",
+  "short_name": "Krupa na Uni",
+  "name_en": "Krupa na Uni municipality",
+  "osm_relation": 2528222,
+  "boundary": "krupa-na-uni.geojson",
+  "town": {
+   "lat": 44.9038436,
+   "lon": 16.2957294
+  }
+ },
+ {
+  "id": "kupres",
+  "short_name": "Kupres",
+  "name_en": "Kupres Мunicipality",
+  "osm_relation": 2528224,
+  "boundary": "kupres.geojson",
+  "town": {
+   "lat": 43.9927632,
+   "lon": 17.2774677
+  }
+ },
+ {
+  "id": "kupres-rs",
+  "short_name": "Kupres (RS)",
+  "name_en": "Kupres (RS) municipality",
+  "osm_relation": 2528223,
+  "boundary": "kupres-rs.geojson",
+  "town": {
+   "lat": 44.0888743,
+   "lon": 17.1456149
+  }
+ },
+ {
+  "id": "laktasi",
+  "short_name": "Laktaši",
+  "name_en": "Town of Laktaši",
+  "osm_relation": 2528225,
+  "boundary": "laktasi.geojson",
+  "town": {
+   "lat": 44.9068353,
+   "lon": 17.3017914
+  }
+ },
+ {
+  "id": "livno",
+  "short_name": "Livno",
+  "name_en": "City of Livno",
+  "osm_relation": 2528226,
+  "boundary": "livno.geojson",
+  "town": {
+   "lat": 43.8259136,
+   "lon": 17.0042416
+  }
+ },
+ {
+  "id": "ljubinje",
+  "short_name": "Ljubinje",
+  "name_en": "Ljubinje municipality",
+  "osm_relation": 2528227,
+  "boundary": "ljubinje.geojson",
+  "town": {
+   "lat": 42.95172,
+   "lon": 18.086178
+  }
+ },
+ {
+  "id": "ljubuski",
+  "short_name": "Ljubuški",
+  "name_en": "",
+  "osm_relation": 2528228,
+  "boundary": "ljubuski.geojson",
+  "town": {
+   "lat": 43.1963022,
+   "lon": 17.5447857
+  }
+ },
+ {
+  "id": "lopare",
+  "short_name": "Lopare",
+  "name_en": "Lopare municipality",
+  "osm_relation": 2528229,
+  "boundary": "lopare.geojson",
+  "town": {
+   "lat": 44.6356497,
+   "lon": 18.8441138
+  }
+ },
+ {
+  "id": "lukavac",
+  "short_name": "Lukavac",
+  "name_en": "Town of Lukavac",
+  "osm_relation": 2528230,
+  "boundary": "lukavac.geojson",
+  "town": {
+   "lat": 44.5344136,
+   "lon": 18.5325309
+  }
+ },
+ {
+  "id": "maglaj",
+  "short_name": "Maglaj",
+  "name_en": "Maglaj municipality",
+  "osm_relation": 2528231,
+  "boundary": "maglaj.geojson",
+  "town": {
+   "lat": 44.5468713,
+   "lon": 18.1010166
+  }
+ },
+ {
+  "id": "milici",
+  "short_name": "Milići",
+  "name_en": "Milici municipality",
+  "osm_relation": 2528232,
+  "boundary": "milici.geojson",
+  "town": {
+   "lat": 44.1691997,
+   "lon": 19.0789283
+  }
+ },
+ {
+  "id": "modrica",
+  "short_name": "Modriča",
+  "name_en": "Modrica municipality",
+  "osm_relation": 2528233,
+  "boundary": "modrica.geojson",
+  "town": {
+   "lat": 44.9565236,
+   "lon": 18.3011351
+  }
+ },
+ {
+  "id": "mostar",
+  "short_name": "Mostar",
+  "name_en": "City of Mostar",
+  "osm_relation": 2528234,
+  "boundary": "mostar.geojson",
+  "town": {
+   "lat": 43.3435855,
+   "lon": 17.8076584
+  }
+ },
+ {
+  "id": "mrkonjic-grad",
+  "short_name": "Mrkonjić Grad",
+  "name_en": "Mrkonjić Grad Municipality",
+  "osm_relation": 2528235,
+  "boundary": "mrkonjic-grad.geojson",
+  "town": {
+   "lat": 44.4166023,
+   "lon": 17.0842585
+  }
+ },
+ {
+  "id": "neum",
+  "short_name": "Neum",
+  "name_en": "Neum municipality",
+  "osm_relation": 2528236,
+  "boundary": "neum.geojson",
+  "town": {
+   "lat": 42.9258614,
+   "lon": 17.6157205
+  }
+ },
+ {
+  "id": "nevesinje",
+  "short_name": "Nevesinje",
+  "name_en": "Nevesinje municipality",
+  "osm_relation": 2528237,
+  "boundary": "nevesinje.geojson",
+  "town": {
+   "lat": 43.2573362,
+   "lon": 18.111879
+  }
+ },
+ {
+  "id": "novi-grad-2528167",
+  "short_name": "Novi Grad",
+  "name_en": "Novi Grad municipality",
+  "osm_relation": 2528167,
+  "boundary": "novi-grad-2528167.geojson",
+  "town": {
+   "lat": 45.0489865,
+   "lon": 16.3776502
+  }
+ },
+ {
+  "id": "novi-grad-2528240",
+  "short_name": "Novi Grad",
+  "name_en": "Novi Grad Municipality",
+  "osm_relation": 2528240,
+  "boundary": "novi-grad-2528240.geojson",
+  "town": {
+   "lat": 43.8681493,
+   "lon": 18.3339168
+  }
+ },
+ {
+  "id": "novi-travnik",
+  "short_name": "Novi Travnik",
+  "name_en": "Town of Novi Travnik",
+  "osm_relation": 2528241,
+  "boundary": "novi-travnik.geojson",
+  "town": {
+   "lat": 44.1707502,
+   "lon": 17.6576521
+  }
+ },
+ {
+  "id": "novo-gorazde",
+  "short_name": "Novo Goražde",
+  "name_en": "New Goražde Municipality",
+  "osm_relation": 2528238,
+  "boundary": "novo-gorazde.geojson",
+  "town": {
+   "lat": 43.6481054,
+   "lon": 19.0363427
+  }
+ },
+ {
+  "id": "novo-sarajevo",
+  "short_name": "Novo Sarajevo",
+  "name_en": "Novo Sarajevo Municipality",
+  "osm_relation": 2528239,
+  "boundary": "novo-sarajevo.geojson",
+  "town": {
+   "lat": 43.8568489,
+   "lon": 18.3849891
+  }
+ },
+ {
+  "id": "odzak",
+  "short_name": "Odžak",
+  "name_en": "Odžak Municipality",
+  "osm_relation": 2528242,
+  "boundary": "odzak.geojson",
+  "town": {
+   "lat": 45.0120287,
+   "lon": 18.3261358
+  }
+ },
+ {
+  "id": "olovo",
+  "short_name": "Olovo",
+  "name_en": "Olovo municipality",
+  "osm_relation": 2528244,
+  "boundary": "olovo.geojson",
+  "town": {
+   "lat": 44.1269033,
+   "lon": 18.580233
+  }
+ },
+ {
+  "id": "orasje",
+  "short_name": "Orašje",
+  "name_en": "Town of Orašje",
+  "osm_relation": 2528245,
+  "boundary": "orasje.geojson",
+  "town": {
+   "lat": 45.0342753,
+   "lon": 18.6943254
+  }
+ },
+ {
+  "id": "osmaci",
+  "short_name": "Osmaci",
+  "name_en": "Osmaci municipality",
+  "osm_relation": 2528246,
+  "boundary": "osmaci.geojson",
+  "town": {
+   "lat": 44.3948278,
+   "lon": 18.906558
+  }
+ },
+ {
+  "id": "ostra-luka",
+  "short_name": "Oštra Luka",
+  "name_en": "Ostra Luka municipality",
+  "osm_relation": 2528247,
+  "boundary": "ostra-luka.geojson",
+  "town": {
+   "lat": 44.7713337,
+   "lon": 16.7939593
+  }
+ },
+ {
+  "id": "pale-fbih",
+  "short_name": "Pale (FBiH)",
+  "name_en": "Pale Municipality (FBiH)",
+  "osm_relation": 2528249,
+  "boundary": "pale-fbih.geojson",
+  "town": {
+   "lat": 43.717493,
+   "lon": 18.7535302
+  }
+ },
+ {
+  "id": "pale-rs",
+  "short_name": "Pale (RS)",
+  "name_en": "Pale Municipality (RS)",
+  "osm_relation": 2528248,
+  "boundary": "pale-rs.geojson",
+  "town": {
+   "lat": 43.8231678,
+   "lon": 18.6530858
+  }
+ },
+ {
+  "id": "pelagicevo",
+  "short_name": "Pelagićevo",
+  "name_en": "Pelagićevo Municipality",
+  "osm_relation": 2528250,
+  "boundary": "pelagicevo.geojson",
+  "town": {
+   "lat": 44.8973288,
+   "lon": 18.5681331
+  }
+ },
+ {
+  "id": "petrovac",
+  "short_name": "Petrovac",
+  "name_en": "Petrovac Municipality",
+  "osm_relation": 2528251,
+  "boundary": "petrovac.geojson",
+  "town": {
+   "lat": 44.4733928,
+   "lon": 16.5452465
+  }
+ },
+ {
+  "id": "petrovo",
+  "short_name": "Petrovo",
+  "name_en": "Petrovo municipality",
+  "osm_relation": 2528252,
+  "boundary": "petrovo.geojson",
+  "town": {
+   "lat": 44.6356272,
+   "lon": 18.3181382
+  }
+ },
+ {
+  "id": "posusje",
+  "short_name": "Posušje",
+  "name_en": "Posušje Municipality",
+  "osm_relation": 2528253,
+  "boundary": "posusje.geojson",
+  "town": {
+   "lat": 43.4712288,
+   "lon": 17.3271281
+  }
+ },
+ {
+  "id": "prijedor",
+  "short_name": "Prijedor",
+  "name_en": "City of Prijedor",
+  "osm_relation": 5729592,
+  "boundary": "prijedor.geojson",
+  "town": {
+   "lat": 44.9801369,
+   "lon": 16.7123704
+  }
+ },
+ {
+  "id": "prnjavor",
+  "short_name": "Prnjavor",
+  "name_en": "Town of Prnjavor",
+  "osm_relation": 2528255,
+  "boundary": "prnjavor.geojson",
+  "town": {
+   "lat": 44.8686369,
+   "lon": 17.6631777
+  }
+ },
+ {
+  "id": "prozor-rama",
+  "short_name": "Prozor-Rama",
+  "name_en": "Prozor-Rama municipality",
+  "osm_relation": 2528256,
+  "boundary": "prozor-rama.geojson",
+  "town": {
+   "lat": 43.7800879,
+   "lon": 17.5499952
+  }
+ },
+ {
+  "id": "ravno",
+  "short_name": "Ravno",
+  "name_en": "Ravno municipality",
+  "osm_relation": 2528257,
+  "boundary": "ravno.geojson",
+  "town": {
+   "lat": 42.7773488,
+   "lon": 18.0404617
+  }
+ },
+ {
+  "id": "ribnik",
+  "short_name": "Ribnik",
+  "name_en": "Ribnik municipality",
+  "osm_relation": 2528258,
+  "boundary": "ribnik.geojson",
+  "town": {
+   "lat": 44.4605493,
+   "lon": 16.7658724
+  }
+ },
+ {
+  "id": "rogatica",
+  "short_name": "Rogatica",
+  "name_en": "Rogatica municipality",
+  "osm_relation": 2528259,
+  "boundary": "rogatica.geojson",
+  "town": {
+   "lat": 43.8003256,
+   "lon": 19.0019083
+  }
+ },
+ {
+  "id": "rudo",
+  "short_name": "Rudo",
+  "name_en": "Rudo Municipality",
+  "osm_relation": 2528260,
+  "boundary": "rudo.geojson",
+  "town": {
+   "lat": 43.6174355,
+   "lon": 19.3656216
+  }
+ },
+ {
+  "id": "sanski-most",
+  "short_name": "Sanski Most",
+  "name_en": "Sanski Most municipality",
+  "osm_relation": 2528261,
+  "boundary": "sanski-most.geojson",
+  "town": {
+   "lat": 44.7651882,
+   "lon": 16.6656827
+  }
+ },
+ {
+  "id": "sapna",
+  "short_name": "Sapna",
+  "name_en": "Sapna municipality",
+  "osm_relation": 2528262,
+  "boundary": "sapna.geojson",
+  "town": {
+   "lat": 44.5182978,
+   "lon": 18.9645532
+  }
+ },
+ {
+  "id": "sarajevo",
+  "short_name": "Sarajevo",
+  "name_en": "City of Sarajevo",
+  "osm_relation": 2567380,
+  "boundary": "sarajevo.geojson",
+  "town": {
+   "lat": 43.8570713,
+   "lon": 18.4126147
+  }
+ },
+ {
+  "id": "sokolac",
+  "short_name": "Sokolac",
+  "name_en": "Sokolac municipality",
+  "osm_relation": 2528267,
+  "boundary": "sokolac.geojson",
+  "town": {
+   "lat": 43.9358936,
+   "lon": 18.7963138
+  }
+ },
+ {
+  "id": "srbac",
+  "short_name": "Srbac",
+  "name_en": "Srbac Municipality",
+  "osm_relation": 2528268,
+  "boundary": "srbac.geojson",
+  "town": {
+   "lat": 45.0954444,
+   "lon": 17.5198587
+  }
+ },
+ {
+  "id": "srebrenica",
+  "short_name": "Srebrenica",
+  "name_en": "Srebrenica municipality",
+  "osm_relation": 2528269,
+  "boundary": "srebrenica.geojson",
+  "town": {
+   "lat": 44.1063188,
+   "lon": 19.2952783
+  }
+ },
+ {
+  "id": "srebrenik",
+  "short_name": "Srebrenik",
+  "name_en": "Town of Srebrenik",
+  "osm_relation": 2528270,
+  "boundary": "srebrenik.geojson",
+  "town": {
+   "lat": 44.7048957,
+   "lon": 18.4912709
+  }
+ },
+ {
+  "id": "stanari",
+  "short_name": "Stanari",
+  "name_en": "Stanari Municipality",
+  "osm_relation": 11507203,
+  "boundary": "stanari.geojson",
+  "town": {
+   "lat": 44.7517257,
+   "lon": 17.8379451
+  }
+ },
+ {
+  "id": "stari-grad",
+  "short_name": "Stari Grad",
+  "name_en": "Stari Grad Municipality",
+  "osm_relation": 2528243,
+  "boundary": "stari-grad.geojson",
+  "town": {
+   "lat": 43.8966626,
+   "lon": 18.4563083
+  }
+ },
+ {
+  "id": "stolac",
+  "short_name": "Stolac",
+  "name_en": "Town of Stolac",
+  "osm_relation": 2528271,
+  "boundary": "stolac.geojson",
+  "town": {
+   "lat": 43.0830587,
+   "lon": 17.9580026
+  }
+ },
+ {
+  "id": "teocak",
+  "short_name": "Teočak",
+  "name_en": "Teočak Municipality",
+  "osm_relation": 2528272,
+  "boundary": "teocak.geojson",
+  "town": {
+   "lat": 44.5928276,
+   "lon": 19.0248297
+  }
+ },
+ {
+  "id": "teslic",
+  "short_name": "Teslić",
+  "name_en": "City of Teslic",
+  "osm_relation": 2528274,
+  "boundary": "teslic.geojson",
+  "town": {
+   "lat": 44.6065761,
+   "lon": 17.8595061
+  }
+ },
+ {
+  "id": "tesanj",
+  "short_name": "Tešanj",
+  "name_en": "Tesanj municipality",
+  "osm_relation": 2528273,
+  "boundary": "tesanj.geojson",
+  "town": {
+   "lat": 44.6129188,
+   "lon": 17.9858051
+  }
+ },
+ {
+  "id": "tomislavgrad",
+  "short_name": "Tomislavgrad",
+  "name_en": "Tomislavgrad municipality",
+  "osm_relation": 2528275,
+  "boundary": "tomislavgrad.geojson",
+  "town": {
+   "lat": 43.7169169,
+   "lon": 17.2278277
+  }
+ },
+ {
+  "id": "travnik",
+  "short_name": "Travnik",
+  "name_en": "Travnik municipality",
+  "osm_relation": 2528276,
+  "boundary": "travnik.geojson",
+  "town": {
+   "lat": 44.2259454,
+   "lon": 17.6661738
+  }
+ },
+ {
+  "id": "trebinje",
+  "short_name": "Trebinje",
+  "name_en": "City of Trebinje",
+  "osm_relation": 2528277,
+  "boundary": "trebinje.geojson",
+  "town": {
+   "lat": 42.7115264,
+   "lon": 18.34468
+  }
+ },
+ {
+  "id": "trnovo-fbih",
+  "short_name": "Trnovo (FBiH)",
+  "name_en": "Trnovo Municipality (FBiH)",
+  "osm_relation": 2528280,
+  "boundary": "trnovo-fbih.geojson",
+  "town": {
+   "lat": 43.672248,
+   "lon": 18.4488153
+  }
+ },
+ {
+  "id": "trnovo-rs",
+  "short_name": "Trnovo (RS)",
+  "name_en": "Trnovo Municipality (RS)",
+  "osm_relation": 2568824,
+  "boundary": "trnovo-rs.geojson",
+  "town": {
+   "lat": 43.6298127,
+   "lon": 18.4430228
+  }
+ },
+ {
+  "id": "tuzla",
+  "short_name": "Tuzla",
+  "name_en": "City of Tuzla",
+  "osm_relation": 2528281,
+  "boundary": "tuzla.geojson",
+  "town": {
+   "lat": 44.539298,
+   "lon": 18.6749337
+  }
+ },
+ {
+  "id": "ugljevik",
+  "short_name": "Ugljevik",
+  "name_en": "Ugljevik municipality",
+  "osm_relation": 2528282,
+  "boundary": "ugljevik.geojson",
+  "town": {
+   "lat": 44.6930533,
+   "lon": 18.9945989
+  }
+ },
+ {
+  "id": "usora",
+  "short_name": "Usora",
+  "name_en": "Usora Municipality",
+  "osm_relation": 2528283,
+  "boundary": "usora.geojson",
+  "town": {
+   "lat": 44.6890659,
+   "lon": 17.9863846
+  }
+ },
+ {
+  "id": "vares",
+  "short_name": "Vareš",
+  "name_en": "Vares municipality",
+  "osm_relation": 2528285,
+  "boundary": "vares.geojson",
+  "town": {
+   "lat": 44.1633731,
+   "lon": 18.3285369
+  }
+ },
+ {
+  "id": "velika-kladusa",
+  "short_name": "Velika Kladuša",
+  "name_en": "Velika Kladuša municipality",
+  "osm_relation": 2528286,
+  "boundary": "velika-kladusa.geojson",
+  "town": {
+   "lat": 45.1843299,
+   "lon": 15.8069257
+  }
+ },
+ {
+  "id": "visoko",
+  "short_name": "Visoko",
+  "name_en": "",
+  "osm_relation": 2528288,
+  "boundary": "visoko.geojson",
+  "town": {
+   "lat": 43.9894986,
+   "lon": 18.1816434
+  }
+ },
+ {
+  "id": "vitez",
+  "short_name": "Vitez",
+  "name_en": "Vitez municipality",
+  "osm_relation": 2528289,
+  "boundary": "vitez.geojson",
+  "town": {
+   "lat": 44.1507747,
+   "lon": 17.7915356
+  }
+ },
+ {
+  "id": "visegrad",
+  "short_name": "Višegrad",
+  "name_en": "Visegrad municipality",
+  "osm_relation": 2528287,
+  "boundary": "visegrad.geojson",
+  "town": {
+   "lat": 43.7861605,
+   "lon": 19.293958
+  }
+ },
+ {
+  "id": "vlasenica",
+  "short_name": "Vlasenica",
+  "name_en": "Vlasenica municipality",
+  "osm_relation": 2528290,
+  "boundary": "vlasenica.geojson",
+  "town": {
+   "lat": 44.1821345,
+   "lon": 18.9411618
+  }
+ },
+ {
+  "id": "vogosca",
+  "short_name": "Vogošća",
+  "name_en": "Vogošća Municipality",
+  "osm_relation": 2528291,
+  "boundary": "vogosca.geojson",
+  "town": {
+   "lat": 43.9018326,
+   "lon": 18.3432927
+  }
+ },
+ {
+  "id": "vukosavlje",
+  "short_name": "Vukosavlje",
+  "name_en": "Vukosavlje municipality",
+  "osm_relation": 2531450,
+  "boundary": "vukosavlje.geojson",
+  "town": {
+   "lat": 45.017313,
+   "lon": 18.2472179
+  }
+ },
+ {
+  "id": "zavidovici",
+  "short_name": "Zavidovići",
+  "name_en": "Town of Zavidovići",
+  "osm_relation": 2528292,
+  "boundary": "zavidovici.geojson",
+  "town": {
+   "lat": 44.4388706,
+   "lon": 18.1458239
+  }
+ },
+ {
+  "id": "zenica",
+  "short_name": "Zenica",
+  "name_en": "City of Zenica",
+  "osm_relation": 2528293,
+  "boundary": "zenica.geojson",
+  "town": {
+   "lat": 44.199828,
+   "lon": 17.9093012
+  }
+ },
+ {
+  "id": "zvornik",
+  "short_name": "Zvornik",
+  "name_en": "City of Zvornik",
+  "osm_relation": 2528296,
+  "boundary": "zvornik.geojson",
+  "town": {
+   "lat": 44.3854067,
+   "lon": 19.1027717
+  }
+ },
+ {
+  "id": "cajnice",
+  "short_name": "Čajniče",
+  "name_en": "Čajniče Municipality",
+  "osm_relation": 2528175,
+  "boundary": "cajnice.geojson",
+  "town": {
+   "lat": 43.5565653,
+   "lon": 19.0721914
+  }
+ },
+ {
+  "id": "capljina",
+  "short_name": "Čapljina",
+  "name_en": "City of Čapljina",
+  "osm_relation": 2528176,
+  "boundary": "capljina.geojson",
+  "town": {
+   "lat": 43.1133536,
+   "lon": 17.705039
+  }
+ },
+ {
+  "id": "celinac",
+  "short_name": "Čelinac",
+  "name_en": "Celinac municipality",
+  "osm_relation": 2528179,
+  "boundary": "celinac.geojson",
+  "town": {
+   "lat": 44.7241731,
+   "lon": 17.319359
+  }
+ },
+ {
+  "id": "celic",
+  "short_name": "Čelić",
+  "name_en": "Celic municipality",
+  "osm_relation": 2528178,
+  "boundary": "celic.geojson",
+  "town": {
+   "lat": 44.722508,
+   "lon": 18.8200011
+  }
+ },
+ {
+  "id": "citluk",
+  "short_name": "Čitluk",
+  "name_en": "Čitluk municipality",
+  "osm_relation": 2528181,
+  "boundary": "citluk.geojson",
+  "town": {
+   "lat": 43.2267192,
+   "lon": 17.6963313
+  }
+ },
+ {
+  "id": "samac",
+  "short_name": "Šamac",
+  "name_en": "Šamac Municipality",
+  "osm_relation": 2528169,
+  "boundary": "samac.geojson",
+  "town": {
+   "lat": 45.0606892,
+   "lon": 18.4693465
+  }
+ },
+ {
+  "id": "sekovici",
+  "short_name": "Šekovići",
+  "name_en": "Sekovici municipality",
+  "osm_relation": 2528263,
+  "boundary": "sekovici.geojson",
+  "town": {
+   "lat": 44.2978089,
+   "lon": 18.8523779
+  }
+ },
+ {
+  "id": "sipovo",
+  "short_name": "Šipovo",
+  "name_en": "Sipovo municipality",
+  "osm_relation": 2528264,
+  "boundary": "sipovo.geojson",
+  "town": {
+   "lat": 44.2809431,
+   "lon": 17.0853048
+  }
+ },
+ {
+  "id": "siroki-brijeg",
+  "short_name": "Široki Brijeg",
+  "name_en": "City of Široki Brijeg",
+  "osm_relation": 2528265,
+  "boundary": "siroki-brijeg.geojson",
+  "town": {
+   "lat": 43.3831944,
+   "lon": 17.5929153
+  }
+ },
+ {
+  "id": "zepce",
+  "short_name": "Žepče",
+  "name_en": "Zepce municipality",
+  "osm_relation": 2528294,
+  "boundary": "zepce.geojson",
+  "town": {
+   "lat": 44.4242172,
+   "lon": 18.0375597
+  }
+ },
+ {
+  "id": "zivinice",
+  "short_name": "Živinice",
+  "name_en": "Town of Živinice",
+  "osm_relation": 2528295,
+  "boundary": "zivinice.geojson",
+  "town": {
+   "lat": 44.451574,
+   "lon": 18.6501306
+  }
+ }
+]
