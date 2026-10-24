@@ -63,7 +63,7 @@ EXTRA_CSS = r"""
   a.docs:empty,#chbtn:empty{display:none}
   #muniinfo a.more{display:block;margin-top:10px;color:var(--accent);font-size:12.5px;text-decoration:none}
   #muniinfo a.more:hover{text-decoration:underline}
-  .gsq{width:24px;height:24px;border:3px solid #111;box-sizing:border-box}
+  .gsq{width:18px;height:18px;border:3px solid #111;box-sizing:border-box}
 """
 
 TEMPLATE = r"""<!doctype html>
@@ -265,7 +265,7 @@ function drawMap(){
       const l=lvR(r), ru=l!=="normal", g=(RIV[m.id]||[]).find(x=>x.name===r.river);
       if(g&&g.lines.length) L.polyline(g.lines,{color:COL[l],weight:ru?9:4,opacity:ru?.95:.9,lineCap:"round"}).addTo(lines).on("click",()=>openMuni(m,null,r));
       const at=atOf(m,r), key=at+","+l; if(seen[key]) continue; seen[key]=1;
-      L.circleMarker(at,{radius:ru?18:8,color:"#0b0e12",weight:2,fillColor:COL[l],fillOpacity:.95}).addTo(dots).on("click",()=>openMuni(m,null,r));
+      L.circleMarker(at,{radius:ru?13.5:6,color:"#0b0e12",weight:2,fillColor:COL[l],fillOpacity:.95}).addTo(dots).on("click",()=>openMuni(m,null,r));
     }
   }
   if(!eyeOn){ for(const g of [polys,lines,dots,gl]) map.removeLayer(g); } else { for(const g of [polys,lines,dots]) g.addTo(map); if(show.ga) gl.addTo(map); }
@@ -293,7 +293,7 @@ function gaugePopup(g){
 function drawGauges(){
   gl.clearLayers();
   for(const g of GA)
-    L.marker([g.lat,g.lon],{icon:L.divIcon({className:"",html:`<div class="gsq" style="background:${g.value==null?"transparent":(g.class?GCOL[g.class]:"#c7d0d9")}"></div>`,iconSize:[24,24]})})
+    L.marker([g.lat,g.lon],{icon:L.divIcon({className:"",html:`<div class="gsq" style="background:${g.value==null?"transparent":(g.class?GCOL[g.class]:"#c7d0d9")}"></div>`,iconSize:[18,18]})})
       .addTo(gl).bindPopup(()=>gaugePopup(g),{autoPan:false,maxHeight:300});
 }
 
