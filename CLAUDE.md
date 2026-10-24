@@ -263,6 +263,10 @@ Day chips replace the time ranges, and the bottom bar steps through forecast day
 Verified 2026-10-24 in headless Chrome: no console errors, all controls exercised by
 script (chips, cards, language, drawer, layers, play, legend, eye), desktop and 500 px.
 Landmine: the browser's `bs` locale can be missing, so dates are formatted by hand.
+Click behaviour: a river dot/line/card calls `openMuni(m, at, r)` and shows that river alone with
+a "{n} more rivers in {m}" link; the municipality polygon calls it without `r` and lists all.
+Untested suspicion: `drawMap` merges dots at the same place and level (`seen`), so where two
+municipalities share a river point only the first gets a dot to click.
 
 ## Documentation
 

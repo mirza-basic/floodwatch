@@ -61,6 +61,8 @@ EXTRA_CSS = r"""
   a.docs{display:block;text-align:center;text-decoration:none;color:#fff;font-weight:600;font-size:13px;
     background:var(--accent);border-radius:8px;padding:9px 12px;margin-top:12px}
   a.docs:empty,#chbtn:empty{display:none}
+  #muniinfo a.more{display:block;margin-top:10px;color:var(--accent);font-size:12.5px;text-decoration:none}
+  #muniinfo a.more:hover{text-decoration:underline}
   .gsq{width:12px;height:12px;border:2px solid #111;box-sizing:border-box}
 """
 
@@ -137,6 +139,7 @@ const I18N={
   legendTxt:"Nivo je prognoza protoka u ćeliji modela (~5 km) koja dostiže vrijednost koja se javlja jednom u 2, 5 ili 20 godina. Nije zvanično upozorenje.",
   docs:"Dokumentacija",src:"Prognoza protoka",map:"rijeke i granice",
   attrNote:"Model prognoze, nije zvanično upozorenje.",
+  more:["još {n} rijeka u općini {m}","još {n} rijeke u općini {m}","još {n} rijeka u općini {m}"],
   coverage:"Prikazane su samo rijeke koje model prognoze razlikuje (~5 km). Manji vodotoci nisu pokriveni, a odsustvo upozorenja ne znači da rizika nema.",
   gsrc:"Izvor",gval:"Očitanje",gtime:"Vrijeme",gstale:"Podaci stariji od 6 h",gcls:"Zvanična klasa izvora",
   gnocls:"Granične vrijednosti nisu definisane",gnounit:"jedinica nije navedena u izvoru",gthr:"Pragovi odbrane (izvor)",
@@ -156,6 +159,7 @@ const I18N={
   legendTxt:"A level is a forecast: the flow in a ~5 km model cell reaches a value that occurs about once in 2, 5 or 20 years. It is not an official warning.",
   docs:"Documentation",src:"River-flow forecast",map:"rivers and boundaries",
   attrNote:"Model forecast, not an official warning.",
+  more:["{n} more river in {m}","{n} more rivers in {m}","{n} more rivers in {m}"],
   coverage:"Only rivers the forecast model can resolve (~5 km) are shown. Smaller streams are not covered, and no alert does not mean there is no risk.",
   gsrc:"Source",gval:"Reading",gtime:"Time",gstale:"Data older than 6 h",gcls:"Source's official class",
   gnocls:"Thresholds not defined",gnounit:"unit not stated by the source",gthr:"Flood-defence thresholds (source)",
@@ -225,11 +229,25 @@ function riverBlock(r){
   return `<div class="rv"><b>${esc(r.river||"")}</b> <span style="color:${COL[l]}">● ${t(l)}</span>${r.near?` <span class="mut">(${t("near")})</span>`:""}
    <div class="mut">${t("day")}: ${v==null?"–":v+" m³/s"} · ${t("peakv")}: ${r.peak} m³/s (${fmtDay(r.peak_day)})</div>${spark(r,230,64)}</div>`;
 }
-function openMuni(m,at){
+// A river dot, line or card opens just that river, with a link to the rest; the
+// municipality area opens the full list (the reader asked about the whole place).
+function openMuni(m,at,r){
   if(at) map.setView(at,Math.max(map.getZoom(),10),{animate:false});
-  $("muniinfo-body").innerHTML=`<h2 style="margin:0 0 4px;font-size:15px">${esc(m.name)}</h2>`+
-    (m.rivers.length?m.rivers.map(riverBlock).join("")+`<div class="mut" style="margin-top:8px">${t("attrNote")}</div>`:`<div class="mut">${t("noriver")}</div>`)+
-    `<div class="mut" style="margin-top:6px">${t("coverage")}</div>`;
+  const body=$("muniinfo-body");
+  const render=all=>{
+    const rs=r?(all?[r,...m.rivers.filter(x=>x!==r)]:[r]):m.rivers;
+    let h=`<h2 style="margin:0 0 4px;font-size:15px">${esc(m.name)}</h2>`;
+    h+=rs.length?rs.map(riverBlock).join(""):`<div class="mut">${t("noriver")}</div>`;
+    if(r&&!all&&m.rivers.length>1){
+      const n=m.rivers.length-1;
+      h+=`<a href="#" class="more" data-more="1">${plural(n,t("more")).replace("{n}",n).replace("{m}",esc(m.name))}</a>`;
+    }
+    if(rs.length) h+=`<div class="mut" style="margin-top:8px">${t("attrNote")}</div>`;
+    body.innerHTML=h+`<div class="mut" style="margin-top:6px">${t("coverage")}</div>`;
+    const more=body.querySelector("[data-more]");
+    if(more) more.onclick=e=>{e.preventDefault();render(true)};
+  };
+  render(false);
   $("muniinfo").classList.add("show");
 }
 function atOf(m,r){const g=(RIV[m.id]||[]).find(x=>x.name===r.river);return g?[g.mlat,g.mlon]:[r.lat,r.lon]}
@@ -245,9 +263,9 @@ function drawMap(){
     if(!show.riv) continue;
     for(const r of m.rivers){
       const l=lvR(r), ru=l!=="normal", g=(RIV[m.id]||[]).find(x=>x.name===r.river);
-      if(g&&g.lines.length) L.polyline(g.lines,{color:COL[l],weight:ru?5:2,opacity:ru?.95:.6,lineCap:"round"}).addTo(lines).on("click",()=>openMuni(m));
+      if(g&&g.lines.length) L.polyline(g.lines,{color:COL[l],weight:ru?5:2,opacity:ru?.95:.6,lineCap:"round"}).addTo(lines).on("click",()=>openMuni(m,null,r));
       const at=atOf(m,r), key=at+","+l; if(seen[key]) continue; seen[key]=1;
-      L.circleMarker(at,{radius:ru?9:4,color:"#0b0e12",weight:1.5,fillColor:COL[l],fillOpacity:.95}).addTo(dots).on("click",()=>openMuni(m));
+      L.circleMarker(at,{radius:ru?9:4,color:"#0b0e12",weight:1.5,fillColor:COL[l],fillOpacity:.95}).addTo(dots).on("click",()=>openMuni(m,null,r));
     }
   }
   if(!eyeOn){ for(const g of [polys,lines,dots,gl]) map.removeLayer(g); } else { for(const g of [polys,lines,dots]) g.addTo(map); if(show.ga) gl.addTo(map); }
@@ -337,7 +355,7 @@ $("list").addEventListener("click",e=>{
   const c=e.target.closest(".ev"); if(!c||e.target.closest("a")) return;
   const m=SNAP.municipalities.find(x=>x.id===c.dataset.m); if(!m) return;
   const r=m.rivers.find(x=>(x.river||"")===c.dataset.r)||m.rivers[0];
-  openMuni(m,r?atOf(m,r):null); drawer(false);
+  openMuni(m,r?atOf(m,r):null,r); drawer(false);
 });
 
 // ---- bottom bar: forecast days -------------------------------------------------------
