@@ -64,11 +64,27 @@ named by their nearest OSM river, best cell per river kept; (3) 33-year archive
 thresholds. A municipality whose best cell is below `MIN_RIVER_M3S` gets
 `river: false` and no point.
 
-**Status 2026-10-24: stage 1 is fully cached; stage 3 had not run** - Open-Meteo's
-*daily* quota was exhausted by earlier runs. A background loop was started
-(`retry.sh` in the Claude job tmp dir) that probes the API every 10 min and then
-runs the build. If it is gone, simply rerun `python3 scripts/build_points.py`
-once the API answers again. Check `data/bih/river_points.json` exists.
+**Status 2026-10-24: built.** `data/bih/river_points.json` exists (committed):
+175 river points in 103 municipalities (1 river: 47, 2: 40, 3: 16), 42 municipalities
+with none, 167/175 snapped onto a named OSM river. The first real poll ran and the
+map renders with live data; every river was far below its "watch" flow (max 32%).
+The build took several attempts because Open-Meteo's daily/hourly quotas were
+exhausted first; it finished on a different IP after the user switched on a VPN.
+(The VPN was the user's decision - circumventing a per-IP limit is against the
+spirit of the free tier; do not make it a routine.)
+
+**Known quality problems (found on first review, not yet fixed):**
+- 42 municipalities get `river: false`, several of which plainly have rivers
+  (Centar/Sarajevo, Gradacac, Gracanica, Breza, Fojnica, Banovici...). Likely cause
+  (unverified): a GloFAS cell is considered only if its *centre* lies inside the
+  municipality, which fails for small polygons or rivers running along a border.
+  Candidate fix: also consider cached cells within a few km of the boundary (they
+  are already in `build-cache.json`), fetch archives for only those, flag them as
+  "nearby".
+- Zavidovici shows Krivaja (mean 1.7 m3/s) and Vozucica but **not the Bosna** - the
+  very case that motivated multi-river support. Same likely cause.
+- 8 points have no river name (not snapped); 1 point lies outside its municipality.
+- Thresholds have not been compared against any official figure.
 
 ## Landmines (all measured)
 
