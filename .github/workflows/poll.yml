@@ -1,0 +1,56 @@
+# Poll the flood forecast and publish the map to GitHub Pages.
+#
+# Gauges are deliberately NOT enabled here: FLOODWATCH_GAUGES is unset, so the
+# published page carries no agency data. Do not set it until written permission
+# from each agency is on file (see Importat_to_to.md).
+#
+# Open-Meteo limits calls per IP address and warns that shared platforms such as
+# CI runners may be limited sooner. A 429 fails the run (red cross) rather than
+# publishing stale data silently; the map also warns when its data is >9 h old.
+name: Poll and publish
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */3 * * *"   # every 3 hours; GitHub may delay scheduled runs
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 -m pip install --quiet requests certifi
+      - name: Test
+        run: python3 tests_levels.py
+      - name: Poll
+        env:
+          FIREWATCH_FORCE_IPV4: "0"
+        run: python3 -m floodwatch poll
+      - name: Build the site
+        run: python3 deploy/build-site.py public
+      - name: Refuse to publish agency data
+        run: |
+          if grep -q '"gauges": \[{' public/index.html; then
+            echo "::error::gauge data found in the public page"; exit 1
+          fi
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - id: deploy
+        uses: actions/deploy-pages@v4

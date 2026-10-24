@@ -7,3 +7,4 @@ state/build-cache.json
 state/gauge-history.json
 state/snapshot.json
 state/floodmap.html
+state/floodmap-gauges.html

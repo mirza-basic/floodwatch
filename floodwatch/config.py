@@ -5,6 +5,7 @@ nothing here touches the network or the disk beyond resolving paths.
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -36,9 +37,9 @@ BATCH = 50
 # Distinct rivers shown per municipality (Bosna and Krivaja both reach Zavidovici).
 MAX_RIVERS = 3
 
-# Measured gauges from the agencies. Local use only until written permission is on file
-# (Importat_to_to.md): nothing here is wired to alerts or public output.
-GAUGES_ENABLED = True
+# Measured gauges from the agencies. OFF by default; set FLOODWATCH_GAUGES=1 for local use.
+# Local use only until written permission is on file (Importat_to_to.md).
+GAUGES_ENABLED = os.environ.get("FLOODWATCH_GAUGES") == "1"  # off unless asked: public deploys must never carry agency data
 
 # A GloFAS cell whose centre is outside a municipality may still be its river: the
 # cell is 5 km wide and a river often runs along a border or in a small polygon

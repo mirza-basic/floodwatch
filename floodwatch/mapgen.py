@@ -35,7 +35,8 @@ html,body,#map{height:100%;margin:0}body{font:14px system-ui,sans-serif;backgrou
 <div class="panel"><span class="lang" id="lang"></span><h1 id="title"></h1>
 <div class="mut" id="stamp"></div><div id="legend"></div>
 <label class="gl"><input type="checkbox" id="gtoggle" checked><span id="glabel"></span></label>
-<div class="mut" id="gattr" style="margin-top:2px"></div><div id="list"></div></div>
+<div class="mut" id="gattr" style="margin-top:2px"></div><div id="list"></div>
+<div class="mut" id="attr" style="margin-top:10px;font-size:11px"></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const SNAP=__SNAPSHOT__, BOUNDS=__BOUNDS__, RIV=__RIVERS__;
@@ -47,7 +48,7 @@ const I18N={
   none:"Nema upozorenja u narednih 7 dana",note:"Prognoza modela GloFAS (~5 km), ne mjerenje vodostaja.",lang:"EN",
   gauges:"Mjerenja (vodomjerne stanice)",gsrc:"Izvor",gval:"Očitanje",gtime:"Vrijeme",gstale:"Podaci stariji od 6 h",
   gcls:"Zvanična klasa izvora",gnocls:"Granične vrijednosti nisu definisane",gnounit:"jedinica nije navedena u izvoru",
-  gthr:"Pragovi odbrane (izvor)",gepoch:"vrijeme prema izvoru, vremenska zona nije potvrđena",gnone:"bez očitanja",near:"obližnja ćelija modela, izvan općine",nomodel:"Podaci prognoze još nisu učitani",ghist:"Očitanja koja smo zabilježili",
+  gthr:"Pragovi odbrane (izvor)",gepoch:"vrijeme prema izvoru, vremenska zona nije potvrđena",gnone:"bez očitanja",stale:"podaci stariji od 9 h",attrFc:"Prognoza protoka: GloFAS preko",attrMap:"Karta i rijeke ©",attrNote:"Model prognoze, nije zvanično upozorenje.",near:"obližnja ćelija modela, izvan općine",nomodel:"Podaci prognoze još nisu učitani",ghist:"Očitanja koja smo zabilježili",
   gnote:"Podaci agencija su informativni i nisu zvanični. Prikazani su kako ih objavljuje izvor.",
   redovna_obrana:"redovna",vanredna_obrana:"vanredna",kontinuirana_obrana:"kontinuirana"},
  en:{title:"FloodWatch BiH",upd:"Updated",normal:"Normal",watch:"Watch",warning:"Warning",severe:"Severe",
@@ -55,7 +56,7 @@ const I18N={
   none:"No warnings in the next 7 days",note:"GloFAS model forecast (~5 km), not a gauge reading.",lang:"BS",
   gauges:"Measurements (gauges)",gsrc:"Source",gval:"Reading",gtime:"Time",gstale:"Data older than 6 h",
   gcls:"Source's official class",gnocls:"Thresholds not defined",gnounit:"unit not stated by the source",
-  gthr:"Flood-defence thresholds (source)",gepoch:"time as published; time zone not confirmed",gnone:"no reading",near:"nearby model cell, outside the municipality",nomodel:"Forecast data not loaded yet",ghist:"Readings we recorded",
+  gthr:"Flood-defence thresholds (source)",gepoch:"time as published; time zone not confirmed",gnone:"no reading",stale:"data older than 9 h",attrFc:"River-flow forecast: GloFAS via",attrMap:"Map and rivers ©",attrNote:"Model forecast, not an official warning.",near:"nearby model cell, outside the municipality",nomodel:"Forecast data not loaded yet",ghist:"Readings we recorded",
   gnote:"Agency data is informative, not official. Shown as the source publishes it.",
   redovna_obrana:"regular",vanredna_obrana:"extraordinary",kontinuirana_obrana:"continuous"}};
 let lang=null;try{lang=localStorage.getItem("fl_lang")}catch(e){}
@@ -117,9 +118,15 @@ function drawGauges(){
   document.getElementById("glabel").textContent=t("gauges")+" ("+GA.length+")";
   document.getElementById("gattr").textContent=[...new Set(GA.map(g=>GSRC[g.source]))].join(" · ");
 }
+function chrome(){
+  document.querySelector(".gl").style.display=GA.length?"":"none";
+  const old=(Date.now()-Date.parse(SNAP.generated_at))>9*3600e3;
+  document.getElementById("stamp").innerHTML=t("upd")+": "+SNAP.generated_at.replace("T"," ").slice(0,16)+" UTC"+(old?` <b style="color:#b00020">⚠ ${t("stale")}</b>`:"");
+  document.getElementById("attr").innerHTML=t("attrFc")+' <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>) · '+t("attrMap")+' <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>. '+t("attrNote");
+}
 document.getElementById("gtoggle").onchange=e=>{e.target.checked?gl.addTo(map):map.removeLayer(gl)};
 function draw(){
-  drawGauges();
+  drawGauges();chrome();
   polys.clearLayers(); lines.clearLayers(); dots.clearLayers();
   const seen={}; const worst=[];
   for(const m of SNAP.municipalities){
