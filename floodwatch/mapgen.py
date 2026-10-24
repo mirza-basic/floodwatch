@@ -25,7 +25,7 @@ CSS = (config.ROOT / "floodwatch" / "ui.css").read_text(encoding="utf8")
 
 EXTRA_CSS = r"""
   /* ---- FloodWatch additions on top of the shared stylesheet ---- */
-  :root{--normal:#6b7785;--watch:#4aa8ff;--warning:#8b6cff;--severe:#e0489f}
+  :root{--normal:#1fb5a6;--watch:#4aa8ff;--warning:#8b6cff;--severe:#e0489f}
   .leaflet-container{background:#0b0e12;font:inherit}
   .leaflet-bar a{background:#151a21;color:#e6edf3;border-bottom:1px solid #28313d}
   .leaflet-bar a:hover{background:#1c232c}
@@ -63,7 +63,7 @@ EXTRA_CSS = r"""
   a.docs:empty,#chbtn:empty{display:none}
   #muniinfo a.more{display:block;margin-top:10px;color:var(--accent);font-size:12.5px;text-decoration:none}
   #muniinfo a.more:hover{text-decoration:underline}
-  .gsq{width:12px;height:12px;border:2px solid #111;box-sizing:border-box}
+  .gsq{width:24px;height:24px;border:3px solid #111;box-sizing:border-box}
 """
 
 TEMPLATE = r"""<!doctype html>
@@ -118,7 +118,7 @@ __CSS__
 <script>
 const SNAP=__SNAPSHOT__, BOUNDS=__BOUNDS__, RIV=__RIVERS__;
 const LV=["normal","watch","warning","severe"];
-const COL={normal:"#6b7785",watch:"#4aa8ff",warning:"#8b6cff",severe:"#e0489f"};
+const COL={normal:"#1fb5a6",watch:"#4aa8ff",warning:"#8b6cff",severe:"#e0489f"};
 const GCOL={N:"#7CFC00",P:"#00B0F0",R:"#FFFF00",V:"#FFC000",Z:"#F00000"};
 const GSRC={sava:"Agencija za vodno područje rijeke Save",rhmzrs:"RHMZ Republike Srpske",jadran:"Agencija za vodno područje Jadranskog mora"};
 const GA=SNAP.gauges||[];
@@ -263,9 +263,9 @@ function drawMap(){
     if(!show.riv) continue;
     for(const r of m.rivers){
       const l=lvR(r), ru=l!=="normal", g=(RIV[m.id]||[]).find(x=>x.name===r.river);
-      if(g&&g.lines.length) L.polyline(g.lines,{color:COL[l],weight:ru?5:2,opacity:ru?.95:.6,lineCap:"round"}).addTo(lines).on("click",()=>openMuni(m,null,r));
+      if(g&&g.lines.length) L.polyline(g.lines,{color:COL[l],weight:ru?9:4,opacity:ru?.95:.9,lineCap:"round"}).addTo(lines).on("click",()=>openMuni(m,null,r));
       const at=atOf(m,r), key=at+","+l; if(seen[key]) continue; seen[key]=1;
-      L.circleMarker(at,{radius:ru?9:4,color:"#0b0e12",weight:1.5,fillColor:COL[l],fillOpacity:.95}).addTo(dots).on("click",()=>openMuni(m,null,r));
+      L.circleMarker(at,{radius:ru?18:8,color:"#0b0e12",weight:2,fillColor:COL[l],fillOpacity:.95}).addTo(dots).on("click",()=>openMuni(m,null,r));
     }
   }
   if(!eyeOn){ for(const g of [polys,lines,dots,gl]) map.removeLayer(g); } else { for(const g of [polys,lines,dots]) g.addTo(map); if(show.ga) gl.addTo(map); }
@@ -293,7 +293,7 @@ function gaugePopup(g){
 function drawGauges(){
   gl.clearLayers();
   for(const g of GA)
-    L.marker([g.lat,g.lon],{icon:L.divIcon({className:"",html:`<div class="gsq" style="background:${g.value==null?"transparent":(g.class?GCOL[g.class]:"#c7d0d9")}"></div>`,iconSize:[12,12]})})
+    L.marker([g.lat,g.lon],{icon:L.divIcon({className:"",html:`<div class="gsq" style="background:${g.value==null?"transparent":(g.class?GCOL[g.class]:"#c7d0d9")}"></div>`,iconSize:[24,24]})})
       .addTo(gl).bindPopup(()=>gaugePopup(g),{autoPan:false,maxHeight:300});
 }
 
