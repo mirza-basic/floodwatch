@@ -202,6 +202,20 @@ undecided; FireWatch's provisioning hit platform limits), de-duplication store
 for sent alerts, `FIREWATCH_`-style secrets. **Never trigger real alerts as a side
 effect of testing.**
 
+## Documentation
+
+`docs/floodwatch-documentation.html` is the system documentation, same idea as
+FireWatch's `docs/`: a self-contained page in **artifact-body form** (opens with
+`<title>`, no doctype or viewport, so it can also be published as a Claude artifact;
+a publishing step would wrap it in a real skeleton, as FireWatch's
+`deploy/build-site.py` does). Its stylesheet is FireWatch's with a flood palette
+(indigo accent, never the fire orange). **Update it when behaviour changes** -
+especially the field notes and the licences section, which go stale invisibly. There
+is no generator: edit the HTML directly. Checked on 2026-10-24: every nav anchor has
+a target, tags balance, desktop renders in light/dark; a phone-width render could not
+be verified (headless Chrome will not go below its minimum window width), though the
+CSS is the same as FireWatch's.
+
 ## Repo conventions
 
 `from __future__ import annotations`, a module docstring that explains *why*,

@@ -1,0 +1,553 @@
+<title>FloodWatch Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* ---- tokens: complete light palette on bare :root ---- */
+  :root{
+    --bg:#f2f5f6; --surface:#ffffff; --surface-2:#e7ecee; --surface-3:#dbe3e6;
+    --ink:#111a1f; --ink-2:#3b4a53; --ink-3:#6a7b84; --rule:#cfd9dd;
+    --accent:#3b4fc4; --accent-soft:#e3e7f8;
+    --mtg:#0b6a88; --firms:#1f7a3a; --s3:#6a3fd1;
+    --ok:#1a6b45; --warn:#95560a; --crit:#a81f2d;
+    --shadow:0 1px 2px rgba(17,26,31,.06), 0 8px 24px rgba(17,26,31,.05);
+    --measure:68ch;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1418; --surface:#161d23; --surface-2:#1e272e; --surface-3:#27333b;
+      --ink:#e7eef2; --ink-2:#aebcc5; --ink-3:#7c8c96; --rule:#2a353d;
+      --accent:#8ea0ff; --accent-soft:#1c2140;
+      --mtg:#4cc9f0; --firms:#5fd08a; --s3:#b79bff;
+      --ok:#48bd85; --warn:#e0a23c; --crit:#ff6b78;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1418; --surface:#161d23; --surface-2:#1e272e; --surface-3:#27333b;
+    --ink:#e7eef2; --ink-2:#aebcc5; --ink-3:#7c8c96; --rule:#2a353d;
+    --accent:#8ea0ff; --accent-soft:#1c2140;
+    --mtg:#4cc9f0; --firms:#5fd08a; --s3:#b79bff;
+    --ok:#48bd85; --warn:#e0a23c; --crit:#ff6b78;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.32);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+    font-size:17px; line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{display:grid; grid-template-columns:232px minmax(0,1fr); gap:0; max-width:1180px; margin:0 auto}
+
+  /* ---- side nav ---- */
+  nav{
+    position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto;
+    padding:38px 22px 38px 26px; border-right:1px solid var(--rule);
+    font-family:Archivo,"Helvetica Neue",Arial,sans-serif; font-size:13px;
+  }
+  nav .brand{font-weight:700; font-size:14px; letter-spacing:-.01em; margin-bottom:4px}
+  nav .brand-sub{color:var(--ink-3); font-size:11.5px; letter-spacing:.04em;
+    text-transform:uppercase; margin-bottom:24px}
+  nav ol{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px}
+  nav a{
+    display:flex; gap:9px; text-decoration:none; color:var(--ink-2);
+    padding:5px 8px; border-radius:5px; line-height:1.35;
+  }
+  nav a:hover{background:var(--surface-2); color:var(--ink)}
+  nav a:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+  nav a .n{color:var(--ink-3); font-variant-numeric:tabular-nums; font-weight:500; min-width:13px}
+
+  /* ---- main ---- */
+  main{padding:38px 46px 96px; min-width:0}
+  header.mast{border-bottom:2px solid var(--ink); padding-bottom:22px; margin-bottom:34px}
+  .eyebrow{
+    font-family:Archivo,sans-serif; font-size:11px; font-weight:600; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent); margin-bottom:12px;
+  }
+  h1{
+    font-family:Archivo,sans-serif; font-weight:700; font-size:clamp(30px,4.4vw,44px);
+    line-height:1.06; letter-spacing:-.026em; margin:0 0 14px; text-wrap:balance;
+  }
+  .standfirst{font-size:19px; color:var(--ink-2); margin:0; max-width:60ch; text-wrap:pretty}
+
+  .facts{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(128px,1fr)); gap:1px;
+    background:var(--rule); border:1px solid var(--rule); border-radius:8px;
+    overflow:hidden; margin:26px 0 0;
+  }
+  .facts div{background:var(--surface); padding:12px 14px; display:flex;
+    flex-direction:column; justify-content:space-between; min-height:68px}
+  .facts dt{
+    font-family:Archivo,sans-serif; font-size:10.5px; font-weight:600; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--ink-3); margin-bottom:3px;
+  }
+  .facts dd{
+    margin:0; font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:19px;
+    font-weight:500; font-variant-numeric:tabular-nums; letter-spacing:-.02em;
+  }
+
+  h2{
+    font-family:Archivo,sans-serif; font-weight:700; font-size:25px; letter-spacing:-.019em;
+    line-height:1.16; margin:54px 0 4px; padding-top:26px; border-top:1px solid var(--rule);
+    text-wrap:balance; display:flex; gap:12px; align-items:baseline;
+  }
+  h2 .num{
+    font-family:"IBM Plex Mono",monospace; font-size:14px; font-weight:500;
+    color:var(--accent); flex:0 0 auto; padding-top:3px;
+  }
+  h3{font-family:Archivo,sans-serif; font-weight:600; font-size:17px; letter-spacing:-.012em;
+    margin:30px 0 6px}
+  h4{font-family:Archivo,sans-serif; font-weight:600; font-size:14px; letter-spacing:.01em;
+    margin:22px 0 4px; color:var(--ink-2)}
+  p{margin:0 0 15px; max-width:var(--measure); text-wrap:pretty}
+  .lede{color:var(--ink-2); font-size:18px; margin-bottom:20px; max-width:62ch}
+  ul,ol.body{margin:0 0 16px; padding-left:22px; max-width:var(--measure)}
+  li{margin-bottom:6px}
+  a{color:var(--accent); text-decoration-thickness:1px; text-underline-offset:2px}
+  strong{font-weight:600}
+  code{
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.855em;
+    background:var(--surface-2); padding:.1em .34em; border-radius:3px;
+    word-break:break-word;
+  }
+  pre{
+    font-family:"IBM Plex Mono",monospace; font-size:12.5px; line-height:1.62;
+    background:var(--surface); color:var(--ink); border:1px solid var(--rule);
+    border-left:3px solid var(--accent); border-radius:6px;
+    padding:14px 16px; overflow-x:auto; margin:0 0 18px;
+  }
+  pre code{background:none; padding:0; font-size:inherit}
+
+  /* ---- tables ---- */
+  .tw{overflow-x:auto; margin:0 0 20px; border:1px solid var(--rule); border-radius:8px;
+    background:var(--surface)}
+  table{border-collapse:collapse; width:100%; font-size:13.5px;
+    font-family:Archivo,sans-serif}
+  caption{
+    text-align:left; font-family:Archivo,sans-serif; font-size:12px; color:var(--ink-3);
+    padding:10px 14px 0; caption-side:top;
+  }
+  th,td{padding:8px 13px; text-align:left; border-bottom:1px solid var(--rule);
+    vertical-align:top}
+  thead th{
+    font-size:10.5px; font-weight:600; letter-spacing:.075em; text-transform:uppercase;
+    color:var(--ink-3); background:var(--surface-2); white-space:nowrap;
+  }
+  tbody tr:last-child td{border-bottom:0}
+  td.mono,th.mono,.num-col{font-family:"IBM Plex Mono",monospace; font-size:12.5px;
+    font-variant-numeric:tabular-nums; white-space:nowrap}
+  .src-mtg{color:var(--mtg); font-weight:600}
+  .src-firms{color:var(--firms); font-weight:600}
+  .src-s3{color:var(--s3); font-weight:600}
+
+  /* ---- figures ---- */
+  figure{margin:26px 0 30px}
+  figure svg{display:block; width:100%; max-width:100%; height:auto;
+    background:var(--surface); border:1px solid var(--rule); border-radius:8px}
+  .figscroll{overflow-x:auto}
+  figcaption{
+    font-family:Archivo,sans-serif; font-size:12.5px; color:var(--ink-3);
+    margin-top:9px; max-width:72ch; line-height:1.5;
+  }
+  figcaption b{color:var(--ink-2); font-weight:600}
+
+  /* svg theming via classes so var() reliably resolves */
+  .s-box{fill:var(--surface-2); stroke:var(--rule); stroke-width:1}
+  .s-box-hi{fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.4}
+  .s-line{stroke:var(--ink-3); stroke-width:1.4; fill:none}
+  .s-line-hi{stroke:var(--accent); stroke-width:1.8; fill:none}
+  .s-dash{stroke:var(--ink-3); stroke-width:1.2; fill:none; stroke-dasharray:4 3}
+  .s-t{fill:var(--ink); font-family:Archivo,sans-serif; font-size:12.5px}
+  .s-t-b{fill:var(--ink); font-family:Archivo,sans-serif; font-size:12.5px; font-weight:600}
+  .s-t-s{fill:var(--ink-3); font-family:Archivo,sans-serif; font-size:10.5px}
+  .s-t-m{fill:var(--ink-2); font-family:"IBM Plex Mono",monospace; font-size:10.5px}
+  .s-fill-mtg{fill:var(--mtg)} .s-fill-firms{fill:var(--firms)} .s-fill-s3{fill:var(--s3)}
+  .s-str-mtg{stroke:var(--mtg)} .s-arrow{fill:var(--ink-3)}
+  .s-poly{fill:var(--mtg); fill-opacity:.1; stroke:var(--mtg); stroke-width:1.6}
+  .s-buf{fill:none; stroke:var(--accent); stroke-width:1.2; stroke-dasharray:5 4}
+
+  /* ---- callouts ---- */
+  .note{
+    border:1px solid var(--rule); border-left:3px solid var(--ink-3);
+    background:var(--surface); border-radius:6px; padding:14px 16px; margin:0 0 20px;
+    max-width:var(--measure); font-size:15.5px;
+  }
+  .note.warn{border-left-color:var(--warn)}
+  .note.crit{border-left-color:var(--crit)}
+  .note.good{border-left-color:var(--ok)}
+  .note .lbl{
+    display:block; font-family:Archivo,sans-serif; font-size:10.5px; font-weight:600;
+    letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-bottom:5px;
+  }
+  .note p:last-child{margin-bottom:0}
+
+  .pill{
+    display:inline-block; font-family:Archivo,sans-serif; font-size:10.5px; font-weight:600;
+    letter-spacing:.05em; text-transform:uppercase; padding:2px 7px; border-radius:4px;
+    background:var(--surface-2); color:var(--ink-2); vertical-align:middle;
+  }
+  .pill.ok{background:var(--ok); color:#fff}
+  .pill.no{background:var(--surface-3); color:var(--ink-2)}
+
+  /* stage list: a real sequence, so it is numbered */
+  ol.stages{list-style:none; counter-reset:st; margin:22px 0 8px; padding:0; max-width:none}
+  ol.stages > li{
+    counter-increment:st; position:relative; padding:0 0 22px 52px; margin:0;
+    border-left:1px solid var(--rule); margin-left:15px;
+  }
+  ol.stages > li:last-child{border-left-color:transparent; padding-bottom:2px}
+  ol.stages > li::before{
+    content:counter(st); position:absolute; left:-15px; top:0;
+    width:30px; height:30px; border-radius:50%;
+    background:var(--surface); border:1px solid var(--rule); color:var(--accent);
+    font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600;
+    display:grid; place-items:center;
+  }
+  ol.stages h3{margin:3px 0 5px}
+  ol.stages p{margin-bottom:9px}
+
+  footer{
+    margin-top:60px; padding-top:22px; border-top:2px solid var(--ink);
+    font-family:Archivo,sans-serif; font-size:12.5px; color:var(--ink-3);
+  }
+  footer p{max-width:74ch; margin-bottom:9px}
+
+  @media (max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    nav{position:static; height:auto; border-right:0; border-bottom:1px solid var(--rule);
+      padding:24px 22px}
+    nav ol{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0}
+    nav .brand-sub{margin-bottom:14px}
+    main{padding:28px 22px 70px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+<div class="wrap">
+<nav>
+  <div class="brand">FloodWatch Bosna i Hercegovina</div>
+  <div class="brand-sub">System documentation</div>
+  <ol>
+    <li><a href="#problem"><span class="n">1</span><span>Forecast, not detection</span></a></li>
+    <li><a href="#sources"><span class="n">2</span><span>Where the data comes from</span></a></li>
+    <li><a href="#levels"><span class="n">3</span><span>From flow to warning level</span></a></li>
+    <li><a href="#points"><span class="n">4</span><span>Choosing river points</span></a></li>
+    <li><a href="#gauges"><span class="n">5</span><span>Measured gauges</span></a></li>
+    <li><a href="#map"><span class="n">6</span><span>The map</span></a></li>
+    <li><a href="#quota"><span class="n">7</span><span>Rate limits &amp; cost</span></a></li>
+    <li><a href="#fieldnotes"><span class="n">8</span><span>Field notes</span></a></li>
+    <li><a href="#legal"><span class="n">9</span><span>Licences &amp; permissions</span></a></li>
+    <li><a href="#ops"><span class="n">10</span><span>Operations</span></a></li>
+    <li><a href="#limits"><span class="n">11</span><span>Limits &amp; roadmap</span></a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="mast">
+  <div class="eyebrow">Bosnia and Herzegovina &middot; 145 municipalities</div>
+  <h1>How FloodWatch sees floods</h1>
+  <p class="standfirst">A river-flow forecast turned into a warning level for each
+  municipality, shown next to the readings that the water agencies measure
+  themselves. Built as the sibling of FireWatch, but a different kind of system.</p>
+  <dl class="facts">
+    <div><dt>Municipalities</dt><dd>145</dd></div>
+    <div><dt>With a river</dt><dd>120</dd></div>
+    <div><dt>River points</dt><dd>207</dd></div>
+    <div><dt>Gauges shown</dt><dd>153</dd></div>
+    <div><dt>History used</dt><dd>33 yr</dd></div>
+    <div><dt>Forecast horizon</dt><dd>7 days</dd></div>
+    <div><dt>API keys needed</dt><dd>0</dd></div>
+  </dl>
+</header>
+
+<!-- ==================== 1 ==================== -->
+<h2 id="problem"><span class="num">01</span> Forecast, not detection</h2>
+
+<p class="lede">FireWatch can say a fire is burning <em>now</em>, because satellites
+report it within minutes. Nothing equivalent exists for floods, and that decides
+the whole design.</p>
+
+<p>A flood has no thermal signature to detect. Sentinel-1 radar can see standing
+water through cloud, but it revisits only every few days. So the core product here
+is a <strong>forecast</strong>: how much water each river is expected to carry over
+the next seven days, compared with how often that much water has happened before.
+Measured gauge readings from the agencies are shown beside it, but they are a
+separate layer and are never blended into the forecast level.</p>
+
+<div class="note">
+  <span class="lbl">What a level means</span>
+  <p>A level says that the <strong>forecast</strong> flow in a ~5&nbsp;km model cell
+  reaches a value that occurs about once in 2, 5 or 20 years. It does not say water
+  is in anyone's street, and it is not an official warning. The gauges are the
+  measured side of the picture.</p>
+</div>
+
+<!-- ==================== 2 ==================== -->
+<h2 id="sources"><span class="num">02</span> Where the data comes from</h2>
+
+<div class="tw">
+<table>
+  <caption>Every input, what it gives, and how it is accessed</caption>
+  <thead><tr><th>Source</th><th>Gives</th><th>Access</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td class="src-mtg">GloFAS via Open-Meteo</td><td>Daily river discharge, 1984 onward, plus a 7-day forecast, on a 0.05&deg; grid</td><td class="mono">flood-api.open-meteo.com</td><td><span class="pill ok">in use</span></td></tr>
+    <tr><td class="src-s3">OpenStreetMap</td><td>145 municipality boundaries, named river lines, base tiles</td><td class="mono">Overpass (build time), tiles</td><td><span class="pill ok">in use</span></td></tr>
+    <tr><td class="src-firms">Sava basin agency</td><td>99 gauges, hourly, with the agency's own class (N/P/R/V/Z)</td><td class="mono">vodostaji.voda.ba/data/…</td><td><span class="pill no">local only</span></td></tr>
+    <tr><td class="src-firms">RHMZ Republika Srpska</td><td>34 gauges (31 with a reading); no unit and no thresholds published</td><td class="mono">rhmzrs.com/data/feeds/…</td><td><span class="pill no">local only</span></td></tr>
+    <tr><td class="src-firms">Adriatic agency, Mostar</td><td>20 gauges, raw flood-defence thresholds on 6</td><td class="mono">avpjm.jadran.ba (page scrape)</td><td><span class="pill no">local only</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>The gauge feeds are marked <em>local only</em> because none of the three states a
+licence for reuse. Section&nbsp;9 has what each agency's terms actually say. The
+boundaries and river lines are build-time artifacts committed to the repository;
+Overpass is never called while the app runs.</p>
+
+<!-- ==================== 3 ==================== -->
+<h2 id="levels"><span class="num">03</span> From flow to warning level</h2>
+
+<p>Open-Meteo serves a flow in m&sup3;/s and nothing else: no idea what is "high" for
+a given river. Levels are therefore derived from the cell's own history.</p>
+
+<ol class="body">
+  <li>Take each year's single highest daily flow (33 years, 1993 to the last full year).</li>
+  <li>Fit a Gumbel (extreme-value) distribution to those yearly maxima by the method of moments.</li>
+  <li>Read off the flows expected once in <strong>2, 5 and 20 years</strong>: these are <em>watch</em>, <em>warning</em> and <em>severe</em>.</li>
+</ol>
+
+<p>Only today and later days can raise a level, because a flood that has already
+crested is history, not news. The window is judged by its highest day, since a mean
+would smooth a two-day crest below its threshold. A municipality is as bad as its
+<strong>worst river</strong>.</p>
+
+<div class="note warn">
+  <span class="lbl">Estimates, not official figures</span>
+  <p>With 33 yearly maxima the 20-year figure is an extrapolation. Treat levels as
+  relative severity. They have not been compared with any official threshold.</p>
+</div>
+
+<!-- ==================== 4 ==================== -->
+<h2 id="points"><span class="num">04</span> Choosing river points</h2>
+
+<p>The model is a grid, not a river network, so something has to decide <em>which
+cell is which river</em>. <code>scripts/build_points.py</code> does that once and
+commits the result.</p>
+
+<ol class="body">
+  <li>Take the 30-day mean flow of every grid cell inside any municipality (2,312 cells).</li>
+  <li>For each municipality keep its strongest cells, and also a few strong cells just outside it (within 8&nbsp;km).</li>
+  <li>Name each cell by its nearest named OpenStreetMap river. A cell outside the municipality counts only if that river has a stretch <em>inside</em> it.</li>
+  <li>Keep the best cell per river, at most <strong>three rivers</strong> per municipality.</li>
+  <li>Fetch 33 years of history for the chosen cells and derive the thresholds.</li>
+</ol>
+
+<h3>Why more than one river, and why cells outside</h3>
+<p>The Bosna and the Krivaja flood together at Zavidovi&#263;i, so one point per
+municipality could only ever show one of them. And a cell is 5&nbsp;km wide: a river
+that runs along a border or through a small municipality can have its cell centre
+just outside it. Counting only cells inside left 42 municipalities with no river at
+all; allowing nearby cells brought that to 25.</p>
+
+<div class="note warn">
+  <span class="lbl">Which river is a heuristic</span>
+  <p>The model gives no river identity. "Nearest named river within 6&nbsp;km" is a
+  judgement, and a cell near a confluence can be named for the wrong river. 99 of the
+  207 points use a nearby cell, and the popup says so. Review the picks after every
+  rebuild.</p>
+</div>
+
+<p>25 municipalities still have no river point, among them Centar and the other
+Sarajevo municipalities, Travnik, Gradačac and Srebrenik. The likely reason is that a
+5&nbsp;km model does not resolve those small rivers; that has not been confirmed
+municipality by municipality. The map says "no significant river in the model",
+which is accurate, and does not say those places have no river.</p>
+
+<!-- ==================== 5 ==================== -->
+<h2 id="gauges"><span class="num">05</span> Measured gauges</h2>
+
+<p>Three agencies publish live gauge readings. They are drawn as squares, kept
+visually apart from the forecast circles, and follow strict rules:</p>
+
+<ul>
+  <li><strong>Values appear exactly as published.</strong> Nothing is rescaled, smoothed or merged.</li>
+  <li><strong>The only class shown is one the source publishes itself</strong>: the Sava agency's N, P, R, V, Z. Nothing is derived from a reading.</li>
+  <li><strong>Each source is isolated.</strong> One failing never costs the others.</li>
+  <li><strong>Nothing is wired to alerts or to any public output</strong> until written permission is on file.</li>
+</ul>
+
+<div class="tw">
+<table>
+  <caption>What each source publishes, as verified on 2026-10-23</caption>
+  <thead><tr><th>Source</th><th>Stations</th><th>Class</th><th>Unit</th><th>Time</th></tr></thead>
+  <tbody>
+    <tr><td>Sava agency</td><td class="mono">99</td><td>Own class; none where thresholds undefined</td><td>As published</td><td>ISO time with offset; flagged on the map if older than 6&nbsp;h</td></tr>
+    <tr><td>RHMZ RS</td><td class="mono">34</td><td>None</td><td><strong>not stated</strong></td><td>Time string with no zone</td></tr>
+    <tr><td>Adriatic agency</td><td class="mono">20</td><td>None; raw thresholds on 6</td><td>As published</td><td>Epoch, described only as "winter time"; zone unconfirmed</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>History is what we recorded</h3>
+<p>The Sava agency publishes history only as images and spreadsheets, and fetching
+those for 99 stations every hour would be an unreasonable load on a public server.
+So each poll saves every new reading (deduplicated on the source's own timestamp, up
+to 96 per station) and the popup draws that record as a small line. A new install
+shows no line until a station has two readings.</p>
+
+<!-- ==================== 6 ==================== -->
+<h2 id="map"><span class="num">06</span> The map</h2>
+
+<ul>
+  <li><strong>Municipality shading</strong> by worst river level; blue to violet to magenta, deliberately unlike FireWatch's orange and red.</li>
+  <li><strong>River stretch and marker</strong> for each point, the stretch drawn only inside its municipality, thick when flagged.</li>
+  <li><strong>Popups</strong> with the forecast chart (threshold lines included) per river, capped in height so three rivers scroll.</li>
+  <li><strong>Gauge layer</strong> with a toggle, attribution and an informative-only note.</li>
+  <li><strong>Bosnian by default</strong>, English on a toggle, remembered per device.</li>
+</ul>
+
+<div class="note crit">
+  <span class="lbl">Open the map over http, not from the file</span>
+  <p>OpenStreetMap's tile servers answer a request with no Referer by sending back a
+  "403 Access blocked" <em>image</em> with HTTP&nbsp;200, so nothing looks like an
+  error. A page opened from <code>file://</code> sends no Referer. <code>python3 -m
+  floodwatch map</code> therefore serves the page on <code>http://127.0.0.1:8765/</code>,
+  and that is what to open. The tile policy requires a valid Referer from web pages
+  and a published page must not set a restrictive Referrer-Policy.</p>
+</div>
+
+<!-- ==================== 7 ==================== -->
+<h2 id="quota"><span class="num">07</span> Rate limits &amp; cost</h2>
+
+<p>Open-Meteo's free tier allows <strong>10,000 calls a day, 5,000 an hour and 600 a
+minute</strong>, applied per IP address, for non-commercial use. Calls are weighted by
+locations multiplied by days, which is what makes the first build expensive.</p>
+
+<div class="tw">
+<table>
+  <caption>Measured behaviour of the flood API</caption>
+  <thead><tr><th>Request</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">50 locations &times; 30 days</td><td>Fine; used for the first selection</td></tr>
+    <tr><td class="mono">50 locations &times; 33 years</td><td>HTTP 400 "requests too much data"; the archive uses 3 per call</td></tr>
+    <tr><td class="mono">93 days &times; 2,312 cells</td><td>Exhausted the hourly limit; repeated tries then exhausted the daily one</td></tr>
+    <tr><td class="mono">Poll: ~150 cells &times; 10 days</td><td>Light; one cycle succeeded straight after the build</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>There are three distinct 429 messages: <em>Minutely</em>, <em>Hourly</em> and
+<em>Daily &hellip; try again tomorrow</em>. Only the first is worth waiting out, so the
+client waits a minute for it and raises on the other two. The build is
+<strong>resumable</strong>: every fetched cell is cached, so a run that dies resumes
+where it stopped.</p>
+
+<!-- ==================== 8 ==================== -->
+<h2 id="fieldnotes"><span class="num">08</span> Field notes</h2>
+
+<p class="lede">Behaviour that is in nobody's documentation, found by measuring.</p>
+
+<h4>The grid snaps, and a cell centre is not the river</h4>
+<p>The API snaps any coordinate to a 0.05&deg; grid with centres at
+<code>0.025 + k&times;0.05</code>. Asking for centres gives one cell reproducibly. A
+centre can sit up to ~3.5&nbsp;km from the water, so markers are moved onto a real
+river line for display.</p>
+
+<h4>Non-river cells answer zero, not an error</h4>
+<p>A hillside cell returns <code>0.0</code>. A threshold of 1&nbsp;m&sup3;/s separates
+those from rivers.</p>
+
+<h4>One point per municipality was a design bug</h4>
+<p>It was found by asking about Zavidovi&#263;i, where two rivers flood together. The
+fix needed nearby cells too, and separate pools for inside and nearby cells: in the
+first attempt, cells beside the large Bosna crowded out the municipality's own
+tributaries.</p>
+
+<h4>Tiles can fail while returning 200</h4>
+<p>See section 6. It is the same trap as FireWatch's EUMETView and FIRMS answers:
+a 200 that carries nothing useful.</p>
+
+<h4>Headless Chrome does not reproduce the tile block</h4>
+<p>Screenshots from <code>file://</code> showed real tiles even though the user's
+browser showed blocked ones. A screenshot therefore cannot verify the Referer fix;
+the curl test and the user's own browser did.</p>
+
+<h4>Not every popup fits the screen</h4>
+<p>A popup with three rivers ran off the top of the window with auto-pan disabled.
+Popups now have a maximum height and scroll.</p>
+
+<h4>The RHMZ feed has no unit</h4>
+<p>Neither the feed nor the page states one, so none is shown. Guessing "cm" would
+have put a number with a unit it may not have.</p>
+
+<!-- ==================== 9 ==================== -->
+<h2 id="legal"><span class="num">09</span> Licences &amp; permissions</h2>
+
+<div class="tw">
+<table>
+  <caption>What each source's terms say, read in full on 2026-10-23/24</caption>
+  <thead><tr><th>Source</th><th>Terms</th><th>Consequence</th></tr></thead>
+  <tbody>
+    <tr><td class="src-mtg">Open-Meteo</td><td>Free API for non-commercial use only (no subscriptions or advertising); CC-BY 4.0; limits per IP; may block misuse</td><td>Visible attribution required; do not rotate IPs to dodge limits</td></tr>
+    <tr><td class="src-s3">OpenStreetMap</td><td>ODbL 1.0 with attribution; tile policy requires a Referer and forbids bulk download</td><td>Credited on the map; serve over http</td></tr>
+    <tr><td class="src-firms">RHMZ RS</td><td>Use allowed for information and non-commercial purposes only, and <strong>no modification without prior written approval</strong></td><td>Show raw values; ask whether a derived level counts as modification</td></tr>
+    <tr><td class="src-firms">Sava agency</td><td>No terms; impressum says data is informative and not official</td><td>Written permission needed before publishing</td></tr>
+    <tr><td class="src-firms">Adriatic agency</td><td>No terms found</td><td>Written permission needed before publishing</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="note warn">
+  <span class="lbl">Not checked</span>
+  <p>Vode Srpske (website not found), Br&#269;ko, the FHMZ bulletin (no terms found),
+  DHMZ Croatia (no terms found; a price list exists) and the Sava Commission's HIS
+  (a login-style application) were not verified, and are not used.</p>
+</div>
+
+<p>Draft permission emails to the three agencies, in Bosnian, are in
+<code>Importat_to_to.md</code>.</p>
+
+<!-- ==================== 10 ==================== -->
+<h2 id="ops"><span class="num">10</span> Operations</h2>
+
+<pre><code>python3 scripts/build_boundaries.py   light polygons for the map
+python3 scripts/build_rivers.py        OSM river lines (Overpass, with mirrors)
+python3 scripts/build_points.py        river points + thresholds (resumable)
+python3 -m floodwatch poll             one cycle: fetch, assess, write the snapshot
+python3 -m floodwatch map [port]       serve the map on http://127.0.0.1:8765/
+python3 tests_levels.py                11 assertions; exits non-zero on failure</code></pre>
+
+<p>There is no package manager and no build step; the only dependency is
+<code>requests</code>. The map's JavaScript has no automated tests, by the same
+decision as FireWatch: verify map changes by rendering and looking. If a build dies
+on a rate limit, just run it again.</p>
+
+<!-- ==================== 11 ==================== -->
+<h2 id="limits"><span class="num">11</span> Limits &amp; roadmap</h2>
+
+<ul>
+  <li><strong>It is a forecast of a model.</strong> A ~5&nbsp;km grid cannot see small rivers or flash floods in narrow valleys.</li>
+  <li><strong>No real warning has been seen yet.</strong> On the first real poll every river was far below its watch flow (at most 32%), so the coloured states are untested on real data.</li>
+  <li><strong>Gauges do not raise a municipality's level.</strong> That would blend a measurement into a forecast, and waits on permissions.</li>
+  <li><strong>Not published.</strong> No repository, workflow or site exists yet, and nothing sends alerts.</li>
+</ul>
+
+<h3>Next</h3>
+<ol class="body">
+  <li>Publish a map-only version (forecast, no gauges, no alerts) on GitHub Pages, with a poll workflow like FireWatch's. Open-Meteo applies limits per IP and warns that shared platforms may be limited sooner, so a hosted poll may sometimes be refused.</li>
+  <li>Send the three permission emails; enable the gauge layer publicly only after written replies.</li>
+  <li>Add Telegram alerts: a new bot and channels, a store so an alert is sent once, and nothing triggered by testing.</li>
+</ol>
+
+<footer>
+  <p><strong>Data and licences.</strong> River discharge: GloFAS via Open-Meteo
+  (non-commercial, CC-BY 4.0). Boundaries, river lines and base tiles &copy;
+  OpenStreetMap contributors, ODbL 1.0. Gauge readings: the Agency for the River Sava
+  Basin, RHMZ Republika Srpska and the Adriatic Sea Basin Agency, shown as published and
+  informative only. Map rendering: Leaflet 1.9.4.</p>
+  <p>FloodWatch Bosna i Hercegovina &mdash; a handful of Python modules, one HTML map,
+  no build step, no API keys.</p>
+</footer>
+</main>
+</div>
