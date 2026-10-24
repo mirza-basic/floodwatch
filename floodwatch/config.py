@@ -34,8 +34,8 @@ MIN_RIVER_M3S = 1.0
 # the documented ceiling.
 BATCH = 50
 
-# Distinct rivers shown per municipality (Bosna and Krivaja both reach Zavidovici).
-MAX_RIVERS = 3
+# Distinct rivers shown per municipality (Bosna and Krivaja both reach Zavidovici; raised from 3 after 55 strong rivers were being dropped).
+MAX_RIVERS = 5
 
 # Measured gauges from the agencies. OFF by default; set FLOODWATCH_GAUGES=1 for local use.
 # Local use only until written permission is on file (the local, unpublished permissions note).

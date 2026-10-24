@@ -137,6 +137,7 @@ const I18N={
   legendTxt:"Nivo je prognoza protoka u ćeliji modela (~5 km) koja dostiže vrijednost koja se javlja jednom u 2, 5 ili 20 godina. Nije zvanično upozorenje.",
   docs:"Dokumentacija",src:"Prognoza protoka",map:"rijeke i granice",
   attrNote:"Model prognoze, nije zvanično upozorenje.",
+  coverage:"Prikazane su samo rijeke koje model prognoze razlikuje (~5 km). Manji vodotoci nisu pokriveni, a odsustvo upozorenja ne znači da rizika nema.",
   gsrc:"Izvor",gval:"Očitanje",gtime:"Vrijeme",gstale:"Podaci stariji od 6 h",gcls:"Zvanična klasa izvora",
   gnocls:"Granične vrijednosti nisu definisane",gnounit:"jedinica nije navedena u izvoru",gthr:"Pragovi odbrane (izvor)",
   gepoch:"vrijeme prema izvoru, vremenska zona nije potvrđena",gnone:"bez očitanja",ghist:"Očitanja koja smo zabilježili",
@@ -155,6 +156,7 @@ const I18N={
   legendTxt:"A level is a forecast: the flow in a ~5 km model cell reaches a value that occurs about once in 2, 5 or 20 years. It is not an official warning.",
   docs:"Documentation",src:"River-flow forecast",map:"rivers and boundaries",
   attrNote:"Model forecast, not an official warning.",
+  coverage:"Only rivers the forecast model can resolve (~5 km) are shown. Smaller streams are not covered, and no alert does not mean there is no risk.",
   gsrc:"Source",gval:"Reading",gtime:"Time",gstale:"Data older than 6 h",gcls:"Source's official class",
   gnocls:"Thresholds not defined",gnounit:"unit not stated by the source",gthr:"Flood-defence thresholds (source)",
   gepoch:"time as published; time zone not confirmed",gnone:"no reading",ghist:"Readings we recorded",
@@ -226,7 +228,8 @@ function riverBlock(r){
 function openMuni(m,at){
   if(at) map.setView(at,Math.max(map.getZoom(),10),{animate:false});
   $("muniinfo-body").innerHTML=`<h2 style="margin:0 0 4px;font-size:15px">${esc(m.name)}</h2>`+
-    (m.rivers.length?m.rivers.map(riverBlock).join("")+`<div class="mut" style="margin-top:8px">${t("attrNote")}</div>`:`<div class="mut">${t("noriver")}</div>`);
+    (m.rivers.length?m.rivers.map(riverBlock).join("")+`<div class="mut" style="margin-top:8px">${t("attrNote")}</div>`:`<div class="mut">${t("noriver")}</div>`)+
+    `<div class="mut" style="margin-top:6px">${t("coverage")}</div>`;
   $("muniinfo").classList.add("show");
 }
 function atOf(m,r){const g=(RIV[m.id]||[]).find(x=>x.name===r.river);return g?[g.mlat,g.mlon]:[r.lat,r.lon]}
@@ -323,7 +326,7 @@ function renderList(){
     h+=`<div class="sechd">${t("warnHd")}</div>`;
     for(const m of on){ const rs=m.rivers.filter(r=>lvR(r)!=="normal").sort((a,b)=>rank(lvR(b))-rank(lvR(a))); h+=card(m,rs[0]); }
   } else {
-    h+=`<div class="empty"><div class="big">💧</div>${t("noWarn")}</div>`;
+    h+=`<div class="empty"><div class="big">💧</div>${t("noWarn")}<div class="mut" style="margin-top:10px;font-size:11.5px">${t("coverage")}</div></div>`;
     const all=[]; SNAP.municipalities.forEach(m=>m.rivers.forEach(r=>{const v=valR(r); if(v!=null) all.push({m,r,q:v/r.thresholds.watch})}));
     all.sort((a,b)=>b.q-a.q);
     h+=`<div class="sechd">${t("nearHd")}</div>`+all.slice(0,6).map(x=>card(x.m,x.r)).join("");
@@ -386,7 +389,7 @@ legend.addTo(map);
 function renderLegend(){
   $("lgbtn").textContent="▥ "+t("legend");
   $("lgbody").innerHTML=["normal","watch","warning","severe"].map(k=>`<div><i style="background:${COL[k]}"></i>${t(k)}</div>`).join("")+
-    `<div style="margin-top:6px">${t("legendTxt")}</div>`+
+    `<div style="margin-top:6px">${t("legendTxt")}</div><div style="margin-top:6px"><b>${t("coverage")}</b></div>`+
     (GA.length?`<div style="margin-top:8px"><i class="sq" style="background:#c7d0d9"></i>${t("lGa")}: ${["N","P","R","V","Z"].map(k=>`<i class="sq" style="background:${GCOL[k]};margin-left:6px"></i>${k}`).join("")}</div>`:"");
 }
 

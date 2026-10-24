@@ -65,8 +65,7 @@ thresholds. A municipality whose best cell is below `MIN_RIVER_M3S` gets
 `river: false` and no point.
 
 **Status 2026-10-24: built, then improved the same day.** `data/bih/river_points.json`
-(committed): 207 river points in 120 of 145 municipalities (1 river: 57, 2: 39,
-3: 24), 201/207 matched to a named OSM river, 0 threshold-ordering violations. The
+(committed): 207 river points in 120 of 145 municipalities (superseded below), 201/207 matched to a named OSM river, 0 threshold-ordering violations. The
 map renders with live data; every river was far below its "watch" flow (max 32%).
 The build took several attempts because Open-Meteo's daily/hourly quotas were
 exhausted first; it finished on a different IP after the user switched on a VPN.
@@ -83,6 +82,23 @@ municipality* passes next to the cell. Such points carry `near: true` and the po
 says "nearby model cell, outside the municipality". 99 of 207 points are near cells.
 Result: 120/145 municipalities (was 103); Zavidovici = Bosna, Krivaja, Vozucica.
 
+**Cap raised to 5 rivers (2026-10-24, second pass).** A count over 394 (municipality, named
+OSM river with >=5 points inside) pairs found: 179 shown (45%), 140 invisible to the model
+(<1 m3/s, 36%), 20 sharing a model cell with a shown river (5%), and **55 with a strong model
+cell that were being dropped** (14%: Tavna at Bijeljina ~31 m3/s, Krusnica at Bosanska Krupa,
+Vrbanja at Banja Luka). `MAX_RIVERS` 3 -> 5, `CANDIDATES` 8 -> 12, `NEAR_CANDIDATES` 4 -> 6; a dry
+run (no API calls) predicted 13 new history fetches, and the real build needed no more.
+Now **232 river points in 120 municipalities** (1 river: 53, 2: 36, 3: 20, 4: 8, 5: 3).
+Not recovered: Jadar at Bratunac (the cell is named for another river - the naming heuristic,
+not the cap). Rivers sharing a cell (Gostovic at Zavidovici shares the Bosna/Krivaja cell) are
+deliberately **not** shown separately: the model has one number per cell and a second line
+would repeat another river's forecast as if it were its own.
+**Names are OSM's `name` tag as is**, so some are Cyrillic (e.g. "Јања", "Крижевица"); the
+HOT export has `name_latin`/`name_bs` but our Overpass data does not.
+**The map states its coverage** (legend, every popup, empty state): only rivers the model can
+resolve are shown and no alert never means no risk - a calm map is easily read as "my small
+river is fine".
+
 **Still without a river (25):** banovici, buzim, celic, centar, dobretici, gradacac,
 han-pijesak, istocni-drvar, istocni-stari-grad, istocno-novo-sarajevo, kalesija,
 kladanj, kresevo, kupres-rs, lopare, novo-sarajevo, osmaci, pale-rs, pelagicevo,
@@ -92,7 +108,7 @@ does not resolve those small rivers (cells below `MIN_RIVER_M3S`). The map says 
 significant river in the model", which is accurate; do not claim these have no river.
 
 **Other open items:** thresholds are not compared against any official figure; 6
-points have no river name; popups with three rivers are capped at 300 px and scroll.
+points have no river name; popups with up to five rivers scroll.
 
 ## Landmines (all measured)
 

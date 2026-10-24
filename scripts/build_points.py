@@ -22,8 +22,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from floodwatch import config, geo, glofas, rivers, thresholds  # noqa: E402
 
-CANDIDATES = 8  # strongest inside cells per municipality considered for naming
-NEAR_CANDIDATES = 4  # strongest nearby outside cells considered on top of those
+CANDIDATES = 12  # strongest inside cells per municipality considered for naming
+NEAR_CANDIDATES = 6  # strongest nearby outside cells considered on top of those
 
 
 CACHE = config.STATE_DIR / "build-cache.json"

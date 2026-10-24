@@ -253,7 +253,7 @@
   <dl class="facts">
     <div><dt>Municipalities</dt><dd>145</dd></div>
     <div><dt>With a river</dt><dd>120</dd></div>
-    <div><dt>River points</dt><dd>207</dd></div>
+    <div><dt>River points</dt><dd>232</dd></div>
     <div><dt>Gauges shown</dt><dd>153</dd></div>
     <div><dt>History used</dt><dd>33 yr</dd></div>
     <div><dt>Forecast horizon</dt><dd>7 days</dd></div>
@@ -338,7 +338,7 @@ commits the result.</p>
   <li>Take the 30-day mean flow of every grid cell inside any municipality (2,312 cells).</li>
   <li>For each municipality keep its strongest cells, and also a few strong cells just outside it (within 8&nbsp;km).</li>
   <li>Name each cell by its nearest named OpenStreetMap river. A cell outside the municipality counts only if that river has a stretch <em>inside</em> it.</li>
-  <li>Keep the best cell per river, at most <strong>three rivers</strong> per municipality.</li>
+  <li>Keep the best cell per river, at most <strong>five rivers</strong> per municipality.</li>
   <li>Fetch 33 years of history for the chosen cells and derive the thresholds.</li>
 </ol>
 
@@ -347,7 +347,9 @@ commits the result.</p>
 municipality could only ever show one of them. And a cell is 5&nbsp;km wide: a river
 that runs along a border or through a small municipality can have its cell centre
 just outside it. Counting only cells inside left 42 municipalities with no river at
-all; allowing nearby cells brought that to 25.</p>
+all; allowing nearby cells brought that to 25. Raising the cap from three rivers to five
+then recovered strong rivers that were being dropped (Tavna at Bijeljina, Krušnica at
+Bosanska Krupa, Vrbanja at Banja Luka). 232 river points in 120 municipalities.</p>
 
 <div class="note warn">
   <span class="lbl">Which river is a heuristic</span>
@@ -411,6 +413,15 @@ bottom bar. On a phone the panel becomes a drawer with an alert badge.</p>
   <li><strong>Layers</strong> (rivers, municipalities, gauges when present), an eye button that hides them all, and a legend.</li>
   <li><strong>Bosnian by default</strong>, English on a toggle, remembered per device.</li>
 </ul>
+
+<div class="note warn">
+  <span class="lbl">What the map does not show</span>
+  <p>Only rivers the forecast model can resolve (~5&nbsp;km) are drawn. Of 394 pairs of a
+  municipality and a named OpenStreetMap river, the map covered about half before the
+  cap was raised; around 36% have no model flow at all (under 1&nbsp;m&sup3;/s), so they
+  cannot be forecast whatever we do. The map says this in its legend, in every popup and
+  in the empty state, because a calm map is easily read as "my small river is fine".</p>
+</div>
 
 <p>Level per day is computed in the browser from each river's daily flows and its
 thresholds, so the chips, the bottom bar and the 7-day view always agree.</p>
@@ -540,7 +551,7 @@ on a rate limit, just run it again.</p>
 <h2 id="limits"><span class="num">11</span> Limits &amp; roadmap</h2>
 
 <ul>
-  <li><strong>It is a forecast of a model.</strong> A ~5&nbsp;km grid cannot see small rivers or flash floods in narrow valleys.</li>
+  <li><strong>It is a forecast of a model.</strong> A ~5&nbsp;km grid cannot see small rivers or flash floods in narrow valleys, and no alert never means no risk.</li>
   <li><strong>No real warning has been seen yet.</strong> On the first real poll every river was far below its watch flow (at most 32%), so the coloured states are untested on real data.</li>
   <li><strong>Gauges do not raise a municipality's level.</strong> That would blend a measurement into a forecast, and waits on permissions.</li>
   <li><strong>Not published.</strong> No repository, workflow or site exists yet, and nothing sends alerts.</li>
