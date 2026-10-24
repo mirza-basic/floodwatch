@@ -20,6 +20,7 @@ MAP = config.STATE_DIR / "floodmap.html"
 
 
 def main(argv: list[str]) -> int:
+    config.ensure_state_dir()
     cmd = argv[0] if argv else "map"
     if cmd == "poll":
         snap = poller.cycle()

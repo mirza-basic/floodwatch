@@ -19,6 +19,7 @@ SNAPSHOT = config.STATE_DIR / "snapshot.json"
 
 
 def cycle() -> dict:
+    config.ensure_state_dir()
     points = json.loads(config.POINTS_FILE.read_text())
     munis = {m["id"]: m for m in json.loads((config.DATA_DIR / "municipalities.json").read_text())}
     rivers = [p for p in points if p["river"]]

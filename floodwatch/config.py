@@ -46,3 +46,11 @@ GAUGES_ENABLED = os.environ.get("FLOODWATCH_GAUGES") == "1"  # off unless asked:
 # that contains no cell centre. Such cells are considered up to this far away, and
 # only if a named river with a stretch inside the municipality passes next to them.
 NEAR_KM = 8.0
+
+
+def ensure_state_dir() -> Path:
+    """`state/` holds only gitignored output, so a fresh clone (a CI runner) has no
+    such folder - git does not keep empty directories. Every writer calls this
+    first; the first deploy failed on exactly that."""
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    return STATE_DIR

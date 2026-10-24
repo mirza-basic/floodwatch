@@ -151,6 +151,7 @@ def update_history(gauges: list[dict], path=HISTORY_FILE) -> None:
     is added only if its timestamp is new, so polling more often than the source
     updates adds nothing. Gaps simply mean the poller was not running.
     """
+    config.ensure_state_dir()
     hist = json.loads(path.read_text()) if path.exists() else {}
     for g in gauges:
         t = g.get("time") or g.get("time_raw_epoch")
