@@ -180,6 +180,28 @@ policy page unreadable). Do not use any of these without checking.
 - **OpenStreetMap** tiles and river lines: attribution (tiles already credited).
 - Agencies: attribution as each requests in its written reply.
 
+## Deployment (decided 2026-10-24: one public repo, Pages deployed from it)
+
+Chosen over a private-source + public-site split. (Docs read 2026-10-24: Pages on
+GitHub Free requires a public repo; a private repo's Pages site is public anyway; a
+cross-repo deploy would need a deploy key or token, and whether a push made with one
+triggers a Pages build is **not stated** in the docs - untested.)
+
+- `.github/workflows/poll.yml`: every 3 h (`schedule`) or manually; checkout, tests,
+  poll, `deploy/build-site.py public`, then `upload-pages-artifact` +
+  `deploy-pages`. **Written but never run** - no repo exists yet. Scheduled
+  workflows may be disabled after a long period of repo inactivity (recalled from
+  FireWatch's notes, not verified here), which would stop the map silently; the map
+  shows a warning when its data is over 9 h old.
+- **Gauges are off by default** (`FLOODWATCH_GAUGES=1` enables them, for local use
+  only) and the workflow has a guard step that fails the run if gauge data appears
+  in the built page. The guard was tested: it trips when gauges are on.
+- `deploy/build-site.py` puts the map at `/` and wraps `docs/*.html` into real pages.
+- Before the first push: every commit so far carries the author's work e-mail, and
+  an early commit tracked a gauge test page, so history should be replaced by a
+  fresh one under a GitHub no-reply address (user's decision), and
+  `Importat_to_to.md` should not be published.
+
 ## Roadmap to publish
 
 Phase 1 - map only (GloFAS forecast, no gauges, no alerts):
