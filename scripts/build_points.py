@@ -109,6 +109,10 @@ def main() -> None:
             if s:
                 rec.update(mlat=s["point"][0], mlon=s["point"][1], lines=s["lines"])
             out.append(rec)
+    # Complete every shown river along its whole course (see rivers.layout) - without
+    # this, stretches inside municipalities that have no point for the river stay blank.
+    fill = rivers.layout(out, munis)
+    (config.DATA_DIR / "river_fill.json").write_text(json.dumps(fill, ensure_ascii=False, separators=(",", ":")))
     config.POINTS_FILE.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
     n = len({p["id"] for p in out if p["river"]})
     print(f"wrote {config.POINTS_FILE.name}: {len(out)} points; {n} municipalities with a river, "

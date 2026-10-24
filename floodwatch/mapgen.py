@@ -116,7 +116,7 @@ __CSS__
   </div>
 </div>
 <script>
-const SNAP=__SNAPSHOT__, BOUNDS=__BOUNDS__, RIV=__RIVERS__;
+const SNAP=__SNAPSHOT__, BOUNDS=__BOUNDS__, RIV=__RIVERS__, FILL=__FILL__;
 const LV=["normal","watch","warning","severe"];
 const COL={normal:"#1fb5a6",watch:"#4aa8ff",warning:"#8b6cff",severe:"#e0489f"};
 const GCOL={N:"#7CFC00",P:"#00B0F0",R:"#FFFF00",V:"#FFC000",Z:"#F00000"};
@@ -139,6 +139,7 @@ const I18N={
   legendTxt:"Nivo je prognoza protoka u ćeliji modela (~5 km) koja dostiže vrijednost koja se javlja jednom u 2, 5 ili 20 godina. Nije zvanično upozorenje.",
   docs:"Dokumentacija",src:"Prognoza protoka",map:"rijeke i granice",
   attrNote:"Model prognoze, nije zvanično upozorenje.",
+  fillNote:"Ovaj dio rijeke nema vlastitu ćeliju modela; prikazan je nivo najbliže tačke ({m}).",
   more:["još {n} rijeka u općini {m}","još {n} rijeke u općini {m}","još {n} rijeka u općini {m}"],
   coverage:"Prikazane su samo rijeke koje model prognoze razlikuje (~5 km). Manji vodotoci nisu pokriveni, a odsustvo upozorenja ne znači da rizika nema.",
   gsrc:"Izvor",gval:"Očitanje",gtime:"Vrijeme",gstale:"Podaci stariji od 6 h",gcls:"Zvanična klasa izvora",
@@ -159,6 +160,7 @@ const I18N={
   legendTxt:"A level is a forecast: the flow in a ~5 km model cell reaches a value that occurs about once in 2, 5 or 20 years. It is not an official warning.",
   docs:"Documentation",src:"River-flow forecast",map:"rivers and boundaries",
   attrNote:"Model forecast, not an official warning.",
+  fillNote:"This stretch has no model cell of its own; it shows the level of the nearest point ({m}).",
   more:["{n} more river in {m}","{n} more rivers in {m}","{n} more rivers in {m}"],
   coverage:"Only rivers the forecast model can resolve (~5 km) are shown. Smaller streams are not covered, and no alert does not mean there is no risk.",
   gsrc:"Source",gval:"Reading",gtime:"Time",gstale:"Data older than 6 h",gcls:"Source's official class",
@@ -231,13 +233,14 @@ function riverBlock(r){
 }
 // A river dot, line or card opens just that river, with a link to the rest; the
 // municipality area opens the full list (the reader asked about the whole place).
-function openMuni(m,at,r){
+function openMuni(m,at,r,note){
   if(at) map.setView(at,Math.max(map.getZoom(),10),{animate:false});
   const body=$("muniinfo-body");
   const render=all=>{
     const rs=r?(all?[r,...m.rivers.filter(x=>x!==r)]:[r]):m.rivers;
     let h=`<h2 style="margin:0 0 4px;font-size:15px">${esc(m.name)}</h2>`;
     h+=rs.length?rs.map(riverBlock).join(""):`<div class="mut">${t("noriver")}</div>`;
+    if(note&&!all) h+=`<div class="mut" style="margin-top:8px">${esc(note)}</div>`;
     if(r&&!all&&m.rivers.length>1){
       const n=m.rivers.length-1;
       h+=`<a href="#" class="more" data-more="1">${plural(n,t("more")).replace("{n}",n).replace("{m}",esc(m.name))}</a>`;
@@ -267,6 +270,14 @@ function drawMap(){
       const at=atOf(m,r), key=at+","+l; if(seen[key]) continue; seen[key]=1;
       L.circleMarker(at,{radius:ru?13.5:6,color:"#0b0e12",weight:2,fillColor:COL[l],fillOpacity:.95}).addTo(dots).on("click",()=>openMuni(m,null,r));
     }
+  }
+  // Stretches of a river inside municipalities that have no point for it: drawn so the river is
+  // continuous, in the level colour of the nearest stretch of the same river.
+  if(show.riv) for(const [name,list] of Object.entries(FILL)) for(const f of list){
+    const m=SNAP.municipalities.find(x=>x.id===f.ref), r=m&&m.rivers.find(x=>x.river===name); if(!r) continue;
+    const l=lvR(r), ru=l!=="normal";
+    L.polyline(f.lines,{color:COL[l],weight:ru?9:4,opacity:ru?.95:.9,lineCap:"round"}).addTo(lines)
+      .on("click",()=>openMuni(m,null,r,t("fillNote").replace("{m}",m.name)));
   }
   if(!eyeOn){ for(const g of [polys,lines,dots,gl]) map.removeLayer(g); } else { for(const g of [polys,lines,dots]) g.addTo(map); if(show.ga) gl.addTo(map); }
 }
@@ -434,7 +445,10 @@ def render(snapshot: dict) -> str:
             if p.get("mlat") is not None:
                 rivers.setdefault(p["id"], []).append(
                     {"name": p["river_name"], "mlat": p["mlat"], "mlon": p["mlon"], "lines": p["lines"]})
+    fill_file = config.DATA_DIR / "river_fill.json"
+    fill = json.loads(fill_file.read_text()) if fill_file.exists() else {}
     page = TEMPLATE.replace("__CSS__", CSS + EXTRA_CSS)
     return (page.replace("__SNAPSHOT__", json.dumps(snapshot, ensure_ascii=False))
                 .replace("__BOUNDS__", json.dumps(bounds, separators=(",", ":")))
-                .replace("__RIVERS__", json.dumps(rivers, ensure_ascii=False, separators=(",", ":"))))
+                .replace("__RIVERS__", json.dumps(rivers, ensure_ascii=False, separators=(",", ":")))
+                .replace("__FILL__", json.dumps(fill, ensure_ascii=False, separators=(",", ":"))))

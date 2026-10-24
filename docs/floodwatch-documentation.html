@@ -409,9 +409,10 @@ bottom bar. On a phone the panel becomes a drawer with an alert badge.</p>
   <li><strong>Day chips</strong> where FireWatch has time ranges: today, tomorrow, two more days, and "7 days" (the worst level over the whole window). Each shows how many municipalities are on alert.</li>
   <li><strong>Cards</strong> for municipalities on alert, with the river, the flow, the peak, a bar showing the flow as a share of the watch level, and a small forecast chart. When there is no alert, the panel lists the rivers closest to the watch level instead.</li>
   <li><strong>Bottom bar</strong> with one button per forecast day, coloured by the worst level that day, plus play and speed controls that step through the days.</li>
-  <li><strong>Shading and river stretches</strong> by worst river level: teal for normal, then blue, violet and magenta, deliberately unlike FireWatch's orange and red. Each river stretch is drawn thick (4 px, 9 px when flagged) only inside its municipality, with a marker 1.5 times the original size (12 px, 27 px when flagged; gauge squares 18 px).</li>
+  <li><strong>Shading and river stretches</strong> by worst river level: teal for normal, then blue, violet and magenta, deliberately unlike FireWatch's orange and red. Each shown river is drawn thick (4 px, 9 px when flagged) along its <em>whole</em> course in Bosnia and Herzegovina, with a marker 1.5 times the original size (12 px, 27 px when flagged; gauge squares 18 px).</li>
   <li><strong>Clicking</strong> a river dot, a river line or a card opens that river alone, with a link to the municipality's other rivers; clicking the municipality area opens the full list.</li>
-  <li><strong>Layers</strong> (rivers, municipalities, gauges when present), an eye button that hides them all, and a legend.</li>
+    <li><strong>No gaps in a drawn river.</strong> A river is cut at municipality borders, which used to leave breaks, and had no line at all in municipalities without a model point for it (Spreča through Kalesija and Osmaci, Bosna at Šamac). Stretches now overlap by one vertex at borders, and a stretch without its own model cell takes the level of the nearest stretch of the same river; clicking it says so. Only ways connected to the shown river are used, because several different rivers share a name (Bistrica, Ribnica).</li>
+<li><strong>Layers</strong> (rivers, municipalities, gauges when present), an eye button that hides them all, and a legend.</li>
   <li><strong>Bosnian by default</strong>, English on a toggle, remembered per device.</li>
 </ul>
 

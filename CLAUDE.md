@@ -268,6 +268,24 @@ a "{n} more rivers in {m}" link; the municipality polygon calls it without `r` a
 Untested suspicion: `drawMap` merges dots at the same place and level (`seen`), so where two
 municipalities share a river point only the first gets a dot to click.
 
+## Full-length rivers (`rivers.layout`, `scripts/build_lines.py`)
+
+Requirement (user, 2026-10-24): every river shown must be drawn 100% along its course. Two gaps
+existed: the vertex lost at each municipality border (a line was clipped to vertices strictly
+inside), and whole stretches inside municipalities with no point for that river (Spreča through
+Kalesija 16 km and Osmaci 10 km, Bosna at Samac 4 km). `rivers.layout()` fixes both: own stretches
+extend one vertex into the neighbour; stretches in a municipality without a point become **fill**
+(`data/bih/river_fill.json`, name -> [{ref, lines}]) drawn in the level of the nearest drawn
+stretch of the same river (`ref`), and the popup says so (`fillNote`). Landmine: **only ways
+connected to the shown river are used** (`_components`, ends within 0.5 km), because different
+rivers share a name (Bistrica, Ribnica); using every way of that name would draw the wrong rivers.
+A vertex within 1.5 km of a municipality still counts as inside BiH, which catches border rivers
+(Una, Sava, Drina) whose line lies just outside the traced polygons. Result: 120 fill stretches on
+22 rivers; Bosna, Spreca, Una, Vrbas, Drina, Neretva, Sava, Krivaja all 100% of their in-BiH
+vertices. `build_points.py` calls `layout()` so a rebuild keeps it (verified: identical output).
+`build_lines.py` redoes it offline (no API calls, ~2 min). Rivers with no point at all (Gostovic) are
+still not drawn - that is the unapproved "rivers without a forecast" layer.
+
 ## Documentation
 
 `docs/floodwatch-documentation.html` is the system documentation, same idea as
