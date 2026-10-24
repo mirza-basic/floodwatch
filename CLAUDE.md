@@ -233,6 +233,21 @@ undecided; FireWatch's provisioning hit platform limits), de-duplication store
 for sent alerts, `FIREWATCH_`-style secrets. **Never trigger real alerts as a side
 effect of testing.**
 
+## Map UI (mirrors FireWatch's)
+
+`mapgen.py` + `floodwatch/ui.css`. The stylesheet is **FireWatch's `<style>` block copied
+once** (lines 68-420 of its `mapgen.py` on 2026-10-24) with the accent changed to blue
+and the fire colours to flood colours; the markup keeps its ids (`#side`, `#hrange`,
+`#timebar`, `#langsw`, `#muniinfo`, `#drawer-btn`...). It is a copy, not an import:
+the two projects must not depend on each other. FireWatch's Esri satellite and
+OpenTopoMap basemaps were **not** carried over - their terms are unverified and
+only OpenStreetMap's tile policy has been read. FireWatch's measure tool, clock/"show
+all" toggle, date picker, splash and Telegram button have no flood counterpart yet.
+Day chips replace the time ranges, and the bottom bar steps through forecast days.
+Verified 2026-10-24 in headless Chrome: no console errors, all controls exercised by
+script (chips, cards, language, drawer, layers, play, legend, eye), desktop and 500 px.
+Landmine: the browser's `bs` locale can be missing, so dates are formatted by hand.
+
 ## Documentation
 
 `docs/floodwatch-documentation.html` is the system documentation, same idea as

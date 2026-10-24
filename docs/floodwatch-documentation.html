@@ -398,13 +398,22 @@ shows no line until a station has two readings.</p>
 <!-- ==================== 6 ==================== -->
 <h2 id="map"><span class="num">06</span> The map</h2>
 
+<p>The layout deliberately follows FireWatch's, so the two read as one family: a docked
+side panel, map tools on the left, a language switch on top, a collapsible legend and a
+bottom bar. On a phone the panel becomes a drawer with an alert badge.</p>
+
 <ul>
-  <li><strong>Municipality shading</strong> by worst river level; blue to violet to magenta, deliberately unlike FireWatch's orange and red.</li>
-  <li><strong>River stretch and marker</strong> for each point, the stretch drawn only inside its municipality, thick when flagged.</li>
-  <li><strong>Popups</strong> with the forecast chart (threshold lines included) per river, capped in height so three rivers scroll.</li>
-  <li><strong>Gauge layer</strong> with a toggle, attribution and an informative-only note.</li>
+  <li><strong>Header</strong> with a status dot and a count such as "4 općine pod upozorenjem" (correct Bosnian plural forms), the update time, and a warning if the data is over 9 hours old.</li>
+  <li><strong>Day chips</strong> where FireWatch has time ranges: today, tomorrow, two more days, and "7 days" (the worst level over the whole window). Each shows how many municipalities are on alert.</li>
+  <li><strong>Cards</strong> for municipalities on alert, with the river, the flow, the peak, a bar showing the flow as a share of the watch level, and a small forecast chart. When there is no alert, the panel lists the rivers closest to the watch level instead.</li>
+  <li><strong>Bottom bar</strong> with one button per forecast day, coloured by the worst level that day, plus play and speed controls that step through the days.</li>
+  <li><strong>Shading and river stretches</strong> by worst river level, in blue, violet and magenta, deliberately unlike FireWatch's orange and red. The stretch is drawn only inside its municipality, and thick when flagged.</li>
+  <li><strong>Layers</strong> (rivers, municipalities, gauges when present), an eye button that hides them all, and a legend.</li>
   <li><strong>Bosnian by default</strong>, English on a toggle, remembered per device.</li>
 </ul>
+
+<p>Level per day is computed in the browser from each river's daily flows and its
+thresholds, so the chips, the bottom bar and the 7-day view always agree.</p>
 
 <div class="note crit">
   <span class="lbl">Open the map over http, not from the file</span>
@@ -473,8 +482,13 @@ browser showed blocked ones. A screenshot therefore cannot verify the Referer fi
 the curl test and the user's own browser did.</p>
 
 <h4>Not every popup fits the screen</h4>
-<p>A popup with three rivers ran off the top of the window with auto-pan disabled.
-Popups now have a maximum height and scroll.</p>
+<p>A popup with three rivers ran off the top of the window with auto-pan disabled. Popups now have a maximum height and scroll.</p>
+
+<h4>The browser may not know Bosnian month names</h4>
+<p>A headless Chrome printed "M10 24" for a Bosnian date, so month and weekday names are written out in the page, as FireWatch does.</p>
+
+<h4>A fresh clone has no state folder</h4>
+<p>The first deploy failed because <code>state/</code> holds only gitignored output and git keeps no empty folders. Every writer now creates it first.</p>
 
 <h4>The RHMZ feed has no unit</h4>
 <p>Neither the feed nor the page states one, so none is shown. Guessing "cm" would
