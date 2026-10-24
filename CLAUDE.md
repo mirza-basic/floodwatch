@@ -129,6 +129,27 @@ points have no river name; popups with three rivers are capped at 300 px and scr
     no JS test framework, by the same decision as FireWatch. Synthetic demo maps
     must carry an unmistakable "DEMO - SYNTHETIC DATA" banner.
 
+## OpenStreetMap tiles need a Referer (measured 2026-10-24)
+
+`tile.openstreetmap.org` answers HTTP **200** with a "403 Access blocked - app is not
+following the tile usage policy" *image* (6,987 bytes) when a request has a
+browser-like User-Agent and **no Referer**; the same tile with any Referer is the real
+one (41,833 bytes). A page opened from `file://` sends no Referer, so the local map
+showed blocked tiles in the user's browser. The policy
+(operations.osmfoundation.org/policies/tiles/) says web pages must send a valid
+Referer and says nothing about `file://`.
+
+- **Never open the map from the file.** `python3 -m floodwatch map [port]` serves
+  `floodmap.html` only (loopback, port 8765) so the browser sends
+  `Referer: http://127.0.0.1:8765/`. Confirmed working by the user in their browser.
+- Headless Chrome did **not** reproduce the block (real tiles from both file:// and
+  http://), so screenshots cannot verify this; trust the curl test and the user.
+- A published page is fine as long as nothing sets a restrictive `Referrer-Policy`
+  (the policy forbids it). The default browser behaviour is acceptable.
+- Same policy: show the attribution (done), do not bulk-download tiles, honour cache
+  headers (the browser does). FireWatch's local map uses the same tile URL and may be
+  affected when opened from a file - not checked or changed.
+
 ## Measured gauges (`gauges.py`) - local only until permission is on file
 
 Three public sources, probed 2026-10-23. **None states a reuse licence.** See
