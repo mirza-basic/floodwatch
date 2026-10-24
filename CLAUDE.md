@@ -182,6 +182,12 @@ policy page unreadable). Do not use any of these without checking.
 
 ## Deployment (decided 2026-10-24: one public repo, Pages deployed from it)
 
+**Pushed 2026-10-24** to https://github.com/mirza-basic/floodwatch (public, `main`). Public site will be
+https://mirza-basic.github.io/floodwatch/ once Pages is enabled. Remaining by hand in the
+GitHub UI: Settings > Pages > Source = **GitHub Actions**, then Actions > "Poll and publish" >
+Run workflow. Verified after the push via the API: 16 commits, one no-reply identity, no work
+email, neither removed file present, workflow file present, 0 runs yet.
+
 Chosen over a private-source + public-site split. (Docs read 2026-10-24: Pages on
 GitHub Free requires a public repo; a private repo's Pages site is public anyway; a
 cross-repo deploy would need a deploy key or token, and whether a push made with one
