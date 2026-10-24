@@ -38,7 +38,7 @@ BATCH = 50
 MAX_RIVERS = 3
 
 # Measured gauges from the agencies. OFF by default; set FLOODWATCH_GAUGES=1 for local use.
-# Local use only until written permission is on file (Importat_to_to.md).
+# Local use only until written permission is on file (the local, unpublished permissions note).
 GAUGES_ENABLED = os.environ.get("FLOODWATCH_GAUGES") == "1"  # off unless asked: public deploys must never carry agency data
 
 # A GloFAS cell whose centre is outside a municipality may still be its river: the

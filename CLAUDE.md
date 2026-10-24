@@ -153,8 +153,8 @@ Referer and says nothing about `file://`.
 ## Measured gauges (`gauges.py`) - local only until permission is on file
 
 Three public sources, probed 2026-10-23. **None states a reuse licence.** See
-`Importat_to_to.md` (Bosnian) for the terms table, rules and draft permission
-emails. Until written replies exist: do not publish gauge data, do not wire it to
+the local, **unpublished** file `Importat_to_to.md` (Bosnian; kept out of the public
+repo, listed in `.gitignore`) for the terms table, rules and draft permission emails. Until written replies exist: do not publish gauge data, do not wire it to
 alerts, `GAUGES_ENABLED` is for local use.
 
 | Source | Access | Notes (verified) |
@@ -197,10 +197,13 @@ triggers a Pages build is **not stated** in the docs - untested.)
   only) and the workflow has a guard step that fails the run if gauge data appears
   in the built page. The guard was tested: it trips when gauges are on.
 - `deploy/build-site.py` puts the map at `/` and wraps `docs/*.html` into real pages.
-- Before the first push: every commit so far carries the author's work e-mail, and
-  an early commit tracked a gauge test page, so history should be replaced by a
-  fresh one under a GitHub no-reply address (user's decision), and
-  `Importat_to_to.md` should not be published.
+- **History was rewritten before the first push (2026-10-24)**: every commit now
+  carries the author's GitHub no-reply address (`ID+USERNAME@users.noreply.github.com`,
+  the format GitHub documents for accounts created after July 2017), and
+  `Importat_to_to.md` and an early gauge test page were removed from all commits.
+  Verified: no work e-mail and neither file in any commit. The old history exists only
+  in a local bundle outside the repo (`../floodwatch-history-backup.bundle`) - never
+  push it. New commits must use the local git identity set in this repo.
 
 ## Roadmap to publish
 
@@ -215,7 +218,7 @@ Phase 1 - map only (GloFAS forecast, no gauges, no alerts):
 4. Add attributions; write README and field notes.
 
 Phase 2 - gauges: send the three permission emails (drafts in
-`Importat_to_to.md`), wait for written replies, store them under `permissions/`,
+the permissions note), wait for written replies, store them under `permissions/`,
 then enable the layer publicly and decide whether gauge classes may raise a
 municipality's level.
 

@@ -2,7 +2,7 @@
 #
 # Gauges are deliberately NOT enabled here: FLOODWATCH_GAUGES is unset, so the
 # published page carries no agency data. Do not set it until written permission
-# from each agency is on file (see Importat_to_to.md).
+# from each agency is on file (the local, unpublished permissions note).
 #
 # Open-Meteo limits calls per IP address and warns that shared platforms such as
 # CI runners may be limited sooner. A 429 fails the run (red cross) rather than

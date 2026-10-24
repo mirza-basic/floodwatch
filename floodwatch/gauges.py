@@ -1,7 +1,7 @@
 """Measured water levels from the agencies that publish them.
 
 Three adapters, one record shape. None of these sources states a reuse licence
-(see Importat_to_to.md), so this module is deliberately conservative:
+(the local, unpublished permissions note), so this module is deliberately conservative:
 
 * values are carried exactly as published - never rescaled, smoothed or merged;
 * the only "class" is one the *source itself* publishes (the Sava agency's
