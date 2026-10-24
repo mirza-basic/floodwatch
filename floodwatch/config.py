@@ -39,3 +39,9 @@ MAX_RIVERS = 3
 # Measured gauges from the agencies. Local use only until written permission is on file
 # (Importat_to_to.md): nothing here is wired to alerts or public output.
 GAUGES_ENABLED = True
+
+# A GloFAS cell whose centre is outside a municipality may still be its river: the
+# cell is 5 km wide and a river often runs along a border or in a small polygon
+# that contains no cell centre. Such cells are considered up to this far away, and
+# only if a named river with a stretch inside the municipality passes next to them.
+NEAR_KM = 8.0

@@ -22,7 +22,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from floodwatch import config, geo, glofas, rivers, thresholds  # noqa: E402
 
-CANDIDATES = 8  # strongest cells per municipality considered for naming
+CANDIDATES = 8  # strongest inside cells per municipality considered for naming
+NEAR_CANDIDATES = 4  # strongest nearby outside cells considered on top of those
 
 
 CACHE = config.STATE_DIR / "build-cache.json"
@@ -62,11 +63,24 @@ def main() -> None:
     # the best cell per river name is kept, and at most MAX_RIVERS survive.
     chosen: dict[str, list[tuple[tuple[float, float], str | None]]] = {}
     for m in munis:
-        cand = sorted((c for c in cells_of[m.id] if mean[c] >= config.MIN_RIVER_M3S),
-                      key=lambda c: -mean[c])[:CANDIDATES]
+        inside = set(cells_of[m.id])
+        w, s_, e, n = m.bbox
+        pad = config.NEAR_KM / 111.0 * 1.3
+        near = [c for c in unique if c not in inside and s_ - pad <= c[0] <= n + pad and w - pad <= c[1] <= e + pad
+                and geo.distance_to_boundary_km(m, *c) <= config.NEAR_KM]
+        strong = lambda cs: sorted((c for c in cs if mean[c] >= config.MIN_RIVER_M3S), key=lambda c: -mean[c])
+        # Separate pools: a big river along the border must not crowd out the
+        # municipality's own tributaries (Bosna vs Krivaja at Zavidovici).
+        cand = sorted(strong(inside)[:CANDIDATES] + strong(near)[:NEAR_CANDIDATES], key=lambda c: -mean[c])
         per: dict[str | None, tuple[float, float]] = {}
         for c in cand:
-            per.setdefault(rivers.nearest_name(*c), c)  # sorted, so first is the best
+            name = rivers.nearest_name(*c)
+            if c not in inside:
+                # An outside cell counts only for a named river that actually runs
+                # through this municipality - otherwise it is the neighbour's river.
+                if not name or not (rivers.snap(m, c[0], c[1], name) or {}).get("lines"):
+                    continue
+            per.setdefault(name, c)  # sorted, so the first cell per river is its best
         named = [(c, n) for n, c in per.items() if n]
         chosen[m.id] = (named or [(c, n) for n, c in per.items()])[:config.MAX_RIVERS]
 
@@ -89,7 +103,7 @@ def main() -> None:
             continue
         for c, n in picks:
             rec = {"id": m.id, "river": True, "lat": c[0], "lon": c[1],
-                   "inside": m.contains(*c), "mean_m3s": round(mean[c], 2),
+                   "inside": m.contains(*c), "near": not m.contains(*c), "mean_m3s": round(mean[c], 2),
                    "thresholds": th[c], "river_name": n}
             s = rivers.snap(m, c[0], c[1], n) if n else None
             if s:

@@ -64,27 +64,35 @@ named by their nearest OSM river, best cell per river kept; (3) 33-year archive
 thresholds. A municipality whose best cell is below `MIN_RIVER_M3S` gets
 `river: false` and no point.
 
-**Status 2026-10-24: built.** `data/bih/river_points.json` exists (committed):
-175 river points in 103 municipalities (1 river: 47, 2: 40, 3: 16), 42 municipalities
-with none, 167/175 snapped onto a named OSM river. The first real poll ran and the
+**Status 2026-10-24: built, then improved the same day.** `data/bih/river_points.json`
+(committed): 207 river points in 120 of 145 municipalities (1 river: 57, 2: 39,
+3: 24), 201/207 matched to a named OSM river, 0 threshold-ordering violations. The
 map renders with live data; every river was far below its "watch" flow (max 32%).
 The build took several attempts because Open-Meteo's daily/hourly quotas were
 exhausted first; it finished on a different IP after the user switched on a VPN.
 (The VPN was the user's decision - circumventing a per-IP limit is against the
 spirit of the free tier; do not make it a routine.)
 
-**Known quality problems (found on first review, not yet fixed):**
-- 42 municipalities get `river: false`, several of which plainly have rivers
-  (Centar/Sarajevo, Gradacac, Gracanica, Breza, Fojnica, Banovici...). Likely cause
-  (unverified): a GloFAS cell is considered only if its *centre* lies inside the
-  municipality, which fails for small polygons or rivers running along a border.
-  Candidate fix: also consider cached cells within a few km of the boundary (they
-  are already in `build-cache.json`), fetch archives for only those, flag them as
-  "nearby".
-- Zavidovici shows Krivaja (mean 1.7 m3/s) and Vozucica but **not the Bosna** - the
-  very case that motivated multi-river support. Same likely cause.
-- 8 points have no river name (not snapped); 1 point lies outside its municipality.
-- Thresholds have not been compared against any official figure.
+**Nearby cells (`NEAR_KM` = 8).** A GloFAS cell is 5 km wide and a river often runs
+along a border or through a polygon containing no cell centre, so counting only
+cells whose centre is inside left 42 municipalities with no river (Zavidovici got
+Krivaja but not the Bosna). Now cells up to `NEAR_KM` outside are also candidates,
+in a separate pool (`NEAR_CANDIDATES`) so a big border river cannot crowd out the
+municipality's own tributaries, and only if a *named river with a stretch inside the
+municipality* passes next to the cell. Such points carry `near: true` and the popup
+says "nearby model cell, outside the municipality". 99 of 207 points are near cells.
+Result: 120/145 municipalities (was 103); Zavidovici = Bosna, Krivaja, Vozucica.
+
+**Still without a river (25):** banovici, buzim, celic, centar, dobretici, gradacac,
+han-pijesak, istocni-drvar, istocni-stari-grad, istocno-novo-sarajevo, kalesija,
+kladanj, kresevo, kupres-rs, lopare, novo-sarajevo, osmaci, pale-rs, pelagicevo,
+srebrenik, stanari, stari-grad, travnik, trnovo-fbih, velika-kladusa. Not yet
+diagnosed per municipality; the likely reason (unverified) is that GloFAS at ~5 km
+does not resolve those small rivers (cells below `MIN_RIVER_M3S`). The map says "no
+significant river in the model", which is accurate; do not claim these have no river.
+
+**Other open items:** thresholds are not compared against any official figure; 6
+points have no river name; popups with three rivers are capped at 300 px and scroll.
 
 ## Landmines (all measured)
 

@@ -47,7 +47,7 @@ const I18N={
   none:"Nema upozorenja u narednih 7 dana",note:"Prognoza modela GloFAS (~5 km), ne mjerenje vodostaja.",lang:"EN",
   gauges:"Mjerenja (vodomjerne stanice)",gsrc:"Izvor",gval:"Očitanje",gtime:"Vrijeme",gstale:"Podaci stariji od 6 h",
   gcls:"Zvanična klasa izvora",gnocls:"Granične vrijednosti nisu definisane",gnounit:"jedinica nije navedena u izvoru",
-  gthr:"Pragovi odbrane (izvor)",gepoch:"vrijeme prema izvoru, vremenska zona nije potvrđena",gnone:"bez očitanja",nomodel:"Podaci prognoze još nisu učitani",ghist:"Očitanja koja smo zabilježili",
+  gthr:"Pragovi odbrane (izvor)",gepoch:"vrijeme prema izvoru, vremenska zona nije potvrđena",gnone:"bez očitanja",near:"obližnja ćelija modela, izvan općine",nomodel:"Podaci prognoze još nisu učitani",ghist:"Očitanja koja smo zabilježili",
   gnote:"Podaci agencija su informativni i nisu zvanični. Prikazani su kako ih objavljuje izvor.",
   redovna_obrana:"redovna",vanredna_obrana:"vanredna",kontinuirana_obrana:"kontinuirana"},
  en:{title:"FloodWatch BiH",upd:"Updated",normal:"Normal",watch:"Watch",warning:"Warning",severe:"Severe",
@@ -55,7 +55,7 @@ const I18N={
   none:"No warnings in the next 7 days",note:"GloFAS model forecast (~5 km), not a gauge reading.",lang:"BS",
   gauges:"Measurements (gauges)",gsrc:"Source",gval:"Reading",gtime:"Time",gstale:"Data older than 6 h",
   gcls:"Source's official class",gnocls:"Thresholds not defined",gnounit:"unit not stated by the source",
-  gthr:"Flood-defence thresholds (source)",gepoch:"time as published; time zone not confirmed",gnone:"no reading",nomodel:"Forecast data not loaded yet",ghist:"Readings we recorded",
+  gthr:"Flood-defence thresholds (source)",gepoch:"time as published; time zone not confirmed",gnone:"no reading",near:"nearby model cell, outside the municipality",nomodel:"Forecast data not loaded yet",ghist:"Readings we recorded",
   gnote:"Agency data is informative, not official. Shown as the source publishes it.",
   redovna_obrana:"regular",vanredna_obrana:"extraordinary",kontinuirana_obrana:"continuous"}};
 let lang=null;try{lang=localStorage.getItem("fl_lang")}catch(e){}
@@ -81,7 +81,7 @@ function spark(m){
   return s;
 }
 function riverBlock(r){
-  return `<div style="margin-top:6px"><b>${r.river||""}</b> <span style="color:${COL[r.level]}">● ${t(r.level)}</span>
+  return `<div style="margin-top:6px"><b>${r.river||""}</b> <span style="color:${COL[r.level]}">● ${t(r.level)}</span>${r.near?` <span class="mut">(${t("near")})</span>`:""}
    <div class="mut">${t("now")}: ${r.now??"–"} m³/s · ${t("peak")}: ${r.peak} (${r.peak_day})</div>${spark(r)}</div>`;
 }
 function popup(m,r){
@@ -127,7 +127,7 @@ function draw(){
     const up=m.level!=="normal";
     const p=L.polygon(rings,{color:COL[m.level],weight:up?2:.8,opacity:up?.9:.5,
       fillColor:COL[m.level],fillOpacity:up?.35:.03}).addTo(polys);
-    p.bindPopup(()=>popup(m),{autoPan:false});
+    p.bindPopup(()=>popup(m),{autoPan:false,maxHeight:300});
     for(const r of m.rivers){
       const g=(RIV[m.id]||[]).find(x=>x.name===r.river);
       const ru=r.level!=="normal";
@@ -150,7 +150,7 @@ function draw(){
   document.getElementById("legend").innerHTML=LV.map(k=>`<div class="row"><span class="dot" style="background:${COL[k]}"></span>${t(k)} <span class="mut">(${c[k]||0})</span></div>`).join("");
   document.getElementById("list").innerHTML=worst.length?worst.map((m,i)=>`<div class="item" data-i="${i}"><span style="color:${COL[m.level]}">●</span> ${m.name} <span class="mut">${m.rivers.filter(r=>r.level===m.level).map(r=>r.river||"").filter(Boolean).join(", ")} · ${pk(m)} m³/s</span></div>`).join(""):`<div class="mut" style="margin-top:8px">${SNAP.municipalities.length?t("none"):t("nomodel")}</div>`;
   document.querySelectorAll(".item").forEach(el=>el.onclick=()=>{const m=worst[+el.dataset.i];
-    const r0=m.rivers[0],g0=(RIV[m.id]||[]).find(x=>x.name===r0.river),at=g0?[g0.mlat,g0.mlon]:[r0.lat,r0.lon];map.setView(at,10,{animate:false});L.popup({autoPan:false}).setLatLng(at).setContent(popup(m)).openOn(map)});
+    const r0=m.rivers[0],g0=(RIV[m.id]||[]).find(x=>x.name===r0.river),at=g0?[g0.mlat,g0.mlon]:[r0.lat,r0.lon];map.setView(at,10,{animate:false});L.popup({autoPan:false,maxHeight:300}).setLatLng(at).setContent(popup(m)).openOn(map)});
 }
 document.getElementById("lang").onclick=()=>{lang=lang==="bs"?"en":"bs";try{localStorage.setItem("fl_lang",lang)}catch(e){}draw()};
 draw();

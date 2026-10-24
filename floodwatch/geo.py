@@ -8,6 +8,7 @@ same reasoning as fire-detection's geo.boundary_rings(), because reading only
 from __future__ import annotations
 
 import json
+import math
 from functools import lru_cache
 
 from . import config
@@ -74,3 +75,11 @@ def snap(lat: float, lon: float) -> tuple[float, float]:
     g = config.GRID_DEG
     return (round(0.025 + round((lat - 0.025) / g) * g, 3),
             round(0.025 + round((lon - 0.025) / g) * g, 3))
+
+
+def distance_to_boundary_km(m: Municipality, lat: float, lon: float) -> float:
+    """Distance to the nearest boundary vertex. Vertex-based on purpose: the
+    boundaries are OSM traces with a vertex every few hundred metres, so the
+    error is far below the 5 km GloFAS cell this is compared against."""
+    k = math.cos(math.radians(lat))
+    return 111.2 * min(math.hypot(y - lat, (x - lon) * k) for r in m.rings for x, y in r)

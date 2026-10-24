@@ -33,7 +33,7 @@ def cycle() -> dict:
         if not p["river"]:
             continue
         d = series[(p["lat"], p["lon"])]
-        r = {"river": p.get("river_name"), "lat": p["lat"], "lon": p["lon"], "thresholds": p["thresholds"],
+        r = {"river": p.get("river_name"), "near": p.get("near", False), "lat": p["lat"], "lon": p["lon"], "thresholds": p["thresholds"],
              "times": d["time"], "flows": [None if q is None else round(q, 2) for q in d["river_discharge"]]}
         r.update(levels.assess(d["time"], d["river_discharge"], p["thresholds"], today))
         rec["rivers"].append(r)
