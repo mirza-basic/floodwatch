@@ -131,34 +131,47 @@ def _components(ws):
 
 
 def layout(points: list[dict], munis) -> dict:
-    """Set p["lines"] for every river point and return {river: [{ref, lines}]} fill stretches."""
-    by_id = {m.id: m for m in munis}
+    """Set p["lines"] for every river point and return {river: [{ref, lines}]} fill stretches.
+
+    Everything is done per connected river, not per name: two unrelated rivers called "Una"
+    (or "Ricina") each have their own points, and pooling them by name drew one river's
+    stretches in the other's municipality and level."""
     rpts = [p for p in points if p.get("river") and p.get("river_name") and p.get("mlat") is not None]
-    names = sorted({p["river_name"] for p in rpts})
     fill: dict[str, list] = {}
     from . import geo
 
-    def owner_of(p, has):
-        inside = [m.id for m in munis if m.contains(p[0], p[1])]
+    def near_bih(q):
+        """Nearest municipality within BORDER_KM of q, or None. bbox first: scanning every
+        boundary vertex of every municipality for each vertex of a river that leaves the
+        country is what made this slow."""
+        pad = 0.03
+        cands = [m for m in munis if m.bbox[0] - pad <= q[1] <= m.bbox[2] + pad and m.bbox[1] - pad <= q[0] <= m.bbox[3] + pad]
+        if not cands:
+            return None
+        d, best = min((geo.distance_to_boundary_km(m, q[0], q[1]), m.id) for m in cands)
+        return best if d <= BORDER_KM else None
+
+    def owner_of(q, has):
+        inside = [m.id for m in munis if m.contains(q[0], q[1])]
         for i in inside:
             if i in has:
                 return i
-        if inside:
-            return inside[0]
-        best = min(munis, key=lambda m: geo.distance_to_boundary_km(m, p[0], p[1]))
-        return best.id if geo.distance_to_boundary_km(best, p[0], p[1]) <= BORDER_KM else None
+        return inside[0] if inside else near_bih(q)
 
-    for name in names:
+    for p in rpts:
+        p["lines"] = []
+    for name in sorted({p["river_name"] for p in rpts}):
         mine = [p for p in rpts if p["river_name"] == name]
-        has = {p["id"] for p in mine}
-        anchors = [(p["mlat"], p["mlon"]) for p in mine]
-        ws = [w for w in ways() if w["name"] == name]
-        comps = [c for c in _components(ws)
-                 if any(_km(a[0], a[1], q[0], q[1]) <= 2.0 for a in anchors for w in c for q in w["pts"])]
-        own: dict[str, list] = {i: [] for i in has}
-        stretches = []                         # (owner, run) for owners with no point
-        ref_pool = []                          # (vertex, municipality id) of the drawn stretches
-        for comp in comps:
+        claimed: set[int] = set()
+        for comp in _components([w for w in ways() if w["name"] == name]):
+            anchors = [p for p in mine if id(p) not in claimed and
+                       any(_km(p["mlat"], p["mlon"], q[0], q[1]) <= 2.0 for w in comp for q in w["pts"])]
+            if not anchors:
+                continue
+            claimed.update(id(p) for p in anchors)
+            has = {p["id"] for p in anchors}
+            own: dict[str, list] = {i: [] for i in has}
+            stretches, ref_pool = [], []
             for w in comp:
                 pts = w["pts"]
                 owners = [owner_of(q, has) for q in pts]
@@ -170,20 +183,19 @@ def layout(points: list[dict], munis) -> dict:
                     j = i
                     while j + 1 < len(pts) and owners[j + 1] == owners[i]:
                         j += 1
-                    lo, hi = max(0, i - 1), min(len(pts), j + 2)    # one vertex into the neighbour
-                    run = pts[lo:hi]
+                    run = pts[max(0, i - 1):min(len(pts), j + 2)]     # one vertex into the neighbour
                     if len(run) > 1:
                         if owners[i] in has:
                             own[owners[i]].append(run)
                             ref_pool += [(q, owners[i]) for q in pts[i:j + 1]]
                         else:
-                            stretches.append((owners[i], run))
+                            stretches.append(run)
                     i = j + 1
-        for p in mine:
-            p["lines"] = own[p["id"]]
-        for _, run in stretches:
-            mid = run[len(run) // 2]
-            ref = min(ref_pool, key=lambda x: _km(mid[0], mid[1], x[0][0], x[0][1]))[1] if ref_pool else None
-            if ref:
-                fill.setdefault(name, []).append({"ref": ref, "lines": [run]})
+            for p in anchors:
+                p["lines"] = own[p["id"]]
+            for run in stretches:
+                mid = run[len(run) // 2]
+                if ref_pool:
+                    ref = min(ref_pool, key=lambda x: _km(mid[0], mid[1], x[0][0], x[0][1]))[1]
+                    fill.setdefault(name, []).append({"ref": ref, "lines": [run]})
     return fill

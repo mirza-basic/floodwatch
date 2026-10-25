@@ -261,7 +261,8 @@ function niceTicks(max,n){
 function chart(r,W,H,full){
   const f=r.flows,T=r.times,n=f.length,th=r.thresholds,B=r.band; if(n<2) return "";
   const ti=Math.max(0,T.indexOf(SNAP.today)), di=T.indexOf(DAYS[sel.day]);
-  let top=Math.max(...f.filter(v=>v!=null)); if(B) for(const v of B.max) if(v!=null&&v>top) top=v;
+  const have=f.filter(v=>v!=null); if(!have.length) return "";
+  let top=Math.max(...have); if(B) for(const v of B.max) if(v!=null&&v>top) top=v;
   const shown=[]; if(top>=0.35*th.watch) shown.push("watch");        // thresholds worth drawing:
   if(top>=0.8*th.watch) shown.push("warning"); if(top>=0.8*th.warning) shown.push("severe"); // only those within reach
   const ymax=Math.max(top,...shown.map(k=>th[k]))*1.08||1;
@@ -273,7 +274,7 @@ function chart(r,W,H,full){
     g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="#28313d"/><text x="${L-5}" y="${y(v)+3}" text-anchor="end" fill="#8b98a5" font-size="9.5">${fmtQ(v)}</text>`;
   }
   if(B){ // spread, drawn only over forecast days
-    const idx=[...Array(n).keys()].filter(i=>i>=ti&&B.max[i]!=null&&B.min[i]!=null);
+    const idx=[...Array(n).keys()].filter(i=>i>=ti&&B.max[i]!=null&&B.min[i]!=null&&B.p25[i]!=null&&B.p75[i]!=null);
     const poly=(hi,lo)=>idx.map(i=>x(i)+","+y(B[hi][i])).join(" ")+" "+[...idx].reverse().map(i=>x(i)+","+y(B[lo][i])).join(" ");
     if(idx.length>1){ g+=`<polygon points="${poly("max","min")}" fill="${col}" opacity=".16"/><polygon points="${poly("p75","p25")}" fill="${col}" opacity=".3"/>`; }
   }
@@ -301,9 +302,10 @@ const dayWord=i=>i<=0?t("wToday"):i===1?t("wTomorrow"):t("wIn").replace("{n}",i)
 function firstAt(a,thr,from){for(let i=from;i<a.length;i++) if(a[i]!=null&&a[i]>=thr) return i; return -1}
 // One sentence that answers "should I worry, and when" - most people will not read a curve.
 function summary(r){
+  if(r.peak==null) return "";
   const th=r.thresholds,B=r.band,ti=Math.max(0,r.times.indexOf(SNAP.today)),pct=v=>Math.round(100*v/th.watch);
   const c=firstAt(r.flows,th.watch,ti), w=B?firstAt(B.max,th.watch,ti):-1;
-  const wmax=B?Math.max(...B.max.filter(v=>v!=null)):null;
+  const wm=B?B.max.filter(v=>v!=null):[], wmax=wm.length?Math.max(...wm):null;
   if(c>=0){
     const hi=r.level==="normal"||r.level==="watch"?"":" "+t("sumTop").replace("{l}",t(r.level));
     return t("sumExceed").replace("{d}",fmtDay(r.times[c])).replace("{w}",dayWord(c-ti)).replace("{pd}",fmtDay(r.peak_day)).replace("{p}",pct(r.peak))+hi;
@@ -324,7 +326,7 @@ function strip(r,legend){
 function riverBlock(r){
   const l=lvR(r), v=valR(r);
   return `<div class="rv"><b>${esc(r.river||"")}</b> <span style="color:${COL[l]}">● ${t(l)}</span>${r.near?` <span class="mut">(${t("near")})</span>`:""}
-   <div class="mut">${t("day")}: ${v==null?"–":v+" m³/s"} · ${t("peakv")}: ${r.peak} m³/s (${fmtDay(r.peak_day)})</div>
+   <div class="mut">${t("day")}: ${v==null?"–":v+" m³/s"} · ${t("peakv")}: ${r.peak==null?"–":r.peak+" m³/s ("+fmtDay(r.peak_day)+")"}</div>
    <div style="margin-top:6px;font-size:12.5px">${esc(summary(r))}</div>
    ${chart(r,340,170,true)}<div class="mut" style="font-size:11px">${t("chartLegend")}</div>${strip(r,true)}</div>`;
 }
@@ -340,27 +342,31 @@ function closeOverlays(except){
   if(typeof tip!=="undefined") tip.style.display="none";
 }
 let cur=null;
-function openMuni(m,at,r,note){
-  closeOverlays("muni");
-  cur={m,r,note};
-  if(at) map.setView(at,Math.max(map.getZoom(),10),{animate:false});
-  const body=$("muniinfo-body");
+// keep=true re-renders the open dialog in place (a day change, play, a language switch): it must not
+// collapse "more rivers", jump back to the top, or close the other overlays. `noteMuni` is the
+// municipality a fill stretch borrows from; the note itself is built at render time so it follows
+// the language.
+function openMuni(m,at,r,noteMuni,keep){
+  const body=$("muniinfo-body"), box=$("muniinfo"), scroll=box.scrollTop;
+  if(!keep){ closeOverlays("muni"); cur={m,r,noteMuni,all:false}; if(at) map.setView(at,Math.max(map.getZoom(),10),{animate:false}); }
   const render=all=>{
+    cur.all=all;
     const rs=r?(all?[r,...m.rivers.filter(x=>x!==r)]:[r]):m.rivers;
     let h=`<h2 style="margin:0 0 4px;font-size:15px">${esc(m.name)}</h2>`;
     h+=rs.length?rs.map(riverBlock).join(""):`<div class="mut">${t("noriver")}</div>`;
-    if(note&&!all) h+=`<div class="mut" style="margin-top:8px">${esc(note)}</div>`;
+    if(noteMuni&&!all) h+=`<div class="mut" style="margin-top:8px">${esc(t("fillNote").replace("{m}",()=>noteMuni))}</div>`;
     if(r&&!all&&m.rivers.length>1){
       const n=m.rivers.length-1;
-      h+=`<a href="#" class="more" data-more="1">${plural(n,t("more")).replace("{n}",n).replace("{m}",esc(m.name))}</a>`;
+      h+=`<a href="#" class="more" data-more="1">${plural(n,t("more")).replace("{n}",n).replace("{m}",()=>esc(m.name))}</a>`;
     }
     if(rs.length) h+=`<div class="mut" style="margin-top:8px">${t("attrNote")}</div>`;
     body.innerHTML=h+`<div class="mut" style="margin-top:6px">${t("coverage")}</div>`;
     const more=body.querySelector("[data-more]");
-    if(more) more.onclick=e=>{e.preventDefault();render(true)};
+    if(more) more.onclick=e=>{e.preventDefault();render(true);box.scrollTop=0};
   };
-  render(false);
-  $("muniinfo").classList.add("show");
+  render(keep?cur.all:false);
+  box.classList.add("show");
+  if(keep) box.scrollTop=scroll;
 }
 function atOf(m,r){const g=(RIV[m.id]||[]).find(x=>x.name===r.river);return g?[g.mlat,g.mlon]:[r.lat,r.lon]}
 
@@ -386,7 +392,7 @@ function drawMap(){
     const m=SNAP.municipalities.find(x=>x.id===f.ref), r=m&&m.rivers.find(x=>x.river===name); if(!r) continue;
     const l=lvR(r), ru=l!=="normal";
     L.polyline(f.lines,{color:COL[l],weight:ru?9:4,opacity:ru?.95:.9,lineCap:"round"}).addTo(lines)
-      .on("click",()=>openMuni(m,null,r,t("fillNote").replace("{m}",m.name)));
+      .on("click",()=>openMuni(m,null,r,m.name));
   }
   if(!eyeOn){ for(const g of [polys,lines,dots,gl]) map.removeLayer(g); } else { for(const g of [polys,lines,dots]) g.addTo(map); if(show.ga) gl.addTo(map); }
 }
@@ -450,7 +456,7 @@ function card(m,r){
   return `<div class="ev" style="border-left-color:${COL[l]}" data-m="${m.id}" data-r="${r?esc(r.river):""}">
     <h2>${esc(m.name)}<span class="sev lv-${l}">${t(l)}</span></h2>
     <div class="meta">${r?`<span>${t("river")}</span><span>${esc(r.river||"–")}${r.near?` <i style="color:var(--dim)">(≈)</i>`:""}</span>
-      <span>${t("day")}</span><span>${v==null?"–":v+" m³/s"}</span><span>${t("peakv")}</span><span>${r.peak} m³/s · ${fmtDay(r.peak_day)}</span>`:""}</div>
+      <span>${t("day")}</span><span>${v==null?"–":v+" m³/s"}</span><span>${t("peakv")}</span><span>${r.peak==null?"–":r.peak+" m³/s · "+fmtDay(r.peak_day)}</span>`:""}</div>
     ${ratio!=null?`<div class="ratio" title="${ratio}% ${t("ofWatch")}"><span style="width:${Math.min(100,ratio)}%;background:${COL[l==="normal"?"watch":l]}"></span></div>
       <div class="meta" style="margin-top:4px"><span></span><span>${ratio}% ${t("ofWatch")}</span></div>`:""}
     ${r?chart(r,300,60,false)+`<div class="mut" style="margin-top:6px;font-size:11.5px">${esc(summary(r))}</div>`+strip(r):""}
@@ -538,7 +544,7 @@ function refresh(full){
   $("ldsub").textContent=t("loading");
   document.querySelectorAll("#langsw button").forEach(b=>b.classList.toggle("on",b.dataset.l===lang));
   renderHeader(); renderList(); renderDays(); renderLayers(); renderLegend(); drawMap(); if(full) drawGauges();
-  if(cur&&$("muniinfo").classList.contains("show")) openMuni(cur.m,null,cur.r,cur.note);
+  if(cur&&$("muniinfo").classList.contains("show")) openMuni(cur.m,null,cur.r,cur.noteMuni,true);
 }
 const tip=document.createElement("div"); tip.id="tip"; document.body.appendChild(tip);
 function showTip(e){
@@ -557,6 +563,14 @@ setTimeout(()=>$("loading").classList.add("hide"),450);
 </script></body></html>"""
 
 
+def _js(obj, **kw) -> str:
+    """JSON for embedding inside a <script> block. json.dumps leaves '</script>' intact, so a river
+    name from OpenStreetMap containing it would end the script and run as page code (verified: such a
+    name produced four </script> in the page instead of two). \u003c is a valid JSON escape for '<'."""
+    return (json.dumps(obj, ensure_ascii=False, **kw).replace("<", "\\u003c").replace(">", "\\u003e")
+            .replace("&", "\\u0026").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029"))
+
+
 def render(snapshot: dict) -> str:
     bounds = json.loads((config.DATA_DIR / "boundaries-simple.json").read_text())
     rivers: dict[str, list] = {}
@@ -568,7 +582,7 @@ def render(snapshot: dict) -> str:
     fill_file = config.DATA_DIR / "river_fill.json"
     fill = json.loads(fill_file.read_text()) if fill_file.exists() else {}
     page = TEMPLATE.replace("__CSS__", CSS + EXTRA_CSS)
-    return (page.replace("__SNAPSHOT__", json.dumps(snapshot, ensure_ascii=False))
-                .replace("__BOUNDS__", json.dumps(bounds, separators=(",", ":")))
-                .replace("__RIVERS__", json.dumps(rivers, ensure_ascii=False, separators=(",", ":")))
-                .replace("__FILL__", json.dumps(fill, ensure_ascii=False, separators=(",", ":"))))
+    return (page.replace("__SNAPSHOT__", _js(snapshot))
+                .replace("__BOUNDS__", _js(bounds, separators=(",", ":")))
+                .replace("__RIVERS__", _js(rivers, separators=(",", ":")))
+                .replace("__FILL__", _js(fill, separators=(",", ":"))))

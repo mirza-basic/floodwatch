@@ -422,11 +422,12 @@ bottom bar. On a phone the panel becomes a drawer with an alert badge.</p>
 
 <div class="note warn">
   <span class="lbl">What the map does not show</span>
-  <p>Only rivers the forecast model can resolve (~5&nbsp;km) are drawn. Of 394 pairs of a
-  municipality and a named OpenStreetMap river, the map covered about half before the
-  cap was raised; around 36% have no model flow at all (under 1&nbsp;m&sup3;/s), so they
-  cannot be forecast whatever we do. The map says this in its legend, in every popup and
-  in the empty state, because a calm map is easily read as "my small river is fine".</p>
+  <p>Only rivers the forecast model can resolve (~5&nbsp;km) are drawn. Of 389 pairs of a
+  municipality and a named OpenStreetMap river (at least five points inside it), 51% are
+  drawn; for 41% the model cells that cover the river carry less than 1&nbsp;m&sup3;/s, so
+  they cannot be forecast whatever we do; the remaining 8% have flow in their own cell but are
+  not shown (the cap, or a cell named for another river). The map says this in its legend, in
+  every popup and in the empty state, because a calm map is easily read as "my small river is fine".</p>
 </div>
 
 <p>Level per day is computed in the browser from each river's daily flows and its

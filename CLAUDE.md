@@ -82,17 +82,19 @@ municipality* passes next to the cell. Such points carry `near: true` and the po
 says "nearby model cell, outside the municipality". 99 of 207 points are near cells.
 Result: 120/145 municipalities (was 103); Zavidovici = Bosna, Krivaja, Vozucica.
 
-**Cap raised to 5 rivers (2026-10-24, second pass).** A count over 394 (municipality, named
-OSM river with >=5 points inside) pairs found: 179 shown (45%), 140 invisible to the model
-(<1 m3/s, 36%), 20 sharing a model cell with a shown river (5%), and **55 with a strong model
-cell that were being dropped** (14%: Tavna at Bijeljina ~31 m3/s, Krusnica at Bosanska Krupa,
-Vrbanja at Banja Luka). `MAX_RIVERS` 3 -> 5, `CANDIDATES` 8 -> 12, `NEAR_CANDIDATES` 4 -> 6; a dry
-run (no API calls) predicted 13 new history fetches, and the real build needed no more.
+**Cap raised to 5 rivers (2026-10-24, second pass).** A first count found 55 strong rivers being
+dropped (Tavna at Bijeljina ~31 m3/s, Krusnica at Bosanska Krupa, Vrbanja at Banja Luka), so
+`MAX_RIVERS` 3 -> 5, `CANDIDATES` 8 -> 12, `NEAR_CANDIDATES` 4 -> 6 (a dry run, no API calls,
+predicted 13 new history fetches; the real build needed no more). **That first count used the
+strongest cell within 4 km of the river, which borrows a neighbouring river's flow (it made Gostovic
+look like it shared the Bosna's cell). The right test is the cell that COVERS each vertex**
+(`geo.snap`). Recount on 2026-10-25, 389 (municipality, named OSM river with >=5 points inside)
+pairs: 198 shown (51%), 158 where the covering cells carry <1 m3/s (41% - invisible to the model),
+33 with flow in their own cell but not shown (8% - cap, or the cell is named for another river).
 Now **232 river points in 120 municipalities** (1 river: 53, 2: 36, 3: 20, 4: 8, 5: 3).
 Not recovered: Jadar at Bratunac (the cell is named for another river - the naming heuristic,
-not the cap). Rivers sharing a cell (Gostovic at Zavidovici shares the Bosna/Krivaja cell) are
-deliberately **not** shown separately: the model has one number per cell and a second line
-would repeat another river's forecast as if it were its own.
+not the cap). Gostovic at Zavidovici is a 13.8 km line whose own cell carries 0.02 m3/s: the model cannot see it
+(the 14 m3/s cell at its mouth is the Bosna's). Not shown, and nothing honest could be.
 **Names are OSM's `name` tag as is**, so some are Cyrillic (e.g. "Јања", "Крижевица"); the
 HOT export has `name_latin`/`name_bs` but our Overpass data does not.
 **The map states its coverage** (legend, every popup, empty state): only rivers the model can
@@ -310,6 +312,27 @@ dialog goes through `openMuni` too and is safe, because opening anything else al
 dialog. Testing landmine: Leaflet keeps a closed popup in the DOM until its fade finishes and keeps
 `map._popup` set, so "is a popup open" must be `map._popup && map.hasLayer(map._popup)`; my first
 two tests reported failures that were this artefact, not a bug.
+
+## Review before the second push (2026-10-25)
+
+All unpushed work was reviewed, partly by an independent read-only agent given only the diff. Found
+and fixed, each confirmed before fixing: (1) **script injection** - `json.dumps` leaves `</script>` intact,
+so an OSM river name containing it ended the page's script block (a hostile name made 4 `</script>`
+instead of 2); all four embedded blobs now go through `mapgen._js()` which escapes `< > &` and U+2028/9;
+(2) `rivers.layout` pooled anchors **by name** - real rivers named "Una" and "Ricina" each have two
+unrelated rivers with points - now per connected river (regression test + mutation-checked; on real
+data only one point changed, so it was latent); (3) the open dialog lost its expansion, scroll and note
+language on every day change, play step or language switch - now re-rendered in place (`openMuni(...,
+keep=true)`); (4) null-safety: all-null ensemble stats printed "-Infinity%", a null peak or all-null
+flows broke cards/charts; (5) `String.replace` with a replacement string mangles `$&` - function
+replacers for names. Also: coverage numbers in the docs were wrong (see the recount above), a
+leftover FireWatch env var was removed from the workflow, and `tests_rivers.py` now runs in CI.
+Not fixed on purpose: `_components` is O(ways^2) per name (the whole offline build takes minutes, it
+never runs in the page); the English plural for 21 ("1 more river") cannot occur (n <= 4); chart hit
+areas are pointer-only (no keyboard tooltip); Leaflet loads from unpkg without a subresource-integrity
+hash (as in FireWatch). **Open decisions, not code:** the repo has no README or LICENSE, and it
+publishes OSM-derived data files (boundaries, rivers) whose ODbL terms (attribution, share-alike for
+derived databases) have not been read in this project.
 
 ## Documentation
 

@@ -37,10 +37,10 @@ jobs:
           python-version: "3.12"
       - run: python3 -m pip install --quiet requests certifi
       - name: Test
-        run: python3 tests_levels.py
+        run: |
+          python3 tests_levels.py
+          python3 tests_rivers.py
       - name: Poll
-        env:
-          FIREWATCH_FORCE_IPV4: "0"
         run: python3 -m floodwatch poll
       - name: Build the site
         run: python3 deploy/build-site.py public
