@@ -1,19 +1,12 @@
 """Render the snapshot into one self-contained HTML map.
 
-The layout deliberately mirrors FireWatch's: a docked side panel (status header,
-day chips, source pills, cards), map tools on the left, language switch on top, a
-collapsible legend, and a bottom bar - which here scrubs forecast *days* where
-FireWatch scrubs hours. The stylesheet (`ui.css`) is FireWatch's with a blue accent
-and flood colours; the markup keeps its ids so the two stay visually one family.
+The page has a side panel (status, day chips, river cards), map tools, a language switch, a legend
+and a bottom bar that steps through the forecast days. The snapshot, the simplified boundaries, the
+river lines and the fill stretches are inlined into the page as JSON. The stylesheet is
+floodwatch/ui.css plus EXTRA_CSS.
 
-The snapshot, light boundaries and river lines are inlined so the page needs no
-server beyond the Referer rule in __main__ (see there): the same first-paint
-approach as fire-detection. Colours run blue -> violet -> magenta on purpose, so
-flood levels never read as FireWatch's orange/red fire scale.
-
-Level per day is computed in the browser from each river's daily flows and
-thresholds (the same comparison levels.classify makes), so the day chips, the
-timeline and the 7-day "peak" view all agree with the server's own peak level.
+A river's level on a given day is computed in the browser from its daily flows and thresholds, so the
+day chips, the bottom bar and the 7-day peak view agree.
 """
 from __future__ import annotations
 
@@ -24,7 +17,7 @@ from . import config
 CSS = (config.ROOT / "floodwatch" / "ui.css").read_text(encoding="utf8")
 
 EXTRA_CSS = r"""
-  /* ---- FloodWatch additions on top of the shared stylesheet ---- */
+  /* ---- additions to ui.css ---- */
   :root{--normal:#1fb5a6;--watch:#4aa8ff;--warning:#8b6cff;--severe:#e0489f}
   .leaflet-container{background:#0b0e12;font:inherit}
   .leaflet-bar a{background:#151a21;color:#e6edf3;border-bottom:1px solid #28313d}
@@ -72,7 +65,7 @@ EXTRA_CSS = r"""
   .strip .cell span{display:block;font-size:9px;color:var(--dim);text-align:center;margin-top:2px}
   #tip{position:fixed;z-index:4000;display:none;pointer-events:none;background:#151a21;color:#e6edf3;border:1px solid #3a4655;
     border-radius:6px;padding:6px 9px;font-size:11.5px;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.5);max-width:240px}
-  /* wide enough for the chart's axis labels to stay apart */
+  /* wider dialog for the chart */
   #muniinfo{max-width:min(430px,calc(100vw - 24px));width:min(430px,calc(100vw - 24px))}
   .gsq{width:18px;height:18px;border:3px solid #111;box-sizing:border-box}
 """
@@ -135,7 +128,7 @@ const GSRC={sava:"Agencija za vodno područje rijeke Save",rhmzrs:"RHMZ Republik
 const GA=SNAP.gauges||[];
 
 // ---- localisation ----------------------------------------------------------
-// Bosnian counted strings need three forms [one, few, many]; English [one, other, other].
+// Texts in Bosnian and English. Counted strings are arrays of three forms: [one, few, many] (English: [one, other, other]).
 const I18N={
  bs:{title:"FloodWatch Bosna i Hercegovina",none:"Nema upozorenja",
   alerts:["općina pod upozorenjem","općine pod upozorenjem","općina pod upozorenjem"],
@@ -219,8 +212,7 @@ function flowOn(r,day){const i=r.times.indexOf(day);return i<0?null:r.flows[i]}
 const lvR=r=>sel.peak?r.level:classify(flowOn(r,DAYS[sel.day]),r.thresholds);
 const lvM=m=>m.rivers.reduce((w,r)=>rank(lvR(r))>rank(w)?lvR(r):w,"normal");
 const valR=r=>sel.peak?r.peak:flowOn(r,DAYS[sel.day]);
-// Month and weekday names are written out: the browser's own Bosnian locale data is
-// often missing (a headless Chrome printed "M10 24"), and FireWatch spells them too.
+// Month and weekday names are written out instead of using the browser's locale data.
 const MON={bs:["jan","feb","mar","apr","maj","jun","jul","aug","sep","okt","nov","dec"],
   en:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]};
 const MONL={bs:["januar","februar","mart","april","maj","juni","juli","august","septembar","oktobar","novembar","decembar"],
@@ -248,11 +240,9 @@ map.on("popupopen",()=>closeOverlays("popup"));
 let eyeOn=true;
 
 // ---- charts -----------------------------------------------------------------------------
-// One chart per river: the main forecast line, the ensemble spread behind it (middle 50% of
-// the members dark, best-to-worst member light; forecast days only - the statistics are not
-// available for the past), today's divider, and the thresholds that are within reach of the
-// data. A calm river is scaled to its own data, with a note that its watch level is off the
-// chart - scaling every chart up to its watch level made a river at 4% of it look flat.
+// One chart per river: the main forecast line, the ensemble spread behind it (middle 50% of the members
+// dark, best to worst member light, forecast days only), a divider at today, and the thresholds near the
+// data. A river far below its watch level is scaled to its own data, and a note gives the watch level.
 function fmtQ(v){return v>=100?Math.round(v):v>=10?Math.round(v*10)/10:Math.round(v*100)/100}
 function niceTicks(max,n){
   const raw=max/n, mag=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/mag, step=(f<=1?1:f<=2?2:f<=5?5:10)*mag, o=[];
@@ -300,7 +290,7 @@ function chart(r,W,H,full){
 }
 const dayWord=i=>i<=0?t("wToday"):i===1?t("wTomorrow"):t("wIn").replace("{n}",i);
 function firstAt(a,thr,from){for(let i=from;i<a.length;i++) if(a[i]!=null&&a[i]>=thr) return i; return -1}
-// One sentence that answers "should I worry, and when" - most people will not read a curve.
+// One sentence per river: when the watch level is first exceeded and the peak as a share of it.
 function summary(r){
   if(r.peak==null) return "";
   const th=r.thresholds,B=r.band,ti=Math.max(0,r.times.indexOf(SNAP.today)),pct=v=>Math.round(100*v/th.watch);
@@ -313,8 +303,8 @@ function summary(r){
   if(w>=0) return t("sumWorst").replace("{d}",fmtDay(r.times[w])).replace("{w}",dayWord(w-ti)).replace("{p}",pct(wmax));
   return t("sumNone").replace("{p}",pct(r.peak))+(B&&wmax!=null?" "+t("sumNoneW").replace("{w}",pct(wmax)):"");
 }
-// A strip of one cell per forecast day: top = main forecast's level, thin bar below = worst
-// ensemble member's level. Readable at a glance, and the same for all 232 rivers.
+// A strip with one cell per forecast day: the top shows the level of the main forecast, the thin bar
+// below it the level of the worst ensemble member.
 function strip(r,legend){
   const cell=(d,i)=>{
     const k=r.times.indexOf(d), q=flowOn(r,d), l=classify(q,r.thresholds), mx=r.band&&k>=0?r.band.max[k]:null;
@@ -330,10 +320,9 @@ function riverBlock(r){
    <div style="margin-top:6px;font-size:12.5px">${esc(summary(r))}</div>
    ${chart(r,340,170,true)}<div class="mut" style="font-size:11px">${t("chartLegend")}</div>${strip(r,true)}</div>`;
 }
-// A river dot, line or card opens just that river, with a link to the rest; the
-// municipality area opens the full list (the reader asked about the whole place).
-// Only one overlay at a time: opening any of them closes the others. Without this a municipality
-// dialog, a gauge popup, the layers menu and the legend could all pile up on top of each other.
+// A river dot, line or card opens just that river, with a link to the others; the municipality area
+// opens all of its rivers.
+// Opening any overlay (municipality dialog, popup, layers menu, legend) closes the others.
 function closeOverlays(except){
   if(except!=="muni") $("muniinfo").classList.remove("show");
   if(except!=="popup") map.closePopup();
@@ -342,10 +331,9 @@ function closeOverlays(except){
   if(typeof tip!=="undefined") tip.style.display="none";
 }
 let cur=null;
-// keep=true re-renders the open dialog in place (a day change, play, a language switch): it must not
-// collapse "more rivers", jump back to the top, or close the other overlays. `noteMuni` is the
-// municipality a fill stretch borrows from; the note itself is built at render time so it follows
-// the language.
+// keep=true re-renders the open dialog in place, keeping its expansion and scroll position. `noteMuni`
+// is the municipality a fill stretch takes its level from; the note text is built at render time in the
+// current language.
 function openMuni(m,at,r,noteMuni,keep){
   const body=$("muniinfo-body"), box=$("muniinfo"), scroll=box.scrollTop;
   if(!keep){ closeOverlays("muni"); cur={m,r,noteMuni,all:false}; if(at) map.setView(at,Math.max(map.getZoom(),10),{animate:false}); }
@@ -386,8 +374,8 @@ function drawMap(){
       L.circleMarker(at,{radius:ru?13.5:6,color:"#0b0e12",weight:2,fillColor:COL[l],fillOpacity:.95}).addTo(dots).on("click",()=>openMuni(m,null,r));
     }
   }
-  // Stretches of a river inside municipalities that have no point for it: drawn so the river is
-  // continuous, in the level colour of the nearest stretch of the same river.
+  // Stretches of a river inside municipalities that have no point for it, drawn in the level colour of
+  // the nearest stretch of the same river.
   if(show.riv) for(const [name,list] of Object.entries(FILL)) for(const f of list){
     const m=SNAP.municipalities.find(x=>x.id===f.ref), r=m&&m.rivers.find(x=>x.river===name); if(!r) continue;
     const l=lvR(r), ru=l!=="normal";
@@ -564,9 +552,8 @@ setTimeout(()=>$("loading").classList.add("hide"),450);
 
 
 def _js(obj, **kw) -> str:
-    """JSON for embedding inside a <script> block. json.dumps leaves '</script>' intact, so a river
-    name from OpenStreetMap containing it would end the script and run as page code (verified: such a
-    name produced four </script> in the page instead of two). \u003c is a valid JSON escape for '<'."""
+    """JSON for embedding in a <script> block. The characters <, > and & and the line separators U+2028
+    and U+2029 are written as unicode escapes, so the text cannot end the script block."""
     return (json.dumps(obj, ensure_ascii=False, **kw).replace("<", "\\u003c").replace(">", "\\u003e")
             .replace("&", "\\u0026").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029"))
 

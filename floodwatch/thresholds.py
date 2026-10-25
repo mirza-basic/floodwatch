@@ -1,11 +1,8 @@
 """Return-period thresholds from the GloFAS archive.
 
-Open-Meteo serves discharge, not warning levels, so levels are derived here:
-fit a Gumbel (EV1) distribution to each year's maximum daily discharge by the
-method of moments and read off the 2-, 5- and 20-year flows. That is the same
-family GloFAS's own return-period products use. It is deliberately simple; a
-42-year sample makes the 20-year figure an extrapolation, so treat levels as
-relative severity, not as the figure an authority would publish.
+A Gumbel (extreme-value) distribution is fitted by the method of moments to each year's maximum
+daily discharge. The flows expected once in 2, 5 and 20 years are the watch, warning and severe
+thresholds.
 """
 from __future__ import annotations
 

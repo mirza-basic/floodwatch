@@ -1,10 +1,7 @@
-"""Download named river geometry once, so markers can sit on the water.
+"""Download named river geometry (waterway=river) from Overpass and write data/bih/rivers.json.
 
-GloFAS answers per ~5 km cell, and a cell centre is not on the river, so the
-map needs real river lines to snap each point onto. Build-time artifact, like
-the boundaries: Overpass is queried here and never at runtime. Overpass is
-flaky (CLAUDE.md in fire-detection says the same), hence mirrors and retries.
-Only waterway=river is taken - streams would make a flagged "river" a ditch.
+Overpass mirrors are tried in turn, with retries. Vertices closer than about 300 m to the last
+kept vertex are dropped.
 
     python3 scripts/build_rivers.py
 """

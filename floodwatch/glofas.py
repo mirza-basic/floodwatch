@@ -1,9 +1,8 @@
 """GloFAS river discharge through Open-Meteo's keyless flood API.
 
-Two shapes of call: a short window (recent + forecast) for the poll cycle, and
-the full 1984-onward archive for deriving thresholds. The API answers a list
-when given several locations and a bare object when given one - normalised
-here so callers never branch on it.
+fetch() returns one daily series per location, for a short window (recent days plus the forecast)
+or for a date range (the history used for thresholds). The API returns a list for several
+locations and a single object for one; both are normalised to a list.
 """
 from __future__ import annotations
 
@@ -14,9 +13,7 @@ import requests
 from . import config
 
 DAILY = "river_discharge"
-# Ensemble statistics: documented as "statistical analysis from ensemble members" and
-# available for forecast days only (not for the consolidated history). Verified 2026-10-25
-# that the API returns them with no ensemble= parameter.
+# Daily ensemble statistics, returned for forecast days only.
 STATS = ("min", "p25", "median", "p75", "max")
 DAILY_STATS = ",".join([DAILY] + [f"river_discharge_{k}" for k in STATS])
 
@@ -30,9 +27,8 @@ def _get(params: dict) -> list[dict]:
             return j if isinstance(j, list) else [j]
         last = f"HTTP {r.status_code}: {r.text[:200]}"
         if r.status_code == 429:
-            # A minutely limit clears in a minute, so wait it out. An hourly (or
-            # daily) one does not - retrying inside the hour only burns more of
-            # the next, so fail and let the caller resume from its cache.
+            # A per-minute limit is waited out for a minute; hourly and daily limits raise, so the
+            # caller can resume later from its cache.
             if "inutely" in r.text and attempt < 3:
                 time.sleep(65)
                 continue
@@ -46,9 +42,8 @@ def _get(params: dict) -> list[dict]:
 def fetch(cells: list[tuple[float, float]], batch: int = config.BATCH, daily: str = DAILY, **window) -> list[dict]:
     """Daily discharge for each cell: {time:[...], river_discharge:[...]}.
 
-    `window` is either past_days/forecast_days or start_date/end_date.
-    Results come back in request order. The API caps locations x days per call,
-    so the 42-year archive needs a much smaller `batch` than a 93-day window.
+    `window` is either past_days/forecast_days or start_date/end_date. Locations are sent in
+    batches of `batch`; results come back in request order.
     """
     out: list[dict] = []
     for i in range(0, len(cells), batch):

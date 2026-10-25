@@ -1,11 +1,8 @@
-"""Snap a GloFAS cell onto the river it is almost certainly reporting.
+"""Match GloFAS cells to named OpenStreetMap rivers and lay the rivers out for drawing.
 
-A cell centre is up to ~3.5 km from the water, so the marker is moved onto a
-real river line and the stretch inside the municipality is drawn. Which river is
-a heuristic, stated here so nobody mistakes it for a fact: among named rivers
-passing within SNAP_KM of the cell centre, take the one with the most vertices
-inside the municipality - the main river runs through a municipality, a tributary
-only touches it. GloFAS offers no river identity to check this against.
+snap() moves a cell onto a river line and returns the stretch inside one municipality. The river
+is the named one within SNAP_KM of the cell centre with the most vertices inside the municipality.
+layout() draws each shown river along its whole course.
 """
 from __future__ import annotations
 
@@ -22,7 +19,7 @@ SNAP_KM = 6.0
 @lru_cache(maxsize=1)
 def ways() -> list[dict]:
     out = json.loads((config.DATA_DIR / "rivers.json").read_text())
-    for w in out:  # bbox lets snap() skip the ~95% of ways nowhere near a cell
+    for w in out:  # Bounding box of each way, used to skip ways far from a cell.
         la = [p[0] for p in w["pts"]]; lo = [p[1] for p in w["pts"]]
         w["bb"] = (min(la), min(lo), max(la), max(lo))
     return out
@@ -37,11 +34,7 @@ def _nearest_vertex(pts, lat, lon):
 
 
 def nearest_name(lat: float, lon: float) -> str | None:
-    """Name of the closest named river line within SNAP_KM of a cell centre.
-
-    Used per cell when a municipality has several: a high-discharge cell is on a
-    main stem, so the nearest line to its centre is the river it reports, which
-    is what lets Bosna and Krivaja get separate points at Zavidovici."""
+    """Name of the closest named river line within SNAP_KM of a cell centre."""
     best, dist = None, SNAP_KM
     pad = SNAP_KM / 111.0 * 1.6
     for w in ways():
@@ -55,10 +48,10 @@ def nearest_name(lat: float, lon: float) -> str | None:
 
 
 def snap(m, lat: float, lon: float, name: str | None = None) -> dict | None:
-    """{name, point:[lat,lon], lines:[[[lat,lon],...]]} or None if no river is near.
+    """{name, point:[lat,lon], lines:[[[lat,lon],...]]}, or None when no river is near.
 
-    `name` forces the river (used once several cells have each been matched);
-    without it the heuristic in the module docstring picks one."""
+    `name` selects the river; without it the river with the most vertices inside `m` is chosen.
+    """
     near = defaultdict(int)
     for w in ways():
         if not w["name"]:
@@ -92,13 +85,10 @@ def snap(m, lat: float, lon: float, name: str | None = None) -> dict | None:
 
 
 # --- full-length layout -------------------------------------------------------------------
-# `snap()` clips a river to one municipality, which leaves two kinds of gap: the vertex
-# lost at every border crossing, and whole stretches inside municipalities that have no
-# point for that river. `layout()` draws each shown river along its whole course in BiH:
-# its own municipality's stretches (extended one vertex into the neighbour so they join),
-# and the rest as "fill" that borrows the level of the nearest stretch of the same river.
-# Several different rivers share a name (Bistrica, Ribnica...), so only ways *connected*
-# to the shown river are used, never every way with that name.
+# layout() draws each shown river along its whole course: the stretches inside the municipalities
+# that have a point for it (each extended by one vertex into the neighbour so they join), and the
+# remaining stretches as 'fill' that takes the level of the nearest stretch of the same river.
+# Only ways connected to the shown river are used, because different rivers can share a name.
 
 JOIN_KM = 0.5      # two ways of one river join when an end lies this close to the other
 BORDER_KM = 1.5    # a vertex this close to a municipality still counts as inside BiH
@@ -133,17 +123,14 @@ def _components(ws):
 def layout(points: list[dict], munis) -> dict:
     """Set p["lines"] for every river point and return {river: [{ref, lines}]} fill stretches.
 
-    Everything is done per connected river, not per name: two unrelated rivers called "Una"
-    (or "Ricina") each have their own points, and pooling them by name drew one river's
-    stretches in the other's municipality and level."""
+    The work is done per connected river, not per name, because different rivers can share a name.
+    """
     rpts = [p for p in points if p.get("river") and p.get("river_name") and p.get("mlat") is not None]
     fill: dict[str, list] = {}
     from . import geo
 
     def near_bih(q):
-        """Nearest municipality within BORDER_KM of q, or None. bbox first: scanning every
-        boundary vertex of every municipality for each vertex of a river that leaves the
-        country is what made this slow."""
+        """Nearest municipality within BORDER_KM of q, or None. Municipalities are pre-filtered by bounding box."""
         pad = 0.03
         cands = [m for m in munis if m.bbox[0] - pad <= q[1] <= m.bbox[2] + pad and m.bbox[1] - pad <= q[0] <= m.bbox[3] + pad]
         if not cands:

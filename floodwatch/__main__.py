@@ -1,11 +1,10 @@
 """python3 -m floodwatch poll | map [port]
 
-`map` serves the page on http://127.0.0.1:<port>/ (default 8765) instead of opening
-the file: OpenStreetMap's tile servers answer a request with no Referer by sending
-back a "403 Access blocked - app is not following the tile usage policy" image, and
-a page opened from file:// sends none. Served over http the browser sends
-`Referer: http://127.0.0.1:<port>/`, which the tile server accepts (checked
-2026-10-24). Only floodmap.html is served - not the rest of state/.
+poll  fetch the forecast and write state/snapshot.json and state/floodmap.html.
+map   render the page and serve it at http://127.0.0.1:<port>/ (default 8765).
+
+The server sends only floodmap.html and listens on the loopback interface only. Serving over
+http makes the browser send a Referer header with its map-tile requests.
 """
 from __future__ import annotations
 
@@ -49,19 +48,18 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         body = MAP.read_bytes()
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
-        # The page is regenerated every poll under the same URL; without this a browser keeps showing
-        # the copy it fetched first (a stale map that looked like a missing feature).
+        # Tell the browser not to cache: the page changes on every poll.
         self.send_header("Cache-Control", "no-store")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
 
-    def log_message(self, *args):  # keep the terminal quiet
+    def log_message(self, *args):  # Suppress request logging.
         pass
 
 
 def serve(port: int) -> None:
-    srv = http.server.ThreadingHTTPServer(("127.0.0.1", port), _Handler)  # loopback only
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", port), _Handler)  # Listen on the loopback interface only.
     url = f"http://127.0.0.1:{port}/"
     print(f"serving {url}  (Ctrl-C to stop)")
     webbrowser.open(url)

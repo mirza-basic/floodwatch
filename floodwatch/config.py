@@ -1,8 +1,4 @@
-"""Paths and tunables for FloodWatch.
-
-Kept flat and import-cheap: every other module reads constants from here, and
-nothing here touches the network or the disk beyond resolving paths.
-"""
+"""Paths and tunables for FloodWatch: constants only, no network access."""
 from __future__ import annotations
 
 import os
@@ -16,41 +12,30 @@ POINTS_FILE = DATA_DIR / "river_points.json"
 FLOOD_API = "https://flood-api.open-meteo.com/v1/flood"
 HTTP_TIMEOUT = 60
 
-# GloFAS v4 grid: 0.05 degrees, cell centres at 0.025 + k*0.05. The API snaps
-# any requested coordinate to its nearest centre, so asking for a centre is
-# asking for exactly one cell and the answer is reproducible.
+# GloFAS grid spacing in degrees; cell centres lie at 0.025 + k * 0.05.
 GRID_DEG = 0.05
 
-# Archive depth used to derive return-period thresholds. The reanalysis starts
-# in 1984; stopping at the last full year keeps a partial year's lower maximum
-# out of the annual-maxima sample.
+# First day of the discharge history used to derive thresholds; the history ends on
+# 31 December of the last full year.
 HISTORY_START = "1993-01-01"
 
-# A cell whose mean discharge is below this is a hillside, not a river: GloFAS
-# returns 0.0 for non-river cells rather than an error.
+# Minimum mean discharge, in m3/s, for a cell to count as a river.
 MIN_RIVER_M3S = 1.0
 
-# Open-Meteo accepts many comma-separated locations per call; stay well under
-# the documented ceiling.
+# Number of locations sent per API call.
 BATCH = 50
 
-# Distinct rivers shown per municipality (Bosna and Krivaja both reach Zavidovici; raised from 3 after 55 strong rivers were being dropped).
+# Maximum number of rivers shown per municipality.
 MAX_RIVERS = 5
 
-# Measured gauges from the agencies. OFF by default; set FLOODWATCH_GAUGES=1 for local use.
-# Local use only until written permission is on file (the local, unpublished permissions note).
-GAUGES_ENABLED = os.environ.get("FLOODWATCH_GAUGES") == "1"  # off unless asked: public deploys must never carry agency data
+# Measured gauge readings from the agencies; read only when FLOODWATCH_GAUGES=1.
+GAUGES_ENABLED = os.environ.get("FLOODWATCH_GAUGES") == "1"
 
-# A GloFAS cell whose centre is outside a municipality may still be its river: the
-# cell is 5 km wide and a river often runs along a border or in a small polygon
-# that contains no cell centre. Such cells are considered up to this far away, and
-# only if a named river with a stretch inside the municipality passes next to them.
+# Maximum distance, in km, outside a municipality at which a model cell still counts for it.
 NEAR_KM = 8.0
 
 
 def ensure_state_dir() -> Path:
-    """`state/` holds only gitignored output, so a fresh clone (a CI runner) has no
-    such folder - git does not keep empty directories. Every writer calls this
-    first; the first deploy failed on exactly that."""
+    """Create the state directory if it is missing and return its path."""
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     return STATE_DIR

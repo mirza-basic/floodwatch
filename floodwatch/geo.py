@@ -1,9 +1,7 @@
 """Boundary geometry for the 145 municipalities.
 
-Nominatim hands back a MultiPolygon for anything with an enclave, so every ring
-of every part is flattened and containment is even-odd over all of them - the
-same reasoning as fire-detection's geo.boundary_rings(), because reading only
-`coordinates[0]` silently drops the rest of the place.
+A boundary can consist of several rings (enclaves, exclaves). All rings of all parts are used,
+and a point is inside when an odd number of rings enclose it (even-odd rule).
 """
 from __future__ import annotations
 
@@ -78,8 +76,6 @@ def snap(lat: float, lon: float) -> tuple[float, float]:
 
 
 def distance_to_boundary_km(m: Municipality, lat: float, lon: float) -> float:
-    """Distance to the nearest boundary vertex. Vertex-based on purpose: the
-    boundaries are OSM traces with a vertex every few hundred metres, so the
-    error is far below the 5 km GloFAS cell this is compared against."""
+    """Distance in km from a point to the nearest boundary vertex."""
     k = math.cos(math.radians(lat))
     return 111.2 * min(math.hypot(y - lat, (x - lon) * k) for r in m.rings for x, y in r)

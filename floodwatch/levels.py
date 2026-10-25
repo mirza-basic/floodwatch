@@ -1,10 +1,6 @@
 """Turn a discharge series into a warning level.
 
-The level is a claim about the *forecast*, not about water already in the
-street: GloFAS is a ~5 km model, so "warning" means this river is expected to
-reach a flow that happens about once in five years at that cell. Levels use the
-highest day in the window because a flood peak is what matters, and a mean
-would smooth a two-day crest below its threshold.
+The level is the highest threshold reached by the highest forecast day in the window.
 """
 from __future__ import annotations
 
@@ -23,11 +19,9 @@ def classify(q: float | None, th: dict[str, float] | None) -> str:
 
 def assess(times: list[str], flows: list[float | None], th: dict[str, float] | None,
            today: str) -> dict:
-    """Current level, forecast peak and when it lands.
+    """Current level, forecast peak and the day it falls on.
 
-    Days before `today` are observations (reanalysis), the rest forecast; only
-    today onward can raise a warning, since a flood that already crested is
-    history, not news.
+    Only today and later days count; earlier days are observations.
     """
     ahead = [(t, q) for t, q in zip(times, flows) if t >= today and q is not None]
     now = next((q for t, q in ahead if t == today), None)

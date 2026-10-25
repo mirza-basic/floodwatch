@@ -1,9 +1,8 @@
-"""Recompute every river's drawn line so each shown river is complete along its whole course.
+"""Recompute the drawn line of every river point and the fill stretches, without any API call.
 
-Offline: no API calls, reads river_points.json and rivers.json and rewrites the `lines`
-of every point plus data/bih/river_fill.json (stretches in municipalities that have no
-point for that river, each tagged with the municipality whose level it borrows).
-build_points.py calls the same function, so a rebuild keeps this behaviour.
+Reads river_points.json and rivers.json and rewrites the `lines` of each point and
+data/bih/river_fill.json (stretches in municipalities that have no point for the river, each
+tagged with the municipality whose level it takes).
 
     python3 scripts/build_lines.py
 """

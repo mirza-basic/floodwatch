@@ -1,9 +1,7 @@
-"""One light polygon per municipality for the map.
+"""Write one simplified polygon per municipality for the map.
 
-The full boundaries are 8.8 MB - fine for point-in-polygon, far too heavy to
-inline into a page. Vertices closer than ~400 m to the last one kept are
-dropped; at country zoom that is invisible, and rings are kept closed with
-at least four points so Leaflet never receives a degenerate polygon.
+Vertices closer than about 400 m to the last kept vertex are dropped. Rings stay closed and keep
+at least four points.
 
     python3 scripts/build_boundaries.py
 """

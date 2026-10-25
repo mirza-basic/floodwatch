@@ -1,10 +1,4 @@
-"""One cycle: fetch discharge for every river point, assess it, publish a snapshot.
-
-Unlike fire-detection there is no per-detection novelty to track - the state is
-"what level is each river at", recomputed whole every cycle from a ~10-day
-window, so there is nothing to store between runs for the map. (Alert
-de-duplication will need a store once alerting exists.)
-"""
+"""One poll cycle: fetch discharge for every river point, assess it and write the snapshot."""
 from __future__ import annotations
 
 import json
@@ -19,10 +13,10 @@ SNAPSHOT = config.STATE_DIR / "snapshot.json"
 
 
 def band(d: dict, today: str) -> dict | None:
-    """Ensemble spread per day, aligned with d["time"]; None before today.
+    """Per-day ensemble spread aligned with d["time"], or None when the statistics are missing.
 
-    Statistics exist only for forecast days (documented), and a past day's spread
-    would be a different thing, so they are blanked rather than shown."""
+    Days before `today` are blanked.
+    """
     out = {}
     for k in glofas.STATS:
         col = d.get(f"river_discharge_{k}")

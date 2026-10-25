@@ -1,19 +1,9 @@
 """Measured water levels from the agencies that publish them.
 
-Three adapters, one record shape. None of these sources states a reuse licence
-(the local, unpublished permissions note), so this module is deliberately conservative:
-
-* values are carried exactly as published - never rescaled, smoothed or merged;
-* the only "class" is one the *source itself* publishes (the Sava agency's
-  N/P/R/V/Z); nothing here derives a level from a reading, because RHMZ RS's
-  terms forbid modification without written approval and Mostar publishes raw
-  thresholds, not a class;
-* each source is isolated: one failing never costs the others;
-* nothing here is wired to alerts or to any public output.
-
-Sources were probed 2026-10-23; every parse below failed loudly on an unexpected
-shape rather than guessing, because a 200 with the wrong body is the usual way
-these sites break.
+Three adapters (Sava basin agency, RHMZ Republika Srpska, Adriatic agency) return one record shape.
+Values are kept exactly as published. The only class carried is one the source itself publishes;
+nothing is derived from a reading. Each source is fetched independently, so one failing does not
+affect the others. Reading is disabled unless FLOODWATCH_GAUGES=1.
 """
 from __future__ import annotations
 
@@ -41,8 +31,7 @@ SOURCES = {
     "jadran": "Agencija za vodno područje Jadranskog mora",
 }
 
-# The Sava agency's own classification.json (WaterLevel layer) maps these codes.
-# "#<MIN#" appears once in the feed and is not defined there, so it stays unknown.
+# Codes used by the Sava agency's water-level classification; other codes get no class.
 SAVA_CLASS = {"#MIN#": "N", "#TH1#": "P", "#TH2#": "R", "#TH3#": "V", "#TH4#": "Z"}
 
 
@@ -90,7 +79,7 @@ def fetch_rhmzrs() -> list[dict]:
         if lat is None or lon is None or not name:
             continue
         out.append({"source": "rhmzrs", "id": f"rhmzrs:{name}", "name": name, "river": None,
-                    "lat": lat, "lon": lon, "value": _num(r[keys[2]]), "unit": None,  # feed and page state no unit
+                    "lat": lat, "lon": lon, "value": _num(r[keys[2]]), "unit": None,  # The feed gives no unit.
                     "time": r[keys[0]] or None, "class": None})
     return out
 
@@ -108,9 +97,7 @@ def fetch_jadran() -> list[dict]:
         except (KeyError, ValueError, AttributeError):
             continue
         th = {k: r.get(k) for k in ("redovna_obrana", "vanredna_obrana", "kontinuirana_obrana") if r.get(k)}
-        # `valtime` is an epoch whose time zone the page only describes as
-        # "zimsko računanje vremena" (winter time), so it is carried as published
-        # and flagged rather than converted - converting would be a guess.
+        # `valtime` is an epoch whose time zone is not given, so it is stored as published.
         out.append({"source": "jadran", "id": f"jadran:{r['id']}", "name": r["title"], "river": r.get("vodotok"),
                     "lat": lat, "lon": lon, "value": _num(r.get("val")), "unit": r.get("unit"),
                     "time": None, "time_raw_epoch": r.get("valtime"), "thresholds": th or None, "class": None})
@@ -130,7 +117,7 @@ def fetch_all() -> tuple[list[dict], dict]:
             rows = fn()
             gauges += rows
             status[name] = len(rows)
-        except Exception as exc:  # noqa: BLE001 - one source must never take down the others
+        except Exception as exc:  # noqa: BLE001 - a failing source is recorded and the others continue
             log.warning("gauges %s: %s", name, exc)
             status[name] = f"error: {exc}"
     for g in gauges:
@@ -139,17 +126,13 @@ def fetch_all() -> tuple[list[dict], dict]:
 
 
 HISTORY_FILE = config.STATE_DIR / "gauge-history.json"
-HISTORY_KEEP = 96  # readings per station; hourly feeds => ~4 days
+HISTORY_KEEP = 96  # Maximum readings kept per station.
 
 
 def update_history(gauges: list[dict], path=HISTORY_FILE) -> None:
-    """Append each new published reading to a per-station list and attach it.
+    """Append each new published reading to its station's history and attach the history to the gauge.
 
-    The sources publish only the latest value as data (the Sava agency's history
-    is images and spreadsheets), so history is what *we* saw, poll by poll -
-    exactly as published, deduplicated on the source's own timestamp. A reading
-    is added only if its timestamp is new, so polling more often than the source
-    updates adds nothing. Gaps simply mean the poller was not running.
+    A reading is added only when its timestamp differs from the last stored one.
     """
     config.ensure_state_dir()
     hist = json.loads(path.read_text()) if path.exists() else {}

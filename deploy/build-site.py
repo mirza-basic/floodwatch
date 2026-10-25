@@ -1,10 +1,7 @@
-"""Assemble the published site: the live map at /, the documentation at /docs/.
+"""Assemble the published site: the map at / and the documentation pages at /docs/.
 
-A Pages deploy replaces the whole site, so the map and the docs must go up together
-(same reason as FireWatch's build-site.py). The pages in docs/ are written in
-artifact-body form - they open with <title> and have no doctype or viewport - so
-each is wrapped in a real skeleton here; served unwrapped they would render at
-desktop width on a phone and in quirks mode.
+Each page in docs/ starts with <title> and has no doctype or viewport; it is wrapped in a full
+HTML skeleton here.
 
     python3 deploy/build-site.py public
 """

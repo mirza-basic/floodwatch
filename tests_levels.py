@@ -1,4 +1,4 @@
-"""Plain linear script, same shape as fire-detection's tests: exits non-zero on failure."""
+"""Checks for thresholds, levels and the ensemble spread. A plain script that exits non-zero on failure."""
 from __future__ import annotations
 
 import sys
@@ -28,11 +28,11 @@ check("past crest ignored", a["level"] == "warning" and a["peak_day"] == "2026-1
 check("now taken from today", a["now"] == 8)
 check("all past is normal", levels.assess(days[:2], [90, 90], th, "2026-10-23")["level"] == "normal")
 
-# Gumbel on a known sample: thresholds must rise with return period.
+# Gumbel thresholds rise with the return period.
 g = thresholds.gumbel([float(x) for x in range(10, 60, 2)])
 check("gumbel ordered", g and g["watch"] < g["warning"] < g["severe"])
 check("gumbel needs 20 years", thresholds.gumbel([1.0] * 10) is None)
-# ensemble spread: past days blanked (statistics exist for forecast days only), missing stats tolerated
+# Ensemble spread: past days are blanked and a response without statistics is tolerated.
 from floodwatch import poller
 d = {"time": ["2026-10-23", "2026-10-24", "2026-10-25"], "river_discharge": [1, 2, 3]}
 for k in ("min", "p25", "median", "p75", "max"):

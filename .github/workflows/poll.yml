@@ -1,12 +1,6 @@
-# Poll the flood forecast and publish the map to GitHub Pages.
-#
-# Gauges are deliberately NOT enabled here: FLOODWATCH_GAUGES is unset, so the
-# published page carries no agency data. Do not set it until written permission
-# from each agency is on file (the local, unpublished permissions note).
-#
-# Open-Meteo limits calls per IP address and warns that shared platforms such as
-# CI runners may be limited sooner. A 429 fails the run (red cross) rather than
-# publishing stale data silently; the map also warns when its data is >9 h old.
+# Poll the flood forecast, build the site and publish it to GitHub Pages.
+# FLOODWATCH_GAUGES is not set, so gauge readings are not read and the page contains no agency data.
+# A failed request fails the run, so nothing is published from partial data.
 name: Poll and publish
 
 on:

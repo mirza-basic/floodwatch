@@ -1,9 +1,7 @@
-"""Plain linear script, same shape as tests_levels.py: exits non-zero on failure.
+"""Checks for rivers.layout(). A plain script that exits non-zero on failure.
 
-rivers.layout() is the most intricate logic in the project (it decides which river is drawn
-where), so it is checked on a tiny synthetic map: two squares side by side, a river through both,
-a point for the river in the first square only, and a same-named river inside the second square, unconnected,
-that must NOT be joined in (different rivers share names: Bistrica, Ribnica...).
+It uses a small synthetic map: two squares side by side, a river through both with a point in the
+first, and unrelated rivers with the same name.
 """
 from __future__ import annotations
 
@@ -25,9 +23,9 @@ A, B = geo.Municipality("A", "A", sq(0.0, 1.0)), geo.Municipality("B", "B", sq(1
 LONS = [-0.25, 0.25, 0.75, 1.25, 1.75, 2.25]       # none on a border; the two ends are far outside both squares
 rivers.ways = lambda: [
     {"name": "R", "pts": [[0.5, x] for x in LONS]},
-    {"name": "R", "pts": [[0.9, 1.25], [0.9, 1.75]]},          # another river called R, INSIDE B but 44 km from ours
+    {"name": "R", "pts": [[0.9, 1.25], [0.9, 1.75]]},          # a second, unconnected river with the same name, inside B
 ]
-# the real anchor (mlat/mlon) is always a vertex of the river, so it is one here too
+# The anchor (mlat/mlon) is a vertex of the river.
 pts = [{"id": "A", "river": True, "river_name": "R", "mlat": 0.5, "mlon": 0.75}]
 fill = rivers.layout(pts, [A, B])
 own = pts[0]["lines"]
@@ -46,13 +44,12 @@ check("a run overshoots the country by at most its one joining vertex per end",
 check("an unconnected river with the same name is not joined in (it lies inside the country, so only the connectivity rule keeps it out)",
       all(p[0] != 0.9 for r in own for p in r) and all(p[0] != 0.9 for x in fill["R"] for r in x["lines"] for p in r))
 
-# every vertex inside Bosnia is covered (the 100% requirement), counting own + fill
+# Every in-country vertex is drawn, counting own and fill stretches.
 inside = {x for x in LONS if A.contains(0.5, x) or B.contains(0.5, x)}
 drawn = {p[1] for r in own for p in r} | {p[1] for x in fill["R"] for r in x["lines"] for p in r}
 check("every in-country vertex of the shown river is drawn", inside <= drawn)
-# --- two UNRELATED rivers with the same name, each with its own point (real: "Una", "Ricina") ---
+# Two unrelated rivers with the same name, each with its own point.
 # R1 runs along lat 0.2 through A and B (point in A); R2 along lat 0.8 through A and B (point in B).
-# Pooling by name would draw R2's part inside A as R1's line and borrow the wrong level for fills.
 rivers.ways = lambda: [
     {"name": "R", "pts": [[0.2, x] for x in (0.25, 0.75, 1.25, 1.75)]},
     {"name": "R", "pts": [[0.8, x] for x in (0.25, 0.75, 1.25, 1.75)]},

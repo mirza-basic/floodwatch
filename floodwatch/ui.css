@@ -6,9 +6,7 @@
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
     font:14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}
-  /* Three heights on purpose: plain vh for ancient browsers, --appvh (set from
-     window.innerHeight by JS) for Chrome/Safari without dvh, then dvh where it
-     exists. position:relative makes this the anchor for #timebar. */
+  /* Page layout: side panel and map in a row; the height follows the viewport. */
   #wrap{display:flex;position:relative;overflow:hidden;
     height:100vh;height:var(--appvh,100vh);height:100dvh}
   #side{width:370px;flex:0 0 370px;background:var(--panel);border-right:1px solid var(--line);
@@ -30,8 +28,7 @@
   .seg button.on{background:var(--accent);color:#fff;font-weight:600}
   .seg button b{font-weight:700;font-variant-numeric:tabular-nums}
   .seg button.on b{color:#fff}
-  /* The count sits under the range label: five buttons share one row, so
-     side by side it would wrap or clip the number. */
+  /* In the day chips the count sits under the label. */
   #hrange button b{display:block;font-size:10.5px;line-height:1.2;margin-top:1px}
   .chip{background:var(--panel2);border:1px solid var(--line);border-radius:999px;
     padding:4px 10px;font-size:11.5px;color:var(--dim)}
@@ -59,8 +56,7 @@
   .foot-link:hover,.foot-link:focus-visible{border-bottom-color:currentColor}
   .empty{text-align:center;color:var(--dim);padding:40px 20px}
   .empty .big{font-size:34px;margin-bottom:10px}
-  /* Anchored to both edges of the map area rather than centred, so the ruler gets
-     the full width available - 370px is the docked side panel. */
+  /* Bottom bar spanning the map area to the right of the side panel. */
   #timebar{position:absolute;left:384px;right:14px;bottom:18px;z-index:1050;
     background:rgba(21,26,33,.94);border:1px solid var(--line);border-radius:11px;
     padding:10px 14px;display:flex;align-items:center;gap:11px;
@@ -74,7 +70,6 @@
   #tltrack{position:relative;height:100%}
   #tlcontent{position:absolute;top:0;bottom:0}
   #tlmarks,#tlticks{position:absolute;inset:0}
-  /* the moment being shown sits under this line, dead centre */
   #playhead{position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;
     background:var(--accent);pointer-events:none;border-radius:2px;
     box-shadow:0 0 7px rgba(91,140,255,.7)}
@@ -90,8 +85,6 @@
   #tpbtn{background:#26303b;border:1px solid var(--line);color:var(--fg);border-radius:6px;
     width:30px;height:26px;cursor:pointer;font-size:13px;padding:0}
   #tpbtn:hover{background:#31404f}
-  /* Popover with its own Cancel/Set: the browser's native picker has neither, and
-     committing on every spin of a wheel would jump the map while still choosing. */
   #tppop{position:absolute;right:0;bottom:calc(100% + 10px);z-index:1200;display:none;
     flex-direction:column;gap:8px;padding:10px;background:var(--panel);color:var(--fg);
     border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.45)}
@@ -110,9 +103,7 @@
   #unit{background:#26303b;border:1px solid var(--line);color:var(--fg);border-radius:6px;
     height:26px;min-width:44px;padding:0 7px;cursor:pointer;font:inherit;font-size:11.5px}
   #speed:hover,#play:hover,#unit:hover{background:#31404f}
-  /* Collapsed by default at every width, not just on a phone: the outer .legend
-     div is just a layout wrapper, and the toggle button / expanded body each
-     carry their own card styling so only one of the two is ever on screen. */
+  /* Legend: a toggle button that opens a card; only one of the two is visible at a time. */
   .legend{line-height:1.6}
   .legend-toggle{display:block;width:100%;max-width:min(74vw,300px);text-align:left;
     cursor:pointer;background:rgba(21,26,33,.94);border:1px solid var(--line);
@@ -124,14 +115,9 @@
     backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
   .legend.open .legend-body{display:block}
   .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
-  /* Fire-danger detail inside a municipality's popup - see fwiDetail() in mapgen.py. */
   .fwi-row{display:flex;justify-content:space-between;gap:14px}
   .fwi-row+.fwi-row{margin-top:1px}
   .fwi-codes,.fwi-note{opacity:.65;margin-top:6px;font-size:10.5px;line-height:1.5}
-  /* This municipality's own subscribe link - see muniPopupHtml(). There is no
-     single global banner: each municipality has its own channel (see
-     poller._telegram_channel_url()). Accent-filled so it reads as the one
-     clickable action in the popup besides close. */
   .muni-tg{display:flex;align-items:center;justify-content:center;gap:6px;
     background:var(--accent);color:#fff;text-decoration:none;font-weight:600;
     font-size:11.5px;border-radius:7px;padding:7px 8px;margin-top:8px;
@@ -152,16 +138,9 @@
   .imgnote s{color:#f0a35e;text-decoration:none}
   .leaflet-bottom.leaflet-right,
   .leaflet-bottom.leaflet-left{margin-bottom:94px}
-  /* Leaflet's popup pane defaults to z-index 700, below this page's fixed UI
-     (langsw at 1250, the mobile drawer at 1300). Raised above all of it so a
-     popup the reader just opened is never covered. Municipality info does not
-     use this pane - see #muniinfo below. */
+  /* Raise Leaflet's popup pane above the fixed page controls. */
   .leaflet-popup-pane{z-index:1400}
-  /* One shared fixed, centred panel for municipality info and fire events,
-     instead of a Leaflet popup anchored to the click point (which can overlap
-     the layer control, measure tool or eye toggle). Centred with padding on
-     every side, so nothing else has to move or hide. Positioned like #langsw:
-     centred over the map area, offset for the sidebar on desktop. */
+  /* Municipality dialog: one fixed panel centred over the map area. */
   #muniinfo{position:fixed;top:50%;left:calc(50vw + 185px);transform:translate(-50%,-50%);
     z-index:1260;display:none;max-width:280px;width:calc(100% - 48px);
     max-height:70vh;overflow-y:auto;background:rgba(21,26,33,.97);
@@ -173,22 +152,13 @@
     border:0;background:none;color:var(--dim);font-size:19px;line-height:1;cursor:pointer;
     border-radius:5px}
   #muniinfo .miclose:hover,#muniinfo .miclose:focus-visible{background:var(--panel2);color:var(--fg)}
-  /* First-paint cover. Above everything (including the popup pane at 1400)
-     because it hides the map, sidebar and controls assembling at once.
-     Removed after the inlined DATA is drawn (see the applyStaticLabels()/
-     recompute() call near the end of the script); it never waits on the
-     network, since the page ships with a snapshot inlined. */
+  /* Loading cover over the whole page, removed once the page has drawn. */
   #loading{position:fixed;inset:0;z-index:2000;
     background:radial-gradient(ellipse at 50% 42%,#0d1626 0%,#080b14 55%,var(--bg) 80%);
     transition:opacity .6s ease,visibility 0s linear .6s}
   #loading.hide{opacity:0;visibility:hidden;pointer-events:none}
   .ldwrap{position:absolute;inset:0;color:var(--fg)}
-  /* The scene is one self-contained SVG (planet horizon, treeline, satellite,
-     scanning HUD) with its own keyframes, filling the screen with no letterbox
-     bars (preserveAspectRatio="slice"). Bars are not free: an animated layer
-     compositing at the seam between the SVG and the page background measured
-     more expensive. The 1200x800 viewBox is close to a real window's aspect
-     ratio, so slice crops little. */
+  /* Loading illustration. */
   .ldscene{position:absolute;inset:0;overflow:hidden}
   .ldscene svg{display:block;width:100%;height:100%}
   .ldsub{position:absolute;right:16px;bottom:38px;color:var(--dim);
@@ -202,11 +172,6 @@
   .leaflet-popup-content a{color:#7cc4ff}
   .leaflet-bar a{background:var(--panel2);color:var(--fg);border-color:var(--line)}
   .leaflet-bar a:hover{background:#31404f}
-  /* Layers control dressed as the legend: a labelled button that opens a card on
-     click (not hover), sharing .legend-toggle / .legend-body so the two panels
-     cannot drift apart. Leaflet's own toggle icon is hidden and its list is shown
-     only while .open - the extra :not(.open) keeps the selector above Leaflet's
-     own "expanded" rule. Opens downward, since the control sits top-right. */
   .leaflet-control-layers.layersctl{background:transparent;border:0;box-shadow:none;
     padding:0;color:var(--fg)}
   .layersctl .leaflet-control-layers-toggle{display:none}
@@ -225,20 +190,7 @@
     flex:none;accent-color:var(--accent);cursor:pointer;position:static;top:auto}
   .layersctl .leaflet-control-layers-separator{height:1px;border:0;margin:6px 0;
     background:var(--line)}
-  /* --- measure tool -------------------------------------------------------
-     While measuring, the fire markers and the boundary must not swallow a click
-     that is meant to drop a vertex, so hit testing is turned off for the panes
-     that hold them. The measure pane is a sibling of the overlay pane, hence its
-     own rule - finished measurements are clickable (for their remove popup) only
-     when the tool is off. muniLayer needs its own selector: it renders on
-     L.canvas rather than SVG paths (145 boundaries - see its own comment), so it
-     is a single <canvas> element the `path` rule below never matches, and
-     without this line a click meant for a vertex opens a municipality popup
-     instead. */
   .leaflet-container.measuring{cursor:crosshair}
-  /* !important is load-bearing: Leaflet's own
-     `.leaflet-pane>svg path.leaflet-interactive` rule is more specific than this
-     one, so without it a click meant for a vertex opens a fire popup instead. */
   .measuring .leaflet-overlay-pane path,
   .measuring .leaflet-overlay-pane canvas,
   .measuring .leaflet-marker-pane,
@@ -269,48 +221,33 @@
     color:var(--fg);border-radius:6px;padding:4px 9px;font:inherit;font-size:11.5px;
     cursor:pointer}
   .mpop button:hover{background:#31404f}
-  /* Centred over #map, not the viewport: #side docks at a fixed 370px on desktop,
-     so viewport-centre (50vw) sits 185px left of the map's own visual centre. On
-     a phone #side is an off-canvas overlay that takes no layout width, so #map
-     already spans the full viewport and plain 50vw is correct there - restored
-     in the mobile media query below. */
+  /* Language switch, centred over the map area (offset by the side panel on desktop). */
   #langsw{position:fixed;top:10px;left:calc(50vw + 185px);transform:translateX(-50%);
     z-index:1250;display:flex;gap:2px;padding:2px;border-radius:9px;
     border:1px solid var(--line);background:rgba(21,26,33,.94);
     backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
     transition:opacity .15s}
-  /* Leaflet's popup pane lives inside .leaflet-map-pane, whose pan transform
-     makes it the containing block, so no z-index on .leaflet-popup-pane can
-     paint above a sibling of .leaflet-map-pane with its own z-index (Leaflet's
-     corner containers, #timebar, #langsw...). Only a single raw detection and
-     the measure tool still use an anchored popup; both are small and out of
-     the way, so the rare overlap is accepted. Municipality info and fire
-     events use #muniinfo instead. */
+  /* Language switch buttons. */
   #langsw button{background:none;border:0;color:var(--dim);font:inherit;font-size:11.5px;
     font-weight:600;letter-spacing:.03em;padding:5px 11px;border-radius:7px;cursor:pointer}
   #langsw button:hover{color:var(--fg)}
   #langsw button.on{background:var(--accent);color:#fff}
-  /* Scales from the ring's own centre, so it starts at the marker's edge and
-     expands past it whatever the marker's size. */
   .pulse{transform-box:fill-box;transform-origin:center;
          animation:pulse 1.8s ease-out infinite}
   @keyframes pulse{0%{transform:scale(1);opacity:1}100%{transform:scale(2.1);opacity:0}}
-  /* Desktop keeps the panel docked; these two are only used on small screens. */
+  /* Drawer button: used on small screens only. */
   #drawer-btn{display:none}
   #drawer-close{display:none}
   #backdrop{display:none}
 
-  /* Phone/tablet: the panel becomes an off-canvas drawer so the map gets the
-     whole screen. min-height:0 stops a flex item being floored at its content
-     height. */
+  /* Small screens: the side panel becomes an off-canvas drawer. */
   @media (max-width:880px){
     #side{position:fixed;top:0;left:0;height:100%;height:100dvh;width:min(86vw,340px);
       flex:0 0 auto;min-height:0;z-index:1200;transform:translateX(-102%);
       transition:transform .26s ease;box-shadow:0 0 42px rgba(0,0,0,.55)}
     #side.open{transform:none}
     #map{flex:1 1 auto;min-height:0}
-    /* #side is an off-canvas overlay here, not docked, so #map already spans the
-       full viewport width - the desktop offset above would be wrong here. */
+    /* Language switch centred on the full-width map. */
     #langsw{left:50%}
     #muniinfo{left:50%}
     #drawer-btn{display:flex;align-items:center;gap:7px;position:fixed;top:10px;left:10px;
@@ -318,8 +255,7 @@
       border-radius:9px;padding:9px 12px;font:inherit;font-size:14px;cursor:pointer;
       backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
     #drawer-btn:active{background:#26303b}
-    /* The toggle is fixed above the drawer, so it would sit on top of the panel
-       header and cover the title. The drawer has its own close button. */
+    /* Hide the drawer button and the language switch while the drawer is open. */
     body.drawer-open #drawer-btn,
     body.drawer-open #langsw{display:none}
     #drawer-badge:not(:empty){font-size:12px;font-weight:700;color:var(--accent)}
@@ -330,24 +266,20 @@
     #backdrop{display:block;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1100;
       opacity:0;pointer-events:none;transition:opacity .26s}
     #backdrop.on{opacity:1;pointer-events:auto}
-    /* keep Leaflet's own controls clear of the drawer button */
+    /* Keep Leaflet's top-left controls clear of the drawer button. */
     .leaflet-top.leaflet-left{margin-top:54px}
-    /* the drawer is off-canvas, so the map is full width here */
+    /* Bottom bar spans the full width. */
     #timebar{left:11px;right:11px;padding:8px 11px;gap:8px;flex-wrap:wrap;
       bottom:calc(11px + env(safe-area-inset-bottom, 0px))}
     #tlabel{min-width:0;font-size:11px;flex:1 1 auto}
-    /* the ruler gets its own full-width row; beside the buttons it is too
-       narrow to scrub */
     #tlwrap{order:9;flex:1 1 100%;margin-top:3px}
     #list{padding:8px}
     .mpanel{width:min(52vw,190px);padding:8px 9px}
-    /* Lift the bottom control stack clear of the timeline bar; the legend
-       collapses to a single "Key" button so it never permanently covers a
-       phone-sized map. */
+    /* Lift Leaflet's bottom controls above the bottom bar. */
     .leaflet-bottom.leaflet-right,
     .leaflet-bottom.leaflet-left{
       margin-bottom:calc(124px + env(safe-area-inset-bottom, 0px))}
-    /* attribution must stay visible, but it can be smaller on a phone */
+    /* Smaller attribution text. */
     .leaflet-control-attribution{font-size:9.5px;padding:1px 5px}
   }
   @media (prefers-reduced-motion:reduce){#side,#backdrop{transition:none}}
