@@ -459,7 +459,7 @@ function card(m,r){
       <span>${t("day")}</span><span>${v==null?"–":v+" m³/s"}</span><span>${t("peakv")}</span><span>${r.peak==null?"–":r.peak+" m³/s · "+fmtDay(r.peak_day)}</span>`:""}</div>
     ${ratio!=null?`<div class="ratio" title="${ratio}% ${t("ofWatch")}"><span style="width:${Math.min(100,ratio)}%;background:${COL[l==="normal"?"watch":l]}"></span></div>
       <div class="meta" style="margin-top:4px"><span></span><span>${ratio}% ${t("ofWatch")}</span></div>`:""}
-    ${r?chart(r,300,60,false)+`<div class="mut" style="margin-top:6px;font-size:11.5px">${esc(summary(r))}</div>`+strip(r):""}
+    ${r?chart(r,300,60,false)+`<div class="mut" style="margin-top:6px;font-size:11.5px">${esc(summary(r))}</div>`:""}
     ${at?`<div class="acts"><button data-act="show">${t("show")}</button>
       <a href="https://www.google.com/maps/@?api=1&map_action=map&center=${at[0]},${at[1]}&zoom=13" target="_blank" rel="noopener">${t("gmaps")}</a></div>`:""}</div>`;
 }

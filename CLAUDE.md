@@ -290,6 +290,9 @@ still not drawn - that is the unapproved "rivers without a forecast" layer.
 
 ## Charts, summary sentence, day strip (2026-10-25)
 
+(The day strip is in the river dialog only. It was removed from the list cards on request: the list has no
+date control; the day is chosen with the header chips or the bottom bar.)
+
 `chart()`, `summary()` and `strip()` in `mapgen.py`. The poll now asks for
 `river_discharge` plus `_min/_p25/_median/_p75/_max` (`glofas.DAILY_STATS`) and stores them per
 river as `band`, **blanked for days before today** (`poller.band`; tested). Verified in Open-Meteo's
