@@ -286,6 +286,21 @@ vertices. `build_points.py` calls `layout()` so a rebuild keeps it (verified: id
 `build_lines.py` redoes it offline (no API calls, ~2 min). Rivers with no point at all (Gostovic) are
 still not drawn - that is the unapproved "rivers without a forecast" layer.
 
+## Charts, summary sentence, day strip (2026-10-25)
+
+`chart()`, `summary()` and `strip()` in `mapgen.py`. The poll now asks for
+`river_discharge` plus `_min/_p25/_median/_p75/_max` (`glofas.DAILY_STATS`) and stores them per
+river as `band`, **blanked for days before today** (`poller.band`; tested). Verified in Open-Meteo's
+docs: these are "statistical analysis from ensemble members" and "only available for forecasts";
+ensemble size is not stated. **Levels still use the main `river_discharge`**, the spread is shown
+beside it - the worst member can cross a threshold the main line does not. A threshold is drawn
+only when the data is within reach (watch from 35% of it, warning from 80% of watch, severe from
+80% of warning); scaling every chart up to its watch level made a river at 4% of it look flat.
+Landmine: the first CSS patch used `str.replace` on an anchor (`.gsq{width:12px`) that an earlier edit
+had changed, so it silently inserted nothing and the strip rendered as plain white buttons - assert
+that an anchor exists before replacing. `#muniinfo` has `max-width:280px` in the shared stylesheet;
+the chart popup overrides it (430px). Poll weight: 6 variables x ~150 cells x 10 days.
+
 ## Documentation
 
 `docs/floodwatch-documentation.html` is the system documentation, same idea as

@@ -63,6 +63,17 @@ EXTRA_CSS = r"""
   a.docs:empty,#chbtn:empty{display:none}
   #muniinfo a.more{display:block;margin-top:10px;color:var(--accent);font-size:12.5px;text-decoration:none}
   #muniinfo a.more:hover{text-decoration:underline}
+  .fchart{display:block;width:100%;height:auto;margin-top:8px}
+  .strip{display:flex;gap:3px;margin-top:8px}
+  .strip .cell{flex:1;min-width:0;background:#101720;border:1px solid var(--line);border-radius:5px;padding:2px;cursor:pointer;font:inherit;color:inherit}
+  .strip .cell.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+  .strip .cell i{display:block;height:12px;border-radius:3px}
+  .strip .cell b{display:block;height:4px;border-radius:2px;margin-top:2px}
+  .strip .cell span{display:block;font-size:9px;color:var(--dim);text-align:center;margin-top:2px}
+  #tip{position:fixed;z-index:4000;display:none;pointer-events:none;background:#151a21;color:#e6edf3;border:1px solid #3a4655;
+    border-radius:6px;padding:6px 9px;font-size:11.5px;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.5);max-width:240px}
+  /* wide enough for the chart's axis labels to stay apart */
+  #muniinfo{max-width:min(430px,calc(100vw - 24px));width:min(430px,calc(100vw - 24px))}
   .gsq{width:18px;height:18px;border:3px solid #111;box-sizing:border-box}
 """
 
@@ -139,6 +150,15 @@ const I18N={
   legendTxt:"Nivo je prognoza protoka u ćeliji modela (~5 km) koja dostiže vrijednost koja se javlja jednom u 2, 5 ili 20 godina. Nije zvanično upozorenje.",
   docs:"Dokumentacija",src:"Prognoza protoka",map:"rijeke i granice",
   attrNote:"Model prognoze, nije zvanično upozorenje.",
+  today:"danas",past:"prošlost",mid50:"srednjih 50% članova",minmax:"najbolji–najgori član",worst:"najgori član",
+  wToday:"danas",wTomorrow:"sutra",wIn:"za {n} dana",
+  sumExceed:"Prag pažnje se prekoračuje {d} ({w}); vrhunac {pd} je {p}% praga pažnje.",
+  sumTop:"Najviši nivo: {l}.",
+  sumWorst:"Glavna prognoza ne prelazi prag pažnje, ali najgori član skupa prognoza ga prelazi {d} ({w}), do {p}% praga.",
+  sumNone:"Bez prekoračenja praga pažnje u 7 dana. Vrhunac glavne prognoze: {p}% praga.",
+  sumNoneW:"Najgori član skupa: {w}%.",
+  chartLegend:"Linija: glavna prognoza · tamno polje: srednjih 50% članova skupa · svijetlo: od najboljeg do najgoreg člana.",
+  stripLegend:"Gore: glavna prognoza po danima · dolje: najgori član skupa. Klik bira dan.",
   fillNote:"Ovaj dio rijeke nema vlastitu ćeliju modela; prikazan je nivo najbliže tačke ({m}).",
   more:["još {n} rijeka u općini {m}","još {n} rijeke u općini {m}","još {n} rijeka u općini {m}"],
   coverage:"Prikazane su samo rijeke koje model prognoze razlikuje (~5 km). Manji vodotoci nisu pokriveni, a odsustvo upozorenja ne znači da rizika nema.",
@@ -160,6 +180,15 @@ const I18N={
   legendTxt:"A level is a forecast: the flow in a ~5 km model cell reaches a value that occurs about once in 2, 5 or 20 years. It is not an official warning.",
   docs:"Documentation",src:"River-flow forecast",map:"rivers and boundaries",
   attrNote:"Model forecast, not an official warning.",
+  today:"today",past:"past",mid50:"middle 50% of members",minmax:"best–worst member",worst:"worst member",
+  wToday:"today",wTomorrow:"tomorrow",wIn:"in {n} days",
+  sumExceed:"The watch level is exceeded on {d} ({w}); the peak on {pd} is {p}% of the watch level.",
+  sumTop:"Highest level: {l}.",
+  sumWorst:"The main forecast stays below the watch level, but the worst ensemble member exceeds it on {d} ({w}), up to {p}% of it.",
+  sumNone:"No watch-level exceedance in 7 days. Main forecast peak: {p}% of the watch level.",
+  sumNoneW:"Worst ensemble member: {w}%.",
+  chartLegend:"Line: main forecast · dark band: middle 50% of ensemble members · light band: best to worst member.",
+  stripLegend:"Top: main forecast per day · bottom: worst ensemble member. Click to pick a day.",
   fillNote:"This stretch has no model cell of its own; it shows the level of the nearest point ({m}).",
   more:["{n} more river in {m}","{n} more rivers in {m}","{n} more rivers in {m}"],
   coverage:"Only rivers the forecast model can resolve (~5 km) are shown. Smaller streams are not covered, and no alert does not mean there is no risk.",
@@ -217,23 +246,92 @@ const polys=L.layerGroup().addTo(map), lines=L.layerGroup().addTo(map), dots=L.l
 const show={riv:true,muni:true,ga:true};
 let eyeOn=true;
 
-function spark(r,W,H){
-  const f=r.flows,n=f.length,th=r.thresholds; if(n<2) return "";
-  const top=Math.max(...f.filter(v=>v!=null),th.watch)*1.1||1;
-  const x=i=>6+i*(W-12)/(n-1), y=v=>H-4-(H-10)*v/top, di=r.times.indexOf(DAYS[sel.day]);
-  let s=`<svg class="spark" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${t("flow")}">`;
-  for(const k of ["watch","warning","severe"]) if(th[k]<=top) s+=`<line x1="0" x2="${W}" y1="${y(th[k])}" y2="${y(th[k])}" stroke="${COL[k]}" stroke-dasharray="3 3" opacity=".7"/>`;
-  if(di>=0) s+=`<line x1="${x(di)}" x2="${x(di)}" y1="0" y2="${H}" stroke="#8b98a5" opacity=".45"/>`;
-  return s+`<polyline fill="none" stroke="${COL[r.level]}" stroke-width="2" points="${f.map((v,i)=>v==null?"":x(i)+","+y(v)).join(" ")}"/></svg>`;
+// ---- charts -----------------------------------------------------------------------------
+// One chart per river: the main forecast line, the ensemble spread behind it (middle 50% of
+// the members dark, best-to-worst member light; forecast days only - the statistics are not
+// available for the past), today's divider, and the thresholds that are within reach of the
+// data. A calm river is scaled to its own data, with a note that its watch level is off the
+// chart - scaling every chart up to its watch level made a river at 4% of it look flat.
+function fmtQ(v){return v>=100?Math.round(v):v>=10?Math.round(v*10)/10:Math.round(v*100)/100}
+function niceTicks(max,n){
+  const raw=max/n, mag=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/mag, step=(f<=1?1:f<=2?2:f<=5?5:10)*mag, o=[];
+  for(let v=0;v<=max+1e-9;v+=step) o.push(v); return o;
+}
+function chart(r,W,H,full){
+  const f=r.flows,T=r.times,n=f.length,th=r.thresholds,B=r.band; if(n<2) return "";
+  const ti=Math.max(0,T.indexOf(SNAP.today)), di=T.indexOf(DAYS[sel.day]);
+  let top=Math.max(...f.filter(v=>v!=null)); if(B) for(const v of B.max) if(v!=null&&v>top) top=v;
+  const shown=[]; if(top>=0.35*th.watch) shown.push("watch");        // thresholds worth drawing:
+  if(top>=0.8*th.watch) shown.push("warning"); if(top>=0.8*th.warning) shown.push("severe"); // only those within reach
+  const ymax=Math.max(top,...shown.map(k=>th[k]))*1.08||1;
+  const L=full?42:6, R=full?80:6, TP=full?12:4, BT=full?22:4;
+  const x=i=>L+i*(W-L-R)/(n-1), y=v=>H-BT-(H-TP-BT)*v/ymax;
+  const col=COL[r.level];
+  let g=`<svg class="fchart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t("flow"))}">`;
+  if(full) for(const v of niceTicks(ymax,4)){
+    g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="#28313d"/><text x="${L-5}" y="${y(v)+3}" text-anchor="end" fill="#8b98a5" font-size="9.5">${fmtQ(v)}</text>`;
+  }
+  if(B){ // spread, drawn only over forecast days
+    const idx=[...Array(n).keys()].filter(i=>i>=ti&&B.max[i]!=null&&B.min[i]!=null);
+    const poly=(hi,lo)=>idx.map(i=>x(i)+","+y(B[hi][i])).join(" ")+" "+[...idx].reverse().map(i=>x(i)+","+y(B[lo][i])).join(" ");
+    if(idx.length>1){ g+=`<polygon points="${poly("max","min")}" fill="${col}" opacity=".16"/><polygon points="${poly("p75","p25")}" fill="${col}" opacity=".3"/>`; }
+  }
+  for(const k of shown) g+=`<line x1="${L}" x2="${W-R}" y1="${y(th[k])}" y2="${y(th[k])}" stroke="${COL[k]}" stroke-dasharray="4 3" opacity=".85"/>`+
+    (full?`<text x="${W-R+4}" y="${y(th[k])+3}" fill="${COL[k]}" font-size="9.5">${esc(t(k))} ${fmtQ(th[k])}</text>`:"");
+  if(full&&!shown.includes("watch")) g+=`<text x="${W-R}" y="${TP+2}" text-anchor="end" fill="${COL.watch}" font-size="9.5">▲ ${esc(t("watch"))}: ${fmtQ(th.watch)} m³/s</text>`;
+  const pt=a=>a.map((v,i)=>v==null?null:x(i)+","+y(v)).filter(Boolean).join(" ");
+  if(ti>0) g+=`<polyline fill="none" stroke="#8b98a5" stroke-width="1.6" opacity=".7" points="${pt(f.slice(0,ti+1))}"/>`;
+  g+=`<polyline fill="none" stroke="${col}" stroke-width="2.4" stroke-linejoin="round" points="${f.map((v,i)=>i>=ti&&v!=null?x(i)+","+y(v):null).filter(Boolean).join(" ")}"/>`;
+  g+=`<line x1="${x(ti)}" x2="${x(ti)}" y1="${TP}" y2="${H-BT}" stroke="#8b98a5" stroke-dasharray="2 3" opacity=".6"/>`+(full?`<text x="${x(ti)+3}" y="${H-BT-3}" fill="#8b98a5" font-size="9">${esc(t("today"))}</text>`:"");
+  if(di>=0&&f[di]!=null) g+=`<line x1="${x(di)}" x2="${x(di)}" y1="${TP}" y2="${H-BT}" stroke="#e6edf3" opacity=".35"/><circle cx="${x(di)}" cy="${y(f[di])}" r="3.6" fill="${col}" stroke="#0b0e12" stroke-width="1.2"/>`;
+  if(full){
+    T.forEach((d,i)=>{ if(i%2===0) g+=`<text x="${x(i)}" y="${H-7}" text-anchor="middle" fill="${i>=ti?"#aab6c2":"#6b7785"}" font-size="9">${fmtDay(d,"num")}</text>`});
+    const w=(W-L-R)/(n-1);
+    T.forEach((d,i)=>{ if(f[i]==null) return;
+      const parts=[fmtDay(d,"long")+(i<ti?" · "+t("past"):""),`${t("flow")}: ${fmtQ(f[i])} m³/s`];
+      if(B&&i>=ti&&B.max[i]!=null) parts.push(`${t("mid50")}: ${fmtQ(B.p25[i])}–${fmtQ(B.p75[i])}`,`${t("minmax")}: ${fmtQ(B.min[i])}–${fmtQ(B.max[i])}`);
+      parts.push(`${Math.round(100*f[i]/th.watch)}% ${t("ofWatch")}`);
+      g+=`<rect class="hit" x="${x(i)-w/2}" y="0" width="${w}" height="${H}" fill="transparent" data-tip="${esc(parts.join("||"))}"/>`;
+    });
+  }
+  return g+"</svg>";
+}
+const dayWord=i=>i<=0?t("wToday"):i===1?t("wTomorrow"):t("wIn").replace("{n}",i);
+function firstAt(a,thr,from){for(let i=from;i<a.length;i++) if(a[i]!=null&&a[i]>=thr) return i; return -1}
+// One sentence that answers "should I worry, and when" - most people will not read a curve.
+function summary(r){
+  const th=r.thresholds,B=r.band,ti=Math.max(0,r.times.indexOf(SNAP.today)),pct=v=>Math.round(100*v/th.watch);
+  const c=firstAt(r.flows,th.watch,ti), w=B?firstAt(B.max,th.watch,ti):-1;
+  const wmax=B?Math.max(...B.max.filter(v=>v!=null)):null;
+  if(c>=0){
+    const hi=r.level==="normal"||r.level==="watch"?"":" "+t("sumTop").replace("{l}",t(r.level));
+    return t("sumExceed").replace("{d}",fmtDay(r.times[c])).replace("{w}",dayWord(c-ti)).replace("{pd}",fmtDay(r.peak_day)).replace("{p}",pct(r.peak))+hi;
+  }
+  if(w>=0) return t("sumWorst").replace("{d}",fmtDay(r.times[w])).replace("{w}",dayWord(w-ti)).replace("{p}",pct(wmax));
+  return t("sumNone").replace("{p}",pct(r.peak))+(B&&wmax!=null?" "+t("sumNoneW").replace("{w}",pct(wmax)):"");
+}
+// A strip of one cell per forecast day: top = main forecast's level, thin bar below = worst
+// ensemble member's level. Readable at a glance, and the same for all 232 rivers.
+function strip(r,legend){
+  const cell=(d,i)=>{
+    const k=r.times.indexOf(d), q=flowOn(r,d), l=classify(q,r.thresholds), mx=r.band&&k>=0?r.band.max[k]:null;
+    const lw=mx==null?l:(rank(classify(mx,r.thresholds))>rank(l)?classify(mx,r.thresholds):l);
+    return `<button type="button" class="cell${!sel.peak&&sel.day===i?" on":""}" data-day="${i}" title="${esc(fmtDay(d,"long")+": "+t(l)+(lw!==l?" ("+t("worst")+": "+t(lw)+")":""))}"><i style="background:${COL[l]}"></i><b style="background:${COL[lw]}"></b><span>${fmtDay(d,"num")}</span></button>`;
+  };
+  return `<div class="strip">${DAYS.map(cell).join("")}</div>`+(legend?`<div class="mut" style="font-size:11px;margin-top:3px">${t("stripLegend")}</div>`:"");
 }
 function riverBlock(r){
   const l=lvR(r), v=valR(r);
   return `<div class="rv"><b>${esc(r.river||"")}</b> <span style="color:${COL[l]}">● ${t(l)}</span>${r.near?` <span class="mut">(${t("near")})</span>`:""}
-   <div class="mut">${t("day")}: ${v==null?"–":v+" m³/s"} · ${t("peakv")}: ${r.peak} m³/s (${fmtDay(r.peak_day)})</div>${spark(r,230,64)}</div>`;
+   <div class="mut">${t("day")}: ${v==null?"–":v+" m³/s"} · ${t("peakv")}: ${r.peak} m³/s (${fmtDay(r.peak_day)})</div>
+   <div style="margin-top:6px;font-size:12.5px">${esc(summary(r))}</div>
+   ${chart(r,340,170,true)}<div class="mut" style="font-size:11px">${t("chartLegend")}</div>${strip(r,true)}</div>`;
 }
 // A river dot, line or card opens just that river, with a link to the rest; the
 // municipality area opens the full list (the reader asked about the whole place).
+let cur=null;
 function openMuni(m,at,r,note){
+  cur={m,r,note};
   if(at) map.setView(at,Math.max(map.getZoom(),10),{animate:false});
   const body=$("muniinfo-body");
   const render=all=>{
@@ -344,7 +442,7 @@ function card(m,r){
       <span>${t("day")}</span><span>${v==null?"–":v+" m³/s"}</span><span>${t("peakv")}</span><span>${r.peak} m³/s · ${fmtDay(r.peak_day)}</span>`:""}</div>
     ${ratio!=null?`<div class="ratio" title="${ratio}% ${t("ofWatch")}"><span style="width:${Math.min(100,ratio)}%;background:${COL[l==="normal"?"watch":l]}"></span></div>
       <div class="meta" style="margin-top:4px"><span></span><span>${ratio}% ${t("ofWatch")}</span></div>`:""}
-    ${r?spark(r,300,34):""}
+    ${r?chart(r,300,60,false)+`<div class="mut" style="margin-top:6px;font-size:11.5px">${esc(summary(r))}</div>`+strip(r):""}
     ${at?`<div class="acts"><button data-act="show">${t("show")}</button>
       <a href="https://www.google.com/maps/@?api=1&map_action=map&center=${at[0]},${at[1]}&zoom=13" target="_blank" rel="noopener">${t("gmaps")}</a></div>`:""}</div>`;
 }
@@ -429,7 +527,18 @@ function refresh(full){
   $("ldsub").textContent=t("loading");
   document.querySelectorAll("#langsw button").forEach(b=>b.classList.toggle("on",b.dataset.l===lang));
   renderHeader(); renderList(); renderDays(); renderLayers(); renderLegend(); drawMap(); if(full) drawGauges();
+  if(cur&&$("muniinfo").classList.contains("show")) openMuni(cur.m,null,cur.r,cur.note);
 }
+const tip=document.createElement("div"); tip.id="tip"; document.body.appendChild(tip);
+function showTip(e){
+  const h=e.target.closest&&e.target.closest(".hit");
+  if(!h){tip.style.display="none";return}
+  tip.innerHTML=h.dataset.tip.split("||").map(esc).join("<br>"); tip.style.display="block";
+  tip.style.left=Math.max(8,Math.min(e.clientX+12,innerWidth-tip.offsetWidth-8))+"px";
+  tip.style.top=Math.max(8,e.clientY-tip.offsetHeight-14)+"px";
+}
+document.addEventListener("pointermove",showTip); document.addEventListener("pointerdown",showTip);
+document.addEventListener("click",e=>{const c=e.target.closest&&e.target.closest(".cell"); if(!c) return; e.stopPropagation(); setView(+c.dataset.day,false)},true);
 function setVh(){document.documentElement.style.setProperty("--appvh",innerHeight+"px")}
 addEventListener("resize",setVh); setVh();
 refresh(true);

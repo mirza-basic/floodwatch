@@ -18,13 +18,27 @@ TZ = ZoneInfo("Europe/Sarajevo")
 SNAPSHOT = config.STATE_DIR / "snapshot.json"
 
 
+def band(d: dict, today: str) -> dict | None:
+    """Ensemble spread per day, aligned with d["time"]; None before today.
+
+    Statistics exist only for forecast days (documented), and a past day's spread
+    would be a different thing, so they are blanked rather than shown."""
+    out = {}
+    for k in glofas.STATS:
+        col = d.get(f"river_discharge_{k}")
+        if col is None:
+            return None
+        out[k] = [None if (q is None or t < today) else round(q, 2) for t, q in zip(d["time"], col)]
+    return out
+
+
 def cycle() -> dict:
     config.ensure_state_dir()
     points = json.loads(config.POINTS_FILE.read_text())
     munis = {m["id"]: m for m in json.loads((config.DATA_DIR / "municipalities.json").read_text())}
     rivers = [p for p in points if p["river"]]
     cells = sorted({(p["lat"], p["lon"]) for p in rivers})
-    series = dict(zip(cells, glofas.fetch(cells, past_days=3, forecast_days=7)))
+    series = dict(zip(cells, glofas.fetch(cells, daily=glofas.DAILY_STATS, past_days=3, forecast_days=7)))
     today = datetime.now(TZ).date().isoformat()
 
     out = {}
@@ -37,6 +51,7 @@ def cycle() -> dict:
         r = {"river": p.get("river_name"), "near": p.get("near", False), "lat": p["lat"], "lon": p["lon"], "thresholds": p["thresholds"],
              "times": d["time"], "flows": [None if q is None else round(q, 2) for q in d["river_discharge"]]}
         r.update(levels.assess(d["time"], d["river_discharge"], p["thresholds"], today))
+        r["band"] = band(d, today)
         rec["rivers"].append(r)
         if levels.ORDER.index(r["level"]) > levels.ORDER.index(rec["level"]):
             rec["level"] = r["level"]  # a municipality is as bad as its worst river

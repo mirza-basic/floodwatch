@@ -14,6 +14,11 @@ import requests
 from . import config
 
 DAILY = "river_discharge"
+# Ensemble statistics: documented as "statistical analysis from ensemble members" and
+# available for forecast days only (not for the consolidated history). Verified 2026-10-25
+# that the API returns them with no ensemble= parameter.
+STATS = ("min", "p25", "median", "p75", "max")
+DAILY_STATS = ",".join([DAILY] + [f"river_discharge_{k}" for k in STATS])
 
 
 def _get(params: dict) -> list[dict]:
@@ -38,7 +43,7 @@ def _get(params: dict) -> list[dict]:
     raise RuntimeError(f"flood api: {last}")
 
 
-def fetch(cells: list[tuple[float, float]], batch: int = config.BATCH, **window) -> list[dict]:
+def fetch(cells: list[tuple[float, float]], batch: int = config.BATCH, daily: str = DAILY, **window) -> list[dict]:
     """Daily discharge for each cell: {time:[...], river_discharge:[...]}.
 
     `window` is either past_days/forecast_days or start_date/end_date.
@@ -50,7 +55,7 @@ def fetch(cells: list[tuple[float, float]], batch: int = config.BATCH, **window)
         part = cells[i:i + batch]
         res = _get({"latitude": ",".join(str(c[0]) for c in part),
                     "longitude": ",".join(str(c[1]) for c in part),
-                    "daily": DAILY, **window})
+                    "daily": daily, **window})
         if len(res) != len(part):
             raise RuntimeError(f"flood api returned {len(res)} for {len(part)} cells")
         out += [r["daily"] for r in res]

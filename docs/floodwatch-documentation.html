@@ -408,6 +408,9 @@ bottom bar. On a phone the panel becomes a drawer with an alert badge.</p>
   <li><strong>Header</strong> with a status dot and a count such as "4 općine pod upozorenjem" (correct Bosnian plural forms), the update time, and a warning if the data is over 9 hours old.</li>
   <li><strong>Day chips</strong> where FireWatch has time ranges: today, tomorrow, two more days, and "7 days" (the worst level over the whole window). Each shows how many municipalities are on alert.</li>
   <li><strong>Cards</strong> for municipalities on alert, with the river, the flow, the peak, a bar showing the flow as a share of the watch level, and a small forecast chart. When there is no alert, the panel lists the rivers closest to the watch level instead.</li>
+  <li><strong>Charts</strong> with a date axis, flow axis and the thresholds that are within reach of the data (a calm river is scaled to its own data, with a note that its watch level is off the chart). Behind the main forecast line is the <em>ensemble spread</em>: the middle 50% of the forecast members dark, the best-to-worst member light. Hover or tap a day for its values. Past days are drawn grey and without a spread.</li>
+  <li><strong>One sentence under every chart</strong> answers "should I worry, and when": when the watch level is first exceeded and the peak as a share of it, or, if the main forecast stays below it but the worst ensemble member does not, that. For example: "Prag pažnje se prekoračuje 27. okt (za 2 dana); vrhunac 28. okt je 174% praga pažnje."</li>
+  <li><strong>Day strip</strong> for every river: one cell per forecast day, the main forecast's level on top and the worst ensemble member's level as a thin bar below. A click picks the day on the whole map.</li>
   <li><strong>Bottom bar</strong> with one button per forecast day, coloured by the worst level that day, plus play and speed controls that step through the days.</li>
   <li><strong>Shading and river stretches</strong> by worst river level: teal for normal, then blue, violet and magenta, deliberately unlike FireWatch's orange and red. Each shown river is drawn thick (4 px, 9 px when flagged) along its <em>whole</em> course in Bosnia and Herzegovina, with a marker 1.5 times the original size (12 px, 27 px when flagged; gauge squares 18 px).</li>
   <li><strong>Clicking</strong> a river dot, a river line or a card opens that river alone, with a link to the municipality's other rivers; clicking the municipality area opens the full list.</li>
@@ -502,6 +505,9 @@ the curl test and the user's own browser did.</p>
 
 <h4>A fresh clone has no state folder</h4>
 <p>The first deploy failed because <code>state/</code> holds only gitignored output and git keeps no empty folders. Every writer now creates it first.</p>
+
+<h4>The flood API also returns ensemble statistics</h4>
+<p>Besides <code>river_discharge</code>, it returns <code>_min</code>, <code>_p25</code>, <code>_median</code>, <code>_p75</code> and <code>_max</code>, documented as "statistical analysis from ensemble members" and available for forecasts only, not for the consolidated history. The ensemble size is not stated in the documentation. A level is still judged on the main <code>river_discharge</code> line; the spread is shown beside it, because the worst member can reach a threshold the main line does not (on one day the main line read 33.6 m&sup3;/s while the members ranged from 18 to 42).</p>
 
 <h4>The RHMZ feed has no unit</h4>
 <p>Neither the feed nor the page states one, so none is shown. Guessing "cm" would
