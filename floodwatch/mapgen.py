@@ -66,7 +66,11 @@ EXTRA_CSS = r"""
   #tip{position:fixed;z-index:4000;display:none;pointer-events:none;background:#151a21;color:#e6edf3;border:1px solid #3a4655;
     border-radius:6px;padding:6px 9px;font-size:11.5px;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.5);max-width:240px}
   /* wider dialog for the chart */
-  #muniinfo{max-width:min(430px,calc(100vw - 24px));width:min(430px,calc(100vw - 24px))}
+  .leaflet-popup-content{max-height:calc(var(--appvh,100vh) - var(--ui-top,58px) - var(--ui-bottom-all,104px) - 70px);overflow-y:auto}
+  @media (max-width:600px){#muniinfo{width:calc(100vw - 72px);max-width:none;left:calc(50% + 24px)}}
+  #muniinfo{max-width:min(430px,calc(100vw - 24px));width:min(430px,calc(100vw - 24px));
+    top:calc(var(--ui-top,58px) + (var(--appvh,100vh) - var(--ui-top,58px) - var(--ui-bottom,104px)) / 2);
+    max-height:calc(var(--appvh,100vh) - var(--ui-top,58px) - var(--ui-bottom,104px) - 16px)}
   .clu{border-radius:50%;text-align:center;font-weight:700;font-size:12px;color:#fff;background:#1fb5a6;box-shadow:0 0 0 3px rgba(11,14,18,.55)}
   .clu.gauge{border-radius:6px;background:#c7d0d9;color:#111;box-shadow:0 0 0 3px rgba(17,17,17,.5)}
   .gsq{width:18px;height:18px;border:3px solid #111;box-sizing:border-box}
@@ -240,6 +244,11 @@ const map=L.map("map",{zoomControl:true,attributionControl:true}).fitBounds([[42
 map.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,
   attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> · GloFAS via <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0)'}).addTo(map);
+// Drawing order, bottom to top: municipality areas (400), river lines of calm rivers (410), river lines
+// on alert (420), calm river dots (450), gauges and group circles (600), river dots on alert (640).
+// Layers in one pane are drawn in the order they were added, so without separate panes a line added
+// later would cover an earlier dot.
+for(const [name,z] of [["linesCalm",410],["linesAlert",420],["dotsCalm",450],["dotsAlert",640]]) map.createPane(name).style.zIndex=z;
 const polys=L.layerGroup().addTo(map), lines=L.layerGroup().addTo(map), dots=L.layerGroup().addTo(map), gl=L.layerGroup().addTo(map);
 // Calm river dots and calm gauges close together are grouped into numbered circles that open when the
 // map is zoomed in. Markers on alert are never grouped. Without the plugin the pins are drawn ungrouped.
@@ -385,9 +394,9 @@ function drawMap(){
     if(!show.riv) continue;
     for(const r of m.rivers){
       const l=lvR(r), ru=l!=="normal", g=(RIV[m.id]||[]).find(x=>x.name===r.river);
-      if(g&&g.lines.length) L.polyline(g.lines,{color:COL[l],weight:ru?9:4,opacity:ru?.95:.9,lineCap:"round"}).addTo(lines).on("click",()=>openMuni(m,null,r));
+      if(g&&g.lines.length) L.polyline(g.lines,{pane:ru?"linesAlert":"linesCalm",color:COL[l],weight:ru?9:4,opacity:ru?.95:.9,lineCap:"round"}).addTo(lines).on("click",()=>openMuni(m,null,r));
       const at=atOf(m,r), key=at+","+l; if(seen[key]) continue; seen[key]=1;
-      L.circleMarker(at,{radius:ru?13.5:6,color:"#0b0e12",weight:2,fillColor:COL[l],fillOpacity:.95}).addTo(ru?dotsA:dotsC).on("click",()=>openMuni(m,null,r));
+      L.circleMarker(at,{pane:ru?"dotsAlert":"dotsCalm",radius:ru?13.5:6,color:"#0b0e12",weight:2,fillColor:COL[l],fillOpacity:.95}).addTo(ru?dotsA:dotsC).on("click",()=>openMuni(m,null,r));
     }
   }
   // Stretches of a river inside municipalities that have no point for it, drawn in the level colour of
@@ -395,7 +404,7 @@ function drawMap(){
   if(show.riv) for(const [name,list] of Object.entries(FILL)) for(const f of list){
     const m=SNAP.municipalities.find(x=>x.id===f.ref), r=m&&m.rivers.find(x=>x.river===name); if(!r) continue;
     const l=lvR(r), ru=l!=="normal";
-    L.polyline(f.lines,{color:COL[l],weight:ru?9:4,opacity:ru?.95:.9,lineCap:"round"}).addTo(lines)
+    L.polyline(f.lines,{pane:ru?"linesAlert":"linesCalm",color:COL[l],weight:ru?9:4,opacity:ru?.95:.9,lineCap:"round"}).addTo(lines)
       .on("click",()=>openMuni(m,null,r,m.name));
   }
   if(!eyeOn){ for(const g of [polys,lines,dots,gl]) map.removeLayer(g); } else { for(const g of [polys,lines,dots]) g.addTo(map); if(show.ga) gl.addTo(map); }
@@ -423,8 +432,8 @@ function gaugePopup(g){
 function drawGauges(){
   gaugesC.clearLayers(); gaugesA.clearLayers();
   for(const g of GA)
-    L.marker([g.lat,g.lon],{icon:L.divIcon({className:"",html:`<div class="gsq" style="background:${g.value==null?"transparent":(g.class?GCOL[g.class]:"#c7d0d9")}"></div>`,iconSize:[18,18]})})
-      .addTo(g.class&&g.class!=="N"?gaugesA:gaugesC).bindPopup(()=>gaugePopup(g),{autoPan:false,maxHeight:300});
+    L.marker([g.lat,g.lon],{icon:L.divIcon({className:"",html:`<div class="gsq" style="background:${g.value==null?"transparent":(g.class?GCOL[g.class]:"#c7d0d9")}"></div>`,iconSize:[18,18]}),zIndexOffset:g.class&&g.class!=="N"?1000:0})
+      .addTo(g.class&&g.class!=="N"?gaugesA:gaugesC).bindPopup(()=>gaugePopup(g),{autoPan:true});
 }
 
 // ---- side panel -----------------------------------------------------------------
@@ -561,8 +570,37 @@ function showTip(e){
 document.addEventListener("pointermove",showTip); document.addEventListener("pointerdown",showTip);
 document.addEventListener("click",e=>{const c=e.target.closest&&e.target.closest(".cell"); if(!c) return; e.stopPropagation(); setView(+c.dataset.day,false)},true);
 function setVh(){document.documentElement.style.setProperty("--appvh",innerHeight+"px")}
-addEventListener("resize",setVh); setVh();
-refresh(true);
+// Free space for dialogs and popups: below the top controls and above the bottom controls (the bottom
+// bar, and the legend and attribution stacked over it), with a gap. It is measured from the elements
+// themselves and re-measured when they change size, so it follows the bottom bar when it wraps.
+const UI_GAP=12;
+// insets(span): with a horizontal span {left,right}, only controls that overlap that span count at the bottom
+// (the dialog is centred, so the legend and attribution at the right edge usually do not); without one,
+// every bottom control counts (a popup can be anywhere).
+function insets(span){
+  const vis=e=>e&&e.getBoundingClientRect().height>0;
+  const topPx=Math.max(...["langsw","layersbtn","drawer-btn"].map($).filter(vis).map(e=>e.getBoundingClientRect().bottom))+UI_GAP;
+  const tops=[$("timebar"),$("lgbtn"),document.querySelector(".leaflet-control-attribution")].filter(vis)
+    .map(e=>e.getBoundingClientRect()).filter(r=>!span||(r.left<span.right&&r.right>span.left)).map(r=>r.top);
+  return {top:Math.ceil(topPx), bottom:Math.ceil(innerHeight-Math.min(...tops)+UI_GAP)};
+}
+// Horizontal extent of the municipality dialog, measured by showing it invisibly for a moment.
+function dialogSpan(){
+  const el=$("muniinfo"), keep=el.style.cssText; el.style.cssText+=";display:block;visibility:hidden";
+  const r=el.getBoundingClientRect(); el.style.cssText=keep; return {left:r.left,right:r.right};
+}
+function setInsets(){
+  const st=document.documentElement.style, all=insets(), dlg=insets(dialogSpan());
+  st.setProperty("--ui-top",all.top+"px"); st.setProperty("--ui-bottom",dlg.bottom+"px"); st.setProperty("--ui-bottom-all",all.bottom+"px");
+}
+// Leaflet pans a popup into view using fixed padding options; use the measured insets instead.
+// (Leaflet 1.9.4 is pinned; _adjustPan is its internal hook for this.)
+const adjustPan=L.Popup.prototype._adjustPan;
+L.Popup.prototype._adjustPan=function(){const i=insets(); this.options.autoPanPaddingTopLeft=L.point(16,i.top); this.options.autoPanPaddingBottomRight=L.point(16,i.bottom); return adjustPan.apply(this,arguments)};
+addEventListener("resize",()=>{setVh(); setInsets()});
+if(window.ResizeObserver){const ro=new ResizeObserver(setInsets); ["timebar","langsw","layersbtn","drawer-btn"].forEach(id=>ro.observe($(id)));}
+setVh(); setInsets();
+refresh(true); setInsets();
 setTimeout(()=>$("loading").classList.add("hide"),450);
 </script></body></html>"""
 

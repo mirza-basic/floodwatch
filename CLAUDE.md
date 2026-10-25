@@ -351,6 +351,30 @@ holding both, so the eye button and the layer checkbox still work; never call `d
 real DOM click does), and zoom animations never finish under headless virtual time, so set
 `map.options.zoomAnimation=false` and `map._zoomAnimated=false` before asserting a zoom change.
 
+## Stacking order and room around dialogs (2026-10-25)
+
+**Panes.** Vector layers in one pane are painted in the order they were added, so with one shared SVG a line
+added after a dot covered it. `mapgen` creates panes: `linesCalm` 410, `linesAlert` 420, `dotsCalm` 450,
+(Leaflet `markerPane` 600: gauges, group circles), `dotsAlert` 640; municipality areas stay in the overlay
+pane (400). Measured on the alert scenario by reading what is on top at each dot's centre
+(`document.elementFromPoint`): 13 of 222 dots covered (9 by a river line) with the old single pane, 1
+(by another dot) with panes. The live site, which had no alerts, showed 0 covered, so the problem only
+appears when thick alert lines exist. Testing landmines: the cluster plugin draws a dot only after the zoom
+ends, so wait before testing a dot (a first test counted unrendered dots as covered); and a "before"
+measurement must come from the real old code, not from an unrelated page.
+
+**Insets.** `insets()` measures the free band: below the top controls (language switch, layers and drawer
+buttons) and above the bottom controls (bottom bar, and the legend button and attribution stacked over it).
+`setInsets()` writes `--ui-top`, `--ui-bottom` (dialog: only controls that overlap its horizontal span
+count, measured by showing it invisibly) and `--ui-bottom-all` (popups: every control counts), after the
+first draw, on resize and through a `ResizeObserver`. CSS uses them for the dialog's position and
+max-height and for `.leaflet-popup-content`. Leaflet pans a popup into view with fixed padding options, so
+`L.Popup.prototype._adjustPan` is wrapped to use the measured insets - **an internal method of the pinned
+Leaflet 1.9.4; re-check it if Leaflet is upgraded.** On screens up to 600 px wide the dialog is narrower
+and shifted right to clear the zoom buttons. Checked at 1400x900, 1100x560, 700x600, 500x700 and 500x560:
+no overlap for the dialog or a gauge popup. Pan animation never finishes under headless virtual time, so
+the test replaces `map.panBy` with a non-animated one.
+
 ## Documentation
 
 `docs/floodwatch-documentation.html` is the system documentation, same idea as
