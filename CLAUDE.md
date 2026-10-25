@@ -301,6 +301,16 @@ had changed, so it silently inserted nothing and the strip rendered as plain whi
 that an anchor exists before replacing. `#muniinfo` has `max-width:280px` in the shared stylesheet;
 the chart popup overrides it (430px). Poll weight: 6 variables x ~150 cells x 10 days.
 
+## One overlay at a time
+
+`closeOverlays(except)` in `mapgen.py` closes the municipality dialog (`#muniinfo`), Leaflet's popup
+(gauges), the layers menu, the legend and the tooltip; every opener calls it (`openMuni`, the
+`popupopen` event, the layers and legend buttons, `drawer`). The day-change re-render of an open
+dialog goes through `openMuni` too and is safe, because opening anything else already closed the
+dialog. Testing landmine: Leaflet keeps a closed popup in the DOM until its fade finishes and keeps
+`map._popup` set, so "is a popup open" must be `map._popup && map.hasLayer(map._popup)`; my first
+two tests reported failures that were this artefact, not a bug.
+
 ## Documentation
 
 `docs/floodwatch-documentation.html` is the system documentation, same idea as
