@@ -49,6 +49,9 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         body = MAP.read_bytes()
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
+        # The page is regenerated every poll under the same URL; without this a browser keeps showing
+        # the copy it fetched first (a stale map that looked like a missing feature).
+        self.send_header("Cache-Control", "no-store")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
