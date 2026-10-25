@@ -22,10 +22,6 @@ EXTRA_CSS = r"""
   .leaflet-container{background:#0b0e12;font:inherit}
   .leaflet-bar a{background:#151a21;color:#e6edf3;border-bottom:1px solid #28313d}
   .leaflet-bar a:hover{background:#1c232c}
-  .tool{display:flex;align-items:center;justify-content:center;width:30px;height:30px;
-    background:#151a21;border:1px solid #28313d;border-radius:4px;color:#e6edf3;cursor:pointer;
-    font-size:15px;box-shadow:0 1px 5px rgba(0,0,0,.45);margin-top:8px}
-  .tool.off{color:#6b7785}
   #layersbtn{position:absolute;top:10px;right:10px;z-index:1000;background:rgba(21,26,33,.94);
     border:1px solid var(--line);color:var(--fg);border-radius:9px;padding:8px 13px;font:inherit;
     font-size:12.5px;cursor:pointer;backdrop-filter:blur(8px)}
@@ -147,7 +143,7 @@ const I18N={
   now:"Sada",peakv:"Vrhunac",day:"Dan",flow:"Protok",ofWatch:"praga pažnje",
   near:"obližnja ćelija modela, izvan općine",river:"Rijeka",show:"Prikaži",gmaps:"Google Maps",
   noriver:"Nema značajnog vodotoka u modelu",forecast:"Prognoza",legend:"Legenda",layers:"Slojevi",
-  lRiv:"Rijeke (prognoza)",lMuni:"Općine",lGa:"Mjerenja",hide:"Sakrij/prikaži sloj",
+  lRiv:"Rijeke (prognoza)",lMuni:"Općine",lGa:"Mjerenja",hideMarkers:"Sakrij oznake",showMarkers:"Prikaži oznake",
   legendTxt:"Nivo je prognoza protoka u ćeliji modela (~5 km) koja dostiže vrijednost koja se javlja jednom u 2, 5 ili 20 godina. Nije zvanično upozorenje.",
   docs:"Dokumentacija",src:"Prognoza protoka",map:"rijeke i granice",
   attrNote:"Model prognoze, nije zvanično upozorenje.",
@@ -178,7 +174,7 @@ const I18N={
   now:"Now",peakv:"Peak",day:"Day",flow:"Discharge",ofWatch:"of the watch level",
   near:"nearby model cell, outside the municipality",river:"River",show:"Show",gmaps:"Google Maps",
   noriver:"No significant river in the model",forecast:"Forecast",legend:"Legend",layers:"Layers",
-  lRiv:"Rivers (forecast)",lMuni:"Municipalities",lGa:"Gauges",hide:"Hide/show layer",
+  lRiv:"Rivers (forecast)",lMuni:"Municipalities",lGa:"Gauges",hideMarkers:"Hide markers",showMarkers:"Show markers",
   legendTxt:"A level is a forecast: the flow in a ~5 km model cell reaches a value that occurs about once in 2, 5 or 20 years. It is not an official warning.",
   docs:"Documentation",src:"River-flow forecast",map:"rivers and boundaries",
   attrNote:"Model forecast, not an official warning.",
@@ -262,7 +258,7 @@ const dotsC=mkCluster("river"), dotsA=L.layerGroup(), gaugesC=mkCluster("gauge")
 dots.addLayer(dotsC); dots.addLayer(dotsA); gl.addLayer(gaugesC); gl.addLayer(gaugesA);
 const show={riv:true,muni:true,ga:true};
 map.on("popupopen",()=>closeOverlays("popup"));
-let eyeOn=true;
+let markersOn=true;   // the eye button: hides the pins (river dots and gauges), not the map beneath them
 
 // ---- charts -----------------------------------------------------------------------------
 // One chart per river: the main forecast line, the ensemble spread behind it (middle 50% of the members
@@ -407,7 +403,7 @@ function drawMap(){
     L.polyline(f.lines,{pane:ru?"linesAlert":"linesCalm",color:COL[l],weight:ru?9:4,opacity:ru?.95:.9,lineCap:"round"}).addTo(lines)
       .on("click",()=>openMuni(m,null,r,m.name));
   }
-  if(!eyeOn){ for(const g of [polys,lines,dots,gl]) map.removeLayer(g); } else { for(const g of [polys,lines,dots]) g.addTo(map); if(show.ga) gl.addTo(map); }
+  applyMarkers();
 }
 
 // ---- gauges -------------------------------------------------------------------
@@ -531,13 +527,26 @@ function renderLayers(){
 }
 $("layersbtn").onclick=()=>{const o=!$("layerspanel").classList.contains("open"); if(o) closeOverlays("layers"); $("layerspanel").classList.toggle("open",o)};
 $("layerspanel").addEventListener("change",e=>{const k=e.target.dataset.k; if(!k) return; show[k]=e.target.checked;
-  if(k==="ga"){e.target.checked?gl.addTo(map):map.removeLayer(gl)} else drawMap()});
-const tools=L.control({position:"topleft"});
-tools.onAdd=()=>{const d=L.DomUtil.create("div","");
-  d.innerHTML=`<div class="tool" id="eyebtn" role="button" tabindex="0" title="${t("hide")}" aria-label="${t("hide")}">&#128065;</div>`;
-  L.DomEvent.disableClickPropagation(d);
-  d.querySelector("#eyebtn").onclick=ev=>{eyeOn=!eyeOn;ev.currentTarget.classList.toggle("off",!eyeOn);drawMap()}; return d};
-tools.addTo(map);
+  if(k==="ga") applyMarkers(); else drawMap()});
+// Eye button: hides or shows the pins. The pin groups are detached from the map, not cleared, because the
+// groups are rebuilt on every redraw and a cleared group would fill up again. The hidden state is not stored.
+const EYE_ON='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1.6 12S5.3 5 12 5s10.4 7 10.4 7-3.7 7-10.4 7S1.6 12 1.6 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9.9 5.2A9.8 9.8 0 0 1 12 5c6.7 0 10.4 7 10.4 7a18 18 0 0 1-3.2 4.1"/><path d="M6.4 6.5A17.6 17.6 0 0 0 1.6 12S5.3 19 12 19a9.9 9.9 0 0 0 4.2-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="M2 2l20 20"/></svg>';
+let eyeEl=null;
+const eyeBtn=L.control({position:"topleft"});
+eyeBtn.onAdd=()=>{
+  const d=L.DomUtil.create("div","leaflet-bar");
+  eyeEl=L.DomUtil.create("a","eye",d); eyeEl.href="#"; eyeEl.setAttribute("role","button");
+  L.DomEvent.on(eyeEl,"click",e=>{L.DomEvent.preventDefault(e); L.DomEvent.stopPropagation(e); markersOn=!markersOn; applyMarkers()});
+  applyMarkers(); return d;
+};
+eyeBtn.addTo(map);
+// Attach or detach the pin groups according to markersOn (the gauges also follow their layer checkbox).
+function applyMarkers(){
+  const want=[[dots,markersOn],[gl,markersOn&&show.ga]];
+  for(const [g,on] of want){ if(on){ if(!map.hasLayer(g)) g.addTo(map) } else if(map.hasLayer(g)) map.removeLayer(g) }
+  if(eyeEl){ eyeEl.innerHTML=markersOn?EYE_ON:EYE_OFF; eyeEl.title=t(markersOn?"hideMarkers":"showMarkers"); eyeEl.setAttribute("aria-pressed",markersOn?"false":"true"); eyeEl.setAttribute("aria-label",eyeEl.title) }
+}
 const legend=L.control({position:"bottomright"});
 legend.onAdd=()=>{const d=L.DomUtil.create("div","legend"); L.DomEvent.disableClickPropagation(d);
   d.innerHTML=`<div class="legend-body" id="lgbody"></div><button class="legend-toggle" id="lgbtn" type="button"></button>`;
@@ -556,7 +565,7 @@ function refresh(full){
   $("drawer-label").textContent=t("rivers").replace(/^./,c=>c.toUpperCase());
   $("ldsub").textContent=t("loading");
   document.querySelectorAll("#langsw button").forEach(b=>b.classList.toggle("on",b.dataset.l===lang));
-  renderHeader(); renderList(); renderDays(); renderLayers(); renderLegend(); drawMap(); if(full) drawGauges();
+  renderHeader(); renderList(); renderDays(); renderLayers(); renderLegend(); drawMap(); applyMarkers(); if(full) drawGauges();
   if(cur&&$("muniinfo").classList.contains("show")) openMuni(cur.m,null,cur.r,cur.noteMuni,true);
 }
 const tip=document.createElement("div"); tip.id="tip"; document.body.appendChild(tip);

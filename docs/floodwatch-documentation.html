@@ -419,7 +419,7 @@ bottom bar. On a phone the panel becomes a drawer with an alert badge.</p>
   <li><strong>Grouped pins.</strong> Calm river dots and calm gauge squares that lie close together are grouped into numbered circles (teal for rivers, grey squares for gauges); clicking a circle zooms in, and from zoom 11 every pin is drawn on its own. <em>Markers on alert are never grouped</em>, so a river at watch level or above, or a gauge in a class above Normal, is always visible. Grouping uses the Leaflet.markercluster plugin; if it cannot be loaded the pins are drawn ungrouped.</li>
   <li><strong>Stacking order.</strong> From the bottom: municipality areas, river lines of calm rivers, river lines on alert, calm river dots, gauges and grouped circles, and river dots on alert on top. Each kind of layer has its own map pane, so a river line is never drawn over a dot.</li>
   <li><strong>Room around dialogs.</strong> The river dialog and gauge popups keep clear of the language switch, the layers button, the drawer button, the zoom buttons, the legend, the attribution and the bottom bar. The free space is measured from those elements, so it follows the bottom bar when it wraps on a phone; a popup is panned into view instead of opening under a control.</li>
-  <li><strong>Layers</strong> (rivers, municipalities, gauges when present), an eye button that hides them all, and a legend.</li>
+  <li><strong>Layers</strong> (rivers, municipalities, gauges when present), an eye button that hides the pins (river dots and gauges) while the areas and river lines stay, and a legend.</li>
   <li><strong>Bosnian by default</strong>, English on a toggle, remembered per device.</li>
 </ul>
 

@@ -375,6 +375,14 @@ and shifted right to clear the zoom buttons. Checked at 1400x900, 1100x560, 700x
 no overlap for the dialog or a gauge popup. Pan animation never finishes under headless virtual time, so
 the test replaces `map.panBy` with a non-animated one.
 
+## Eye button (same as FireWatch)
+
+A `leaflet-bar` button with an eye / crossed-eye SVG, `aria-pressed`, a title that follows the language.
+`markersOn` hides only the **pins**: `dots` and `gl` are detached from the map (not cleared - they are
+rebuilt on every redraw), while municipality areas and river lines stay. Gauges also follow their layer
+checkbox (`applyMarkers()` combines both). The state is not stored and starts "on" at every load; unlike
+FireWatch there is no live data refresh, so there is nothing else to reset it.
+
 ## Documentation
 
 `docs/floodwatch-documentation.html` is the system documentation, same idea as
