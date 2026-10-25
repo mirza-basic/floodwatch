@@ -244,6 +244,7 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,
   attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> · GloFAS via <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0)'}).addTo(map);
 const polys=L.layerGroup().addTo(map), lines=L.layerGroup().addTo(map), dots=L.layerGroup().addTo(map), gl=L.layerGroup().addTo(map);
 const show={riv:true,muni:true,ga:true};
+map.on("popupopen",()=>closeOverlays("popup"));
 let eyeOn=true;
 
 // ---- charts -----------------------------------------------------------------------------
@@ -329,8 +330,18 @@ function riverBlock(r){
 }
 // A river dot, line or card opens just that river, with a link to the rest; the
 // municipality area opens the full list (the reader asked about the whole place).
+// Only one overlay at a time: opening any of them closes the others. Without this a municipality
+// dialog, a gauge popup, the layers menu and the legend could all pile up on top of each other.
+function closeOverlays(except){
+  if(except!=="muni") $("muniinfo").classList.remove("show");
+  if(except!=="popup") map.closePopup();
+  if(except!=="layers") $("layerspanel").classList.remove("open");
+  if(except!=="legend"){ const lg=document.querySelector(".legend"); if(lg) lg.classList.remove("open"); }
+  if(typeof tip!=="undefined") tip.style.display="none";
+}
 let cur=null;
 function openMuni(m,at,r,note){
+  closeOverlays("muni");
   cur={m,r,note};
   if(at) map.setView(at,Math.max(map.getZoom(),10),{animate:false});
   const body=$("muniinfo-body");
@@ -488,7 +499,7 @@ $("play").onclick=()=>timer?stopPlay():startPlay();
 $("speed").onclick=()=>{speed=speed===1?2:speed===2?4:1;$("speed").innerHTML=speed+"&times;"; if(timer) startPlay()};
 
 // ---- chrome: drawer, language, layers, eye, legend ----------------------------------------
-function drawer(open){document.body.classList.toggle("drawer-open",open);$("side").classList.toggle("open",open);
+function drawer(open){if(open) closeOverlays();document.body.classList.toggle("drawer-open",open);$("side").classList.toggle("open",open);
   $("backdrop").classList.toggle("on",open);$("drawer-btn").setAttribute("aria-expanded",open)}
 $("drawer-btn").onclick=()=>drawer(true); $("drawer-close").onclick=()=>drawer(false); $("backdrop").onclick=()=>drawer(false);
 $("muniinfo").querySelector(".miclose").onclick=()=>$("muniinfo").classList.remove("show");
@@ -499,7 +510,7 @@ function renderLayers(){
     <label><input type="checkbox" data-k="muni" ${show.muni?"checked":""}> ${t("lMuni")}</label>`+
     (GA.length?`<label><input type="checkbox" data-k="ga" ${show.ga?"checked":""}> ${t("lGa")} (${GA.length})</label>`:"");
 }
-$("layersbtn").onclick=()=>$("layerspanel").classList.toggle("open");
+$("layersbtn").onclick=()=>{const o=!$("layerspanel").classList.contains("open"); if(o) closeOverlays("layers"); $("layerspanel").classList.toggle("open",o)};
 $("layerspanel").addEventListener("change",e=>{const k=e.target.dataset.k; if(!k) return; show[k]=e.target.checked;
   if(k==="ga"){e.target.checked?gl.addTo(map):map.removeLayer(gl)} else drawMap()});
 const tools=L.control({position:"topleft"});
@@ -511,7 +522,7 @@ tools.addTo(map);
 const legend=L.control({position:"bottomright"});
 legend.onAdd=()=>{const d=L.DomUtil.create("div","legend"); L.DomEvent.disableClickPropagation(d);
   d.innerHTML=`<div class="legend-body" id="lgbody"></div><button class="legend-toggle" id="lgbtn" type="button"></button>`;
-  d.querySelector("#lgbtn").onclick=()=>d.classList.toggle("open"); return d};
+  d.querySelector("#lgbtn").onclick=()=>{const o=!d.classList.contains("open"); if(o) closeOverlays("legend"); d.classList.toggle("open",o)}; return d};
 legend.addTo(map);
 function renderLegend(){
   $("lgbtn").textContent="▥ "+t("legend");
