@@ -116,6 +116,7 @@ __CSS__
       __SPLASH_SVG__
     </div>
     <div class="ldsub" id="ldsub">Loading map&hellip;</div>
+    <div class="ldsig">Created by Mirza Basic</div>
   </div>
 </div>
 <button id="drawer-btn" aria-controls="side" aria-expanded="false" aria-label="Show list">

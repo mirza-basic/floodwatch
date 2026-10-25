@@ -386,17 +386,21 @@ FireWatch there is no live data refresh, so there is nothing else to reset it.
 ## Logo and splash (2026-10-25)
 
 Artwork in `docs/img/`: `app-icon.svg` (header logo), `app-icon-mark.svg` (favicon: thicker orbit, simpler
-satellite), `app-icon-180.png` (phone home-screen icon, rendered from the SVG with headless Chrome and
+rain cloud), `app-icon-180.png` (phone home-screen icon, rendered from the SVG with headless Chrome and
 `--default-background-color=00000000` so the corners are transparent) and `splash-screen.svg`. The same
-composition as FireWatch's (dark rounded icon, orbit, satellite; splash with a curved horizon, scanning beam
-and reticle) with the fire replaced by a water drop, a river valley and rising water. `mapgen` inlines them
+composition as FireWatch's (dark rounded icon with an orbit; splash with a curved horizon and a reticle) with the fire
+replaced by a water drop, a river valley and rising water, and the satellite replaced by a **rain cloud**
+(the app uses no satellite data - GloFAS through Open-Meteo, OpenStreetMap, agency gauges - so a satellite
+would have implied monitoring from space). `mapgen` inlines them
 (`_svg_uri`, `_splash_svg`, `_touch_icon_uri`); open `splash-screen.svg` in a browser to preview it. Its CSS
 classes and ids are prefixed `fl` so they cannot clash with `ui.css`. The reticle text is decoration (a fixed
-coordinate near Zavidovici, "STATUS: MONITORING"); it is not data and claims no alert. The overlay stays at
+coordinate near Zavidovici, "FORECAST: 7 DAYS", "MODEL: GLOFAS"); it claims no alert and no monitoring. The overlay stays at
 least `LOAD_MIN_MS` = 3000 ms like FireWatch. Testing landmine: headless Chrome's virtual time does not
 reproduce real timing (an overlay looked half-faded at 1.3 s), so the timing was checked with real-time
-screenshots (`--timeout`): splash at 1.5 s and 2.7 s, map at 4.8 s. No signature line is shown (FireWatch has
-one).
+screenshots (`--timeout`): splash at 1.5 s and 2.7 s, map at 4.8 s. The loading screen carries the signature
+"Created by Mirza Basic" (`.ldsig`), as FireWatch's does. Landmine: leftover headless browsers from a
+timed-out command stall CSS animations (one-shot animations stayed at frame 0 and looked like a bug in
+the artwork) - wrap Chrome in a process with a kill timeout and check `pgrep -f headless=new` first.
 
 ## Documentation
 

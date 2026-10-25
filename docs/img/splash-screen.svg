@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- FloodWatch loading screen: a satellite fading in above a curved horizon, scanning a river valley with a
-     beam while a HUD reticle locks on and the water rises. Self-contained (no external assets): open it
+<!-- FloodWatch loading screen: a rain cloud fading in above a curved horizon, rain falling on a river valley
+     while a HUD reticle locks on and the water rises. Self-contained (no external assets): open it
      directly in a browser to preview it. floodwatch/mapgen.py reads this file and splices its <svg>...</svg>
      into the page's loading overlay (see _splash_svg() and the __SPLASH_SVG__ placeholder), so this is the
      only copy to edit. This comment and the XML prolog are removed before splicing. -->
@@ -30,13 +30,13 @@
       <stop offset="100%" stop-color="#1D4ED8"/>
     </linearGradient>
     <linearGradient id="flBeamFade" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.4"/>
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.3"/>
       <stop offset="100%" stop-color="#38BDF8" stop-opacity="0"/>
     </linearGradient>
     <clipPath id="flDome"><path d="M -400,1400 A 800,800 0 0,1 1200,1400 Z"/></clipPath>
     <style>
-      /* The first part (satellite, beam, HUD, rising water) plays once over 3 s and holds its last frame.
-         Only the small ambient loops (ripples, rain) repeat. Animated properties are limited to opacity
+      /* The first part (cloud, rain haze, HUD, rising water) plays once over 3 s and holds its last frame.
+         Only the small ambient loops (ripples, falling rain) repeat. Animated properties are limited to opacity
          and transform on small groups; the planet is static. */
       @keyframes flRise {
         0%, 35% { transform: scale(1); }
@@ -47,12 +47,12 @@
         transform-origin: 400px 640px;
       }
       @keyframes flFadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
-      .fl-satellite {
-        transform: translate(400px, 170px);
+      .fl-cloud {
+        transform: translate(400px, 150px) scale(1.9);
         opacity: 0;
         animation: flFadeIn .6s ease-out .15s 1 forwards;
       }
-      .fl-beam { animation: flFadeIn 1.6s ease-out 1.0s 1 both; }
+      .fl-haze { animation: flFadeIn 1.6s ease-out 1.0s 1 both; }
       @keyframes flHud {
         0%, 55% { opacity: 0; transform: scale(0.6); }
         80%, 100% { opacity: 1; transform: scale(1); }
@@ -74,8 +74,8 @@
       }
       .fl-rain { animation: flRain 1.2s linear infinite; }
       @media (prefers-reduced-motion: reduce) {
-        .fl-rise, .fl-satellite, .fl-beam, .fl-hud, .fl-ripple-1, .fl-ripple-2, .fl-rain { animation: none; }
-        .fl-satellite, .fl-beam, .fl-hud { opacity: 1; }
+        .fl-rise, .fl-cloud, .fl-haze, .fl-hud, .fl-ripple-1, .fl-ripple-2, .fl-rain { animation: none; }
+        .fl-cloud, .fl-haze, .fl-hud { opacity: 1; }
       }
     </style>
   </defs>
@@ -113,10 +113,9 @@
     <ellipse class="fl-ripple-2" cx="400" cy="618" rx="46" ry="8" fill="none" stroke="#7DD3FC" stroke-width="1.5"/>
   </g>
 
-  <!-- Rain in the sky beside the beam. -->
-  <g class="fl-rain" stroke="#7DD3FC" stroke-width="1.4" stroke-linecap="round">
-    <path d="M 250,300 l -4,12"/><path d="M 290,360 l -4,12"/><path d="M 330,280 l -4,12"/><path d="M 210,420 l -4,12"/>
-    <path d="M 470,310 l -4,12"/><path d="M 510,370 l -4,12"/><path d="M 550,290 l -4,12"/><path d="M 590,430 l -4,12"/>
+  <!-- Rain falling from the cloud over the valley. -->
+  <g class="fl-rain" stroke="#7DD3FC" stroke-width="1.4" stroke-linecap="round" fill="none">
+    <path d="M 382,230 l -4,12 M 390,230 l -4,12 M 398,230 l -4,12 M 406,230 l -4,12 M 414,230 l -4,12 M 378,264 l -4,12 M 391,264 l -4,12 M 403,264 l -4,12 M 416,264 l -4,12 M 428,264 l -4,12 M 362,298 l -4,12 M 379,298 l -4,12 M 396,298 l -4,12 M 413,298 l -4,12 M 430,298 l -4,12 M 362,332 l -4,12 M 384,332 l -4,12 M 405,332 l -4,12 M 427,332 l -4,12 M 449,332 l -4,12 M 341,366 l -4,12 M 367,366 l -4,12 M 393,366 l -4,12 M 420,366 l -4,12 M 446,366 l -4,12 M 346,400 l -4,12 M 377,400 l -4,12 M 408,400 l -4,12 M 438,400 l -4,12 M 469,400 l -4,12 M 321,434 l -4,12 M 356,434 l -4,12 M 391,434 l -4,12 M 426,434 l -4,12 M 462,434 l -4,12 M 331,468 l -4,12 M 370,468 l -4,12 M 410,468 l -4,12 M 450,468 l -4,12 M 489,468 l -4,12 M 301,502 l -4,12 M 345,502 l -4,12 M 389,502 l -4,12 M 433,502 l -4,12 M 477,502 l -4,12 M 315,536 l -4,12 M 363,536 l -4,12 M 412,536 l -4,12 M 461,536 l -4,12 M 510,536 l -4,12 M 280,570 l -4,12 M 333,570 l -4,12 M 387,570 l -4,12 M 440,570 l -4,12 M 493,570 l -4,12"/>
   </g>
 
   <g class="fl-hud">
@@ -129,25 +128,22 @@
     </g>
     <circle cx="400" cy="600" r="68" fill="none" stroke="#2DD4BF" stroke-width="1" stroke-dasharray="16 32" opacity="0.6"/>
     <g font-family="monospace" font-size="7" font-weight="bold" fill="#38BDF8">
-      <text x="475" y="564">LAT: 44.44 N</text>
-      <text x="475" y="576">LON: 18.15 E</text>
-      <text x="475" y="588">FORECAST: 7 DAYS</text>
-      <text x="475" y="600" fill="#2DD4BF">STATUS: MONITORING</text>
+      <text x="475" y="576">LAT: 44.44 N</text>
+      <text x="475" y="588">LON: 18.15 E</text>
+      <text x="475" y="600">FORECAST: 7 DAYS</text>
+      <text x="475" y="612" fill="#2DD4BF">MODEL: GLOFAS</text>
     </g>
   </g>
 
-  <!-- The beam is fixed at the satellite's resting point (400,170); it only appears after the satellite has arrived. -->
-  <polygon class="fl-beam" transform="translate(400, 170)" points="0,0 -140,430 140,430" fill="url(#flBeamFade)"/>
+  <!-- A faint cone of rain haze from the cloud's resting point (400,170); it appears after the cloud has arrived. -->
+  <polygon class="fl-haze" transform="translate(400, 170)" points="0,0 -140,430 140,430" fill="url(#flBeamFade)"/>
 
-  <g class="fl-satellite">
-    <rect x="-110" y="-10" width="65" height="20" rx="2" fill="url(#flSolar)" stroke="#334155" stroke-width="1"/>
-    <line x1="-45" y1="0" x2="-20" y2="0" stroke="#94A3B8" stroke-width="3"/>
-    <rect x="45" y="-10" width="65" height="20" rx="2" fill="url(#flSolar)" stroke="#334155" stroke-width="1"/>
-    <line x1="20" y1="0" x2="45" y2="0" stroke="#94A3B8" stroke-width="3"/>
-    <rect x="-20" y="-16" width="40" height="32" rx="4" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
-    <circle cx="0" cy="0" r="8" fill="#1E293B"/>
-    <path d="M -12,16 Q 0,26 12,16 Z" fill="#94A3B8"/>
-    <circle cx="0" cy="24" r="2.5" fill="#38BDF8"/>
+  <g class="fl-cloud">
+    <circle cx="-30" cy="2" r="22" fill="#E2E8F0"/>
+    <circle cx="2" cy="-12" r="32" fill="#E2E8F0"/>
+    <circle cx="36" cy="0" r="24" fill="#E2E8F0"/>
+    <rect x="-52" y="2" width="112" height="24" rx="12" fill="#E2E8F0"/>
+    <path d="M -52,14 H 60 a12,12 0 0 1 -12,12 H -40 a12,12 0 0 1 -12,-12 Z" fill="#94A3B8" opacity="0.55"/>
   </g>
 
   <g transform="translate(400, 700)" text-anchor="middle">
