@@ -383,6 +383,21 @@ rebuilt on every redraw), while municipality areas and river lines stay. Gauges 
 checkbox (`applyMarkers()` combines both). The state is not stored and starts "on" at every load; unlike
 FireWatch there is no live data refresh, so there is nothing else to reset it.
 
+## Logo and splash (2026-10-25)
+
+Artwork in `docs/img/`: `app-icon.svg` (header logo), `app-icon-mark.svg` (favicon: thicker orbit, simpler
+satellite), `app-icon-180.png` (phone home-screen icon, rendered from the SVG with headless Chrome and
+`--default-background-color=00000000` so the corners are transparent) and `splash-screen.svg`. The same
+composition as FireWatch's (dark rounded icon, orbit, satellite; splash with a curved horizon, scanning beam
+and reticle) with the fire replaced by a water drop, a river valley and rising water. `mapgen` inlines them
+(`_svg_uri`, `_splash_svg`, `_touch_icon_uri`); open `splash-screen.svg` in a browser to preview it. Its CSS
+classes and ids are prefixed `fl` so they cannot clash with `ui.css`. The reticle text is decoration (a fixed
+coordinate near Zavidovici, "STATUS: MONITORING"); it is not data and claims no alert. The overlay stays at
+least `LOAD_MIN_MS` = 3000 ms like FireWatch. Testing landmine: headless Chrome's virtual time does not
+reproduce real timing (an overlay looked half-faded at 1.3 s), so the timing was checked with real-time
+screenshots (`--timeout`): splash at 1.5 s and 2.7 s, map at 4.8 s. No signature line is shown (FireWatch has
+one).
+
 ## Documentation
 
 `docs/floodwatch-documentation.html` is the system documentation, same idea as

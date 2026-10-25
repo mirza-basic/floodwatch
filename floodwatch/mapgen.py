@@ -10,11 +10,36 @@ day chips, the bottom bar and the 7-day peak view agree.
 """
 from __future__ import annotations
 
+import base64
 import json
+import re
+import urllib.parse
 
 from . import config
 
 CSS = (config.ROOT / "floodwatch" / "ui.css").read_text(encoding="utf8")
+
+IMG = config.ROOT / "docs" / "img"
+
+
+def _svg_uri(name: str) -> str:
+    """An SVG file as a data: URI. Used through <img> or <link>, so its gradient ids cannot clash with the page's."""
+    svg = re.sub(r">\s+<", "><", (IMG / name).read_text(encoding="utf-8")).strip()
+    return "data:image/svg+xml," + urllib.parse.quote(svg, safe="/:=")
+
+
+def _splash_svg() -> str:
+    """The splash scene's own <svg>...</svg>, without the XML prolog and the header comment.
+
+    The opening tag is found by its xmlns attribute: the header comment is free text that can itself
+    contain "<svg>"."""
+    text = (IMG / "splash-screen.svg").read_text(encoding="utf-8")
+    return text[text.index("<svg xmlns="):].strip()
+
+
+def _touch_icon_uri() -> str:
+    """The 180 px PNG of the logo, used as the icon when the page is added to a phone's home screen."""
+    return "data:image/png;base64," + base64.b64encode((IMG / "app-icon-180.png").read_bytes()).decode()
 
 EXTRA_CSS = r"""
   /* ---- additions to ui.css ---- */
@@ -76,7 +101,8 @@ TEMPLATE = r"""<!doctype html>
 <html lang="bs"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FloodWatch Bosna i Hercegovina</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F172A'/%3E%3Cpath d='M32 10C32 10 16 30 16 40a16 16 0 0 0 32 0C48 30 32 10 32 10z' fill='%235b8cff'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="__FAVICON_URI__">
+<link rel="apple-touch-icon" href="__TOUCH_URI__">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" integrity="sha384-pmjIAcz2bAn0xukfxADbZIb3t8oRT9Sv0rvO+BR5Csr6Dhqq+nZs59P0pPKQJkEV" crossorigin="">
@@ -87,7 +113,7 @@ __CSS__
 <div id="loading" role="status" aria-live="polite">
   <div class="ldwrap">
     <div class="ldscene" aria-hidden="true">
-      <svg viewBox="0 0 64 64" width="96" height="96"><path d="M32 8C32 8 15 29 15 40a17 17 0 0 0 34 0C49 29 32 8 32 8z" fill="#5b8cff"/></svg>
+      __SPLASH_SVG__
     </div>
     <div class="ldsub" id="ldsub">Loading map&hellip;</div>
   </div>
@@ -104,7 +130,7 @@ __CSS__
   <div id="side">
     <header>
       <button id="drawer-close" aria-label="Close list">&times;</button>
-      <h1><span class="dot" id="hdot"></span><span id="htitle">FloodWatch</span></h1>
+      <h1><img class="logo" src="__LOGO_URI__" alt="" width="42" height="42"><span class="dot" id="hdot"></span><span id="htitle">FloodWatch</span></h1>
       <div class="sub" id="hsub"></div>
       <div class="seg" id="hrange"></div>
       <div class="status" id="hchips"></div>
@@ -124,6 +150,7 @@ __CSS__
   </div>
 </div>
 <script>
+const LOAD_START=Date.now(), LOAD_MIN_MS=3000;
 const SNAP=__SNAPSHOT__, BOUNDS=__BOUNDS__, RIV=__RIVERS__, FILL=__FILL__;
 const LV=["normal","watch","warning","severe"];
 const COL={normal:"#1fb5a6",watch:"#4aa8ff",warning:"#8b6cff",severe:"#e0489f"};
@@ -610,7 +637,7 @@ addEventListener("resize",()=>{setVh(); setInsets()});
 if(window.ResizeObserver){const ro=new ResizeObserver(setInsets); ["timebar","langsw","layersbtn","drawer-btn"].forEach(id=>ro.observe($(id)));}
 setVh(); setInsets();
 refresh(true); setInsets();
-setTimeout(()=>$("loading").classList.add("hide"),450);
+setTimeout(()=>$("loading").classList.add("hide"),Math.max(0,LOAD_MIN_MS-(Date.now()-LOAD_START)));
 </script></body></html>"""
 
 
@@ -631,7 +658,11 @@ def render(snapshot: dict) -> str:
                     {"name": p["river_name"], "mlat": p["mlat"], "mlon": p["mlon"], "lines": p["lines"]})
     fill_file = config.DATA_DIR / "river_fill.json"
     fill = json.loads(fill_file.read_text()) if fill_file.exists() else {}
-    page = TEMPLATE.replace("__CSS__", CSS + EXTRA_CSS)
+    page = (TEMPLATE.replace("__CSS__", CSS + EXTRA_CSS)
+            .replace("__SPLASH_SVG__", _splash_svg())
+            .replace("__LOGO_URI__", _svg_uri("app-icon.svg"))
+            .replace("__FAVICON_URI__", _svg_uri("app-icon-mark.svg"))
+            .replace("__TOUCH_URI__", _touch_icon_uri()))
     return (page.replace("__SNAPSHOT__", _js(snapshot))
                 .replace("__BOUNDS__", _js(bounds, separators=(",", ":")))
                 .replace("__RIVERS__", _js(rivers, separators=(",", ":")))

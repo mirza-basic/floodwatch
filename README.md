@@ -1,3 +1,5 @@
+<img src="docs/img/app-icon.svg" alt="FloodWatch logo" width="96" align="right">
+
 # FloodWatch Bosna i Hercegovina
 
 A flood-forecast map for all 145 municipalities of Bosnia and Herzegovina.
