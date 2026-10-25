@@ -67,6 +67,8 @@ EXTRA_CSS = r"""
     border-radius:6px;padding:6px 9px;font-size:11.5px;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.5);max-width:240px}
   /* wider dialog for the chart */
   #muniinfo{max-width:min(430px,calc(100vw - 24px));width:min(430px,calc(100vw - 24px))}
+  .clu{border-radius:50%;text-align:center;font-weight:700;font-size:12px;color:#fff;background:#1fb5a6;box-shadow:0 0 0 3px rgba(11,14,18,.55)}
+  .clu.gauge{border-radius:6px;background:#c7d0d9;color:#111;box-shadow:0 0 0 3px rgba(17,17,17,.5)}
   .gsq{width:18px;height:18px;border:3px solid #111;box-sizing:border-box}
 """
 
@@ -77,6 +79,8 @@ TEMPLATE = r"""<!doctype html>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F172A'/%3E%3Cpath d='M32 10C32 10 16 30 16 40a16 16 0 0 0 32 0C48 30 32 10 32 10z' fill='%235b8cff'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" integrity="sha384-pmjIAcz2bAn0xukfxADbZIb3t8oRT9Sv0rvO+BR5Csr6Dhqq+nZs59P0pPKQJkEV" crossorigin="">
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" integrity="sha384-eXVCORTRlv4FUUgS/xmOyr66XBVraen8ATNLMESp92FKXLAMiKkerixTiBvXriZr" crossorigin=""></script>
 <style>
 __CSS__
 </style></head><body>
@@ -154,6 +158,7 @@ const I18N={
   stripLegend:"Gore: glavna prognoza po danima · dolje: najgori član skupa. Klik bira dan.",
   fillNote:"Ovaj dio rijeke nema vlastitu ćeliju modela; prikazan je nivo najbliže tačke ({m}).",
   more:["još {n} rijeka u općini {m}","još {n} rijeke u općini {m}","još {n} rijeka u općini {m}"],
+  clusterNote:"Broj u krugu je broj rijeka (ili stanica) u blizini; krug se otvara približavanjem. Upozorenja se nikad ne grupišu.",
   coverage:"Prikazane su samo rijeke koje model prognoze razlikuje (~5 km). Manji vodotoci nisu pokriveni, a odsustvo upozorenja ne znači da rizika nema.",
   gsrc:"Izvor",gval:"Očitanje",gtime:"Vrijeme",gstale:"Podaci stariji od 6 h",gcls:"Zvanična klasa izvora",
   gnocls:"Granične vrijednosti nisu definisane",gnounit:"jedinica nije navedena u izvoru",gthr:"Pragovi odbrane (izvor)",
@@ -184,6 +189,7 @@ const I18N={
   stripLegend:"Top: main forecast per day · bottom: worst ensemble member. Click to pick a day.",
   fillNote:"This stretch has no model cell of its own; it shows the level of the nearest point ({m}).",
   more:["{n} more river in {m}","{n} more rivers in {m}","{n} more rivers in {m}"],
+  clusterNote:"A number in a circle is how many rivers (or gauges) are close together; zoom in to open it. Alerts are never grouped.",
   coverage:"Only rivers the forecast model can resolve (~5 km) are shown. Smaller streams are not covered, and no alert does not mean there is no risk.",
   gsrc:"Source",gval:"Reading",gtime:"Time",gstale:"Data older than 6 h",gcls:"Source's official class",
   gnocls:"Thresholds not defined",gnounit:"unit not stated by the source",gthr:"Flood-defence thresholds (source)",
@@ -235,6 +241,16 @@ map.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,
   attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> · GloFAS via <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0)'}).addTo(map);
 const polys=L.layerGroup().addTo(map), lines=L.layerGroup().addTo(map), dots=L.layerGroup().addTo(map), gl=L.layerGroup().addTo(map);
+// Calm river dots and calm gauges close together are grouped into numbered circles that open when the
+// map is zoomed in. Markers on alert are never grouped. Without the plugin the pins are drawn ungrouped.
+function mkCluster(kind){
+  if(!L.markerClusterGroup) return L.layerGroup();
+  return L.markerClusterGroup({maxClusterRadius:46,disableClusteringAtZoom:11,showCoverageOnHover:false,spiderfyOnMaxZoom:true,
+    iconCreateFunction:c=>{const n=c.getChildCount(), z=n<10?34:n<100?42:50;
+      return L.divIcon({className:"",html:`<div class="clu ${kind}" style="width:${z}px;height:${z}px;line-height:${z}px">${n}</div>`,iconSize:[z,z]})}});
+}
+const dotsC=mkCluster("river"), dotsA=L.layerGroup(), gaugesC=mkCluster("gauge"), gaugesA=L.layerGroup();
+dots.addLayer(dotsC); dots.addLayer(dotsA); gl.addLayer(gaugesC); gl.addLayer(gaugesA);
 const show={riv:true,muni:true,ga:true};
 map.on("popupopen",()=>closeOverlays("popup"));
 let eyeOn=true;
@@ -359,7 +375,7 @@ function openMuni(m,at,r,noteMuni,keep){
 function atOf(m,r){const g=(RIV[m.id]||[]).find(x=>x.name===r.river);return g?[g.mlat,g.mlon]:[r.lat,r.lon]}
 
 function drawMap(){
-  polys.clearLayers(); lines.clearLayers(); dots.clearLayers();
+  polys.clearLayers(); lines.clearLayers(); dotsC.clearLayers(); dotsA.clearLayers();
   const seen={};
   for(const m of SNAP.municipalities){
     const lm=lvM(m), up=lm!=="normal";
@@ -371,7 +387,7 @@ function drawMap(){
       const l=lvR(r), ru=l!=="normal", g=(RIV[m.id]||[]).find(x=>x.name===r.river);
       if(g&&g.lines.length) L.polyline(g.lines,{color:COL[l],weight:ru?9:4,opacity:ru?.95:.9,lineCap:"round"}).addTo(lines).on("click",()=>openMuni(m,null,r));
       const at=atOf(m,r), key=at+","+l; if(seen[key]) continue; seen[key]=1;
-      L.circleMarker(at,{radius:ru?13.5:6,color:"#0b0e12",weight:2,fillColor:COL[l],fillOpacity:.95}).addTo(dots).on("click",()=>openMuni(m,null,r));
+      L.circleMarker(at,{radius:ru?13.5:6,color:"#0b0e12",weight:2,fillColor:COL[l],fillOpacity:.95}).addTo(ru?dotsA:dotsC).on("click",()=>openMuni(m,null,r));
     }
   }
   // Stretches of a river inside municipalities that have no point for it, drawn in the level colour of
@@ -405,10 +421,10 @@ function gaugePopup(g){
    <div class="mut">${t("gsrc")}: ${GSRC[g.source]}</div><div class="mut" style="margin-top:4px">${t("gnote")}</div></div>`;
 }
 function drawGauges(){
-  gl.clearLayers();
+  gaugesC.clearLayers(); gaugesA.clearLayers();
   for(const g of GA)
     L.marker([g.lat,g.lon],{icon:L.divIcon({className:"",html:`<div class="gsq" style="background:${g.value==null?"transparent":(g.class?GCOL[g.class]:"#c7d0d9")}"></div>`,iconSize:[18,18]})})
-      .addTo(gl).bindPopup(()=>gaugePopup(g),{autoPan:false,maxHeight:300});
+      .addTo(g.class&&g.class!=="N"?gaugesA:gaugesC).bindPopup(()=>gaugePopup(g),{autoPan:false,maxHeight:300});
 }
 
 // ---- side panel -----------------------------------------------------------------
@@ -521,7 +537,7 @@ legend.addTo(map);
 function renderLegend(){
   $("lgbtn").textContent="▥ "+t("legend");
   $("lgbody").innerHTML=["normal","watch","warning","severe"].map(k=>`<div><i style="background:${COL[k]}"></i>${t(k)}</div>`).join("")+
-    `<div style="margin-top:6px">${t("legendTxt")}</div><div style="margin-top:6px"><b>${t("coverage")}</b></div>`+
+    `<div style="margin-top:6px">${t("legendTxt")}</div><div style="margin-top:6px"><b>${t("coverage")}</b></div><div style="margin-top:6px">${t("clusterNote")}</div>`+
     (GA.length?`<div style="margin-top:8px"><i class="sq" style="background:#c7d0d9"></i>${t("lGa")}: ${["N","P","R","V","Z"].map(k=>`<i class="sq" style="background:${GCOL[k]};margin-left:6px"></i>${k}`).join("")}</div>`:"");
 }
 

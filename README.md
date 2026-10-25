@@ -46,7 +46,7 @@ zaštiti. Karta je na bosanskom (uz engleski). Osvježavanje je zakazano svaka t
 |---|---|---|
 | River discharge and ensemble forecast | GloFAS via [Open-Meteo](https://open-meteo.com/) | Free API for non-commercial use, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | Municipality boundaries, rivers, base map | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors | ODbL |
-| Map rendering | [Leaflet](https://leafletjs.com/) | |
+| Map rendering | [Leaflet](https://leafletjs.com/) and [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) (loaded from unpkg with integrity hashes) | BSD-2-Clause and MIT |
 
 The map credits Open-Meteo and OpenStreetMap on screen, as their terms require.
 

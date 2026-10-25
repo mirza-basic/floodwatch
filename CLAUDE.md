@@ -337,6 +337,20 @@ hash (as in FireWatch). **Open decisions, not code:** the repo has no README or 
 publishes OSM-derived data files (boundaries, rivers) whose ODbL terms (attribution, share-alike for
 derived databases) have not been read in this project.
 
+## Grouped pins (2026-10-25)
+
+Calm river dots (`dotsC`) and calm gauges (`gaugesC`) are `L.markerClusterGroup`s from
+Leaflet.markercluster 1.5.3 (MIT, loaded from unpkg with SRI hashes; if the script is blocked,
+`mkCluster()` falls back to a plain layer group and the pins are drawn ungrouped - tested by
+corrupting the hash). **Pins on alert are never grouped** (`dotsA`, `gaugesA` are plain groups): a river at
+watch or above for the selected day, or a gauge whose class is not N, must stay visible. Grouping
+stops from zoom 11 (`disableClusteringAtZoom`). `dots` and `gl` stay as container layer groups
+holding both, so the eye button and the layer checkbox still work; never call `dots.clearLayers()`
+(it would remove the cluster groups themselves) - clear `dotsC`/`dotsA`. Testing landmines: a
+`layer.fire("click")` stays on the marker unless propagated (`fire(type, data, true)`, which is what a
+real DOM click does), and zoom animations never finish under headless virtual time, so set
+`map.options.zoomAnimation=false` and `map._zoomAnimated=false` before asserting a zoom change.
+
 ## Documentation
 
 `docs/floodwatch-documentation.html` is the system documentation, same idea as
