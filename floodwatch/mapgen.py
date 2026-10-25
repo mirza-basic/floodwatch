@@ -88,10 +88,11 @@ EXTRA_CSS = r"""
     border-radius:6px;padding:6px 9px;font-size:11.5px;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.5);max-width:240px}
   /* wider dialog for the chart */
   .leaflet-popup-content{max-height:calc(var(--appvh,100vh) - var(--ui-top,58px) - var(--ui-bottom-all,104px) - 70px);overflow-y:auto}
-  @media (max-width:600px){#muniinfo{width:calc(100vw - 72px);max-width:none;left:calc(50% + 24px)}}
   #muniinfo{max-width:min(430px,calc(100vw - 24px));width:min(430px,calc(100vw - 24px));
     top:calc(var(--ui-top,58px) + (var(--appvh,100vh) - var(--ui-top,58px) - var(--ui-bottom,104px)) / 2);
     max-height:calc(var(--appvh,100vh) - var(--ui-top,58px) - var(--ui-bottom,104px) - 16px)}
+  /* after the base rule, or its width wins and the shifted dialog overflows the right edge */
+  @media (max-width:600px){#muniinfo{width:calc(100vw - 72px);max-width:none;left:calc(50% + 24px)}}
   .clu{border-radius:50%;text-align:center;font-weight:700;font-size:12px;color:#fff;background:#1fb5a6;box-shadow:0 0 0 3px rgba(11,14,18,.55)}
   .clu.gauge{border-radius:6px;background:#c7d0d9;color:#111;box-shadow:0 0 0 3px rgba(17,17,17,.5)}
   .gsq{width:18px;height:18px;border:3px solid #111;box-sizing:border-box}
