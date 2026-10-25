@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- FloodWatch loading screen: a rain cloud fading in above a curved horizon, rain falling on a river valley
-     while a HUD reticle locks on and the water rises. Self-contained (no external assets): open it
+     while a HUD reticle locks on and the river rises. Self-contained (no external assets): open it
      directly in a browser to preview it. floodwatch/mapgen.py reads this file and splices its <svg>...</svg>
      into the page's loading overlay (see _splash_svg() and the __SPLASH_SVG__ placeholder), so this is the
      only copy to edit. This comment and the XML prolog are removed before splicing. -->
@@ -29,22 +29,27 @@
       <stop offset="0%" stop-color="#7DD3FC"/>
       <stop offset="100%" stop-color="#1D4ED8"/>
     </linearGradient>
-    <linearGradient id="flBeamFade" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0"/>
-    </linearGradient>
     <clipPath id="flDome"><path d="M -400,1400 A 800,800 0 0,1 1200,1400 Z"/></clipPath>
     <style>
-      /* The first part (cloud, rain haze, HUD, rising water) plays once over 3 s and holds its last frame.
+      /* The first part (cloud, rising river, HUD) plays once over 3 s and holds its last frame.
          Only the small ambient loops (ripples, falling rain) repeat. Animated properties are limited to opacity
          and transform on small groups; the planet is static. */
       @keyframes flRise {
         0%, 35% { transform: scale(1); }
-        55%, 100% { transform: scale(1.35); }
+        55%, 100% { transform: scale(3.4); }
       }
       .fl-rise {
         animation: flRise 3s ease-out 1 forwards;
         transform-origin: 400px 640px;
+      }
+      @keyframes flFlood {
+        0%, 12% { transform: scaleX(0.2); opacity: 0; }
+        100% { transform: scaleX(1); opacity: 0.8; }
+      }
+      .fl-flood {
+        animation: flFlood 2.8s ease-in-out 1 forwards;
+        transform-origin: 400px 700px;
+        opacity: 0;
       }
       @keyframes flFadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
       .fl-cloud {
@@ -52,7 +57,6 @@
         opacity: 0;
         animation: flFadeIn .6s ease-out .15s 1 forwards;
       }
-      .fl-haze { animation: flFadeIn 1.6s ease-out 1.0s 1 both; }
       @keyframes flHud {
         0%, 55% { opacity: 0; transform: scale(0.6); }
         80%, 100% { opacity: 1; transform: scale(1); }
@@ -68,14 +72,17 @@
       .fl-ripple-1 { animation: flRipple 1.8s ease-out infinite; transform-origin: 400px 618px; }
       .fl-ripple-2 { animation: flRipple 1.8s ease-out infinite .9s; transform-origin: 400px 618px; }
       @keyframes flRain {
-        0% { opacity: 0; transform: translate(0, -20px); }
-        25% { opacity: 0.35; }
-        100% { opacity: 0; transform: translate(-10px, 40px); }
+        0% { opacity: 0; transform: translate(0, -30px); }
+        20% { opacity: 0.55; }
+        100% { opacity: 0; transform: translate(-12px, 60px); }
       }
-      .fl-rain { animation: flRain 1.2s linear infinite; }
+      .fl-rain { opacity: 0; animation: flRain 0.9s linear infinite backwards; }
+      .fl-rain-2 { animation-delay: .3s; }
+      .fl-rain-3 { animation-delay: .6s; }
       @media (prefers-reduced-motion: reduce) {
-        .fl-rise, .fl-cloud, .fl-haze, .fl-hud, .fl-ripple-1, .fl-ripple-2, .fl-rain { animation: none; }
-        .fl-cloud, .fl-haze, .fl-hud { opacity: 1; }
+        .fl-rise, .fl-flood, .fl-cloud, .fl-hud, .fl-ripple-1, .fl-ripple-2, .fl-rain { animation: none; }
+        .fl-cloud, .fl-hud { opacity: 1; }
+        .fl-flood { opacity: 0.8; }
       }
     </style>
   </defs>
@@ -95,6 +102,8 @@
       <!-- The river, widening toward the viewer. -->
       <path d="M 399,601 C 392,620 380,630 388,648 C 396,666 430,676 410,700 C 392,722 350,740 360,770 L 340,800 L 470,800 C 455,770 470,745 450,720 C 432,696 446,676 424,654 C 406,636 416,622 402,601 Z"
         fill="url(#flWater)" stroke="#BAE6FD" stroke-width="1.2" stroke-opacity="0.6"/>
+      <!-- The river rising: a wider translucent copy of the river that grows out from its centre line. -->
+      <path class="fl-flood" d="M 399,601 C 392,620 380,630 388,648 C 396,666 430,676 410,700 C 392,722 350,740 360,770 L 340,800 L 470,800 C 455,770 470,745 450,720 C 432,696 446,676 424,654 C 406,636 416,622 402,601 Z" fill="#38BDF8" fill-opacity="0.5" stroke="#7DD3FC" stroke-width="110" stroke-linejoin="round" stroke-opacity="0.35"/>
       <!-- Houses along the banks, lit. -->
       <g fill="#FBBF24" opacity="0.9">
         <rect x="334" y="652" width="7" height="5"/><rect x="348" y="644" width="6" height="5"/>
@@ -113,10 +122,10 @@
     <ellipse class="fl-ripple-2" cx="400" cy="618" rx="46" ry="8" fill="none" stroke="#7DD3FC" stroke-width="1.5"/>
   </g>
 
-  <!-- Rain falling from the cloud over the valley. -->
-  <g class="fl-rain" stroke="#7DD3FC" stroke-width="1.4" stroke-linecap="round" fill="none">
-    <path d="M 382,230 l -4,12 M 390,230 l -4,12 M 398,230 l -4,12 M 406,230 l -4,12 M 414,230 l -4,12 M 378,264 l -4,12 M 391,264 l -4,12 M 403,264 l -4,12 M 416,264 l -4,12 M 428,264 l -4,12 M 362,298 l -4,12 M 379,298 l -4,12 M 396,298 l -4,12 M 413,298 l -4,12 M 430,298 l -4,12 M 362,332 l -4,12 M 384,332 l -4,12 M 405,332 l -4,12 M 427,332 l -4,12 M 449,332 l -4,12 M 341,366 l -4,12 M 367,366 l -4,12 M 393,366 l -4,12 M 420,366 l -4,12 M 446,366 l -4,12 M 346,400 l -4,12 M 377,400 l -4,12 M 408,400 l -4,12 M 438,400 l -4,12 M 469,400 l -4,12 M 321,434 l -4,12 M 356,434 l -4,12 M 391,434 l -4,12 M 426,434 l -4,12 M 462,434 l -4,12 M 331,468 l -4,12 M 370,468 l -4,12 M 410,468 l -4,12 M 450,468 l -4,12 M 489,468 l -4,12 M 301,502 l -4,12 M 345,502 l -4,12 M 389,502 l -4,12 M 433,502 l -4,12 M 477,502 l -4,12 M 315,536 l -4,12 M 363,536 l -4,12 M 412,536 l -4,12 M 461,536 l -4,12 M 510,536 l -4,12 M 280,570 l -4,12 M 333,570 l -4,12 M 387,570 l -4,12 M 440,570 l -4,12 M 493,570 l -4,12"/>
-  </g>
+  <!-- Rain falling from the cloud to the valley: streaks at scattered positions in three groups, out of step so the fall looks continuous. -->
+  <g class="fl-rain fl-rain-1" stroke="#7DD3FC" stroke-width="1.5" stroke-linecap="round" fill="none"><path d="M 413,389 l -3,12 M 402,280 l -3,12 M 463,242 l -3,12 M 427,471 l -3,12 M 346,282 l -3,12 M 432,416 l -3,12 M 524,611 l -3,12 M 308,323 l -3,12 M 486,595 l -3,12 M 374,604 l -3,12 M 366,240 l -3,12 M 310,246 l -3,12 M 449,283 l -3,12 M 352,292 l -3,12 M 378,291 l -3,12 M 349,292 l -3,12 M 417,242 l -3,12 M 396,595 l -3,12 M 478,575 l -3,12 M 494,285 l -3,12 M 493,221 l -3,12 M 353,448 l -3,12 M 480,433 l -3,12 M 354,212 l -3,12 M 316,438 l -3,12 M 420,486 l -3,12 M 509,490 l -3,12 M 508,335 l -3,12 M 448,505 l -3,12 M 491,572 l -3,12 M 373,459 l -3,12 M 495,609 l -3,12 M 475,384 l -3,12 M 340,401 l -3,12 M 296,309 l -3,12 M 439,574 l -3,12 M 385,286 l -3,12 M 358,442 l -3,12 M 506,494 l -3,12 M 382,292 l -3,12 M 388,605 l -3,12 M 417,493 l -3,12 M 294,390 l -3,12 M 388,461 l -3,12 M 330,484 l -3,12 M 324,496 l -3,12 M 459,455 l -3,12 M 455,585 l -3,12 M 415,358 l -3,12 M 331,470 l -3,12"/></g>
+  <g class="fl-rain fl-rain-2" stroke="#7DD3FC" stroke-width="1.5" stroke-linecap="round" fill="none"><path d="M 392,581 l -3,12 M 468,461 l -3,12 M 293,487 l -3,12 M 299,269 l -3,12 M 393,217 l -3,12 M 437,408 l -3,12 M 450,547 l -3,12 M 376,517 l -3,12 M 342,205 l -3,12 M 426,235 l -3,12 M 464,597 l -3,12 M 323,529 l -3,12 M 430,258 l -3,12 M 475,600 l -3,12 M 434,553 l -3,12 M 359,519 l -3,12 M 421,304 l -3,12 M 484,439 l -3,12 M 334,307 l -3,12 M 425,564 l -3,12 M 443,302 l -3,12 M 446,276 l -3,12 M 349,455 l -3,12 M 302,386 l -3,12 M 485,352 l -3,12 M 304,262 l -3,12 M 427,214 l -3,12 M 409,236 l -3,12 M 499,528 l -3,12 M 464,375 l -3,12 M 425,442 l -3,12 M 374,501 l -3,12 M 451,239 l -3,12 M 399,489 l -3,12 M 438,328 l -3,12 M 487,385 l -3,12 M 499,533 l -3,12 M 399,260 l -3,12 M 329,318 l -3,12 M 399,460 l -3,12 M 305,235 l -3,12 M 463,331 l -3,12 M 337,543 l -3,12 M 436,461 l -3,12 M 328,398 l -3,12 M 367,316 l -3,12 M 464,365 l -3,12 M 390,258 l -3,12 M 472,563 l -3,12 M 475,499 l -3,12"/></g>
+  <g class="fl-rain fl-rain-3" stroke="#7DD3FC" stroke-width="1.5" stroke-linecap="round" fill="none"><path d="M 420,412 l -3,12 M 360,243 l -3,12 M 516,605 l -3,12 M 300,420 l -3,12 M 476,384 l -3,12 M 351,391 l -3,12 M 342,333 l -3,12 M 373,550 l -3,12 M 393,575 l -3,12 M 345,522 l -3,12 M 348,253 l -3,12 M 388,433 l -3,12 M 384,252 l -3,12 M 483,329 l -3,12 M 500,246 l -3,12 M 308,326 l -3,12 M 390,356 l -3,12 M 328,279 l -3,12 M 504,506 l -3,12 M 312,377 l -3,12 M 469,310 l -3,12 M 345,233 l -3,12 M 327,578 l -3,12 M 373,277 l -3,12 M 439,604 l -3,12 M 482,212 l -3,12 M 452,401 l -3,12 M 495,505 l -3,12 M 440,348 l -3,12 M 418,556 l -3,12 M 428,238 l -3,12 M 419,504 l -3,12 M 420,217 l -3,12 M 497,455 l -3,12 M 331,287 l -3,12 M 436,338 l -3,12 M 372,563 l -3,12 M 484,546 l -3,12 M 350,388 l -3,12 M 473,333 l -3,12 M 288,560 l -3,12 M 327,213 l -3,12 M 306,262 l -3,12 M 510,534 l -3,12 M 394,209 l -3,12 M 405,489 l -3,12 M 299,574 l -3,12 M 495,460 l -3,12 M 391,589 l -3,12 M 450,466 l -3,12"/></g>
 
   <g class="fl-hud">
     <g stroke="#38BDF8" stroke-width="1.5" fill="none">
@@ -134,9 +143,6 @@
       <text x="475" y="612" fill="#2DD4BF">MODEL: GLOFAS</text>
     </g>
   </g>
-
-  <!-- A faint cone of rain haze from the cloud's resting point (400,170); it appears after the cloud has arrived. -->
-  <polygon class="fl-haze" transform="translate(400, 170)" points="0,0 -140,430 140,430" fill="url(#flBeamFade)"/>
 
   <g class="fl-cloud">
     <circle cx="-30" cy="2" r="22" fill="#E2E8F0"/>
